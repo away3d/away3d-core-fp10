@@ -1,1 +1,0 @@
-package awaybuilder.interfaces{	import flash.display.BitmapData;	import flash.display.DisplayObject;				public interface IAssetContainer	{		function addBitmapDataAsset ( id : String , data : BitmapData ) : void		function addDisplayObjectAsset ( id : String , data : DisplayObject ) : void		function addColladaAsset ( id : String , data : XML ) : void	}}

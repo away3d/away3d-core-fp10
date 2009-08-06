@@ -1,1 +1,0 @@
-package awaybuilder{	public class ScenePrecision	{		public static const RAW : uint = 1 ;		public static const LOW : uint = 10 ;		public static const MEDIUM : uint = 100 ;		public static const HIGH : uint = 1000 ;		public static const PERFECT : uint = 100000 ;								public function ScenePrecision ( )		{		}	}}

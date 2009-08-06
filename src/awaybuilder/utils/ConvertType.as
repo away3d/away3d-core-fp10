@@ -1,1 +1,0 @@
-package awaybuilder.utils{	public class ConvertType 	{		public function ConvertType ( )		{		}								public static function convertToBoolean ( value : String ) : Boolean		{			if ( value == "1" )			{				return true ;			}			else			{				return false ;			}		}	}}

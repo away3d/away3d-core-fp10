@@ -1,1 +1,0 @@
-package awaybuilder{	public class CoordinateSystem	{		public static const AFTER_EFFECTS : String = "afterEffects" ;		public static const CINEMA4D : String = "cinema4d" ;		public static const MAX : String = "max" ;		public static const MAYA : String = "maya" ;		public static const NATIVE : String = "native" ;	}}
