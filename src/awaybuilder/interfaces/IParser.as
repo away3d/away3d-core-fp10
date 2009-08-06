@@ -1,0 +1,1 @@
+package awaybuilder.interfaces{	public interface IParser	{		function parse ( data : * ) : void	}}
