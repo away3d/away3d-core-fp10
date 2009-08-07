@@ -770,16 +770,19 @@ package away3d.core.render
                 graphics.lineStyle(width, wirecolor, wirealpha);
             else
                 graphics.lineStyle();
-                
-            if(alpha > 0)
-            	graphics.beginFill(color, alpha);
         	
         	if(endIndex - startIndex > 3) {
 	            while(startIndex < endIndex) {
 	            	_index0 = screenIndices[startIndex]*3;
 					switch (commands[startIndex++]) {
 						case "M":
+							if(alpha > 0)
+								graphics.endFill();
+							
 							graphics.moveTo(screenVertices[_index0], screenVertices[_index0+1]);
+							
+							if(alpha > 0)
+								graphics.beginFill(color, alpha);
 							break;
 						case "L":
 							graphics.lineTo(screenVertices[_index0], screenVertices[_index0+1]);
@@ -796,6 +799,10 @@ package away3d.core.render
 	        	_index2 = screenIndices[startIndex+2]*3;
 	        	
 	        	graphics.moveTo(v0x = screenVertices[_index0], v0y = screenVertices[_index0+1]);
+	        	
+	        	if(alpha > 0)
+					graphics.beginFill(color, alpha);
+				
 	            graphics.lineTo(screenVertices[_index1], screenVertices[_index1+1]);
 	        	graphics.lineTo(screenVertices[_index2], screenVertices[_index2+1]);
 	    
