@@ -8,7 +8,7 @@ package away3d.overlays
 	import flash.display.Sprite;
 	import flash.geom.ColorTransform;
 	
-	import gs.TweenMax;
+	//import gs.TweenMax;
 	
 	public class LensFlare extends Sprite implements IOverlay
 	{
@@ -107,7 +107,11 @@ package away3d.overlays
 					var bsVal:Number = 5*burnFactor/_projectionLength;
 					bsVal = bsVal < 1 ? 1 : bsVal;
 					bsVal = bsVal > 3 ? 3 : bsVal;
-					TweenMax.to(_burnClip, 0, {colorMatrixFilter:{contrast:bsVal, brightness:bsVal}});
+					//TweenMax.to(_burnClip, 0, {colorMatrixFilter:{contrast:bsVal, brightness:bsVal}});
+					//TODO: setup colorMatrixFilter tween without TweenMax
+					var ctVal:Number = 500*burnFactor/_projectionLength;
+					_ct = new ColorTransform(1, 1, 1, 1, ctVal, ctVal, ctVal, 0);
+					_burnClip.transform.colorTransform = _ct;
 				}
 				else if(_burnMethod == LensFlare.BURN_METHOD_COLOR_TRANSFORM)
 				{
