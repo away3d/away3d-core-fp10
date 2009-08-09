@@ -1,10 +1,10 @@
 <languageVersion: 1.0;>
 kernel PhongNormalMapShader
 <
-	namespace: "com.derschmale.stok3d";
-	vendor: "Der Schmale";
+	namespace: "com.away3d";
+	vendor: "Away3d";
 	version: 1;
-	description: "Applies a phong shaded lighting effect on a planar surface, with support for normal maps.";
+	description: "Applies a phong shaded lighting effect with support for normal and specular maps.";
 >
 {
 	input image3 diffuse;

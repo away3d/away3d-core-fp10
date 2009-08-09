@@ -1,10 +1,10 @@
 <languageVersion: 1.0;>
 kernel PlanarEnvMapCubeShader
 <
-	namespace: "com.derschmale.stok3d";
-	vendor: "Der Schmale";
+	namespace: "com.away3d";
+	vendor: "Away3d";
 	version: 1;
-	description: "Applies an environment map on a planar surface with support for normal maps.";
+	description: "Applies an environment map with support for normal maps.";
 >
 {
 	input image3 diffuse;

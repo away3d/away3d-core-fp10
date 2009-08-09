@@ -1,8 +1,8 @@
 <languageVersion: 1.0;>
 kernel PositionInterpolator
 <
-	namespace: "com.derschmale";
-	vendor: "Der Schmale";
+	namespace: "com.away3d";
+	vendor: "Away3d";
 	version: 1;
 	description: "When used as a shaderFill, converts tangent space normals to object space normals";
 >

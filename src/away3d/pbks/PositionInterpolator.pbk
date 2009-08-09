@@ -1,8 +1,8 @@
 <languageVersion: 1.0;>
 kernel PositionInterpolator
 <
-	namespace: "com.derschmale";
-	vendor: "Der Schmale";
+	namespace: "com.away3d";
+	vendor: "Away3D";
 	version: 1;
 	description: "When used as a shaderFill, draws interpolated 3D positions to a Triangle3D's uv coordinates";
 >
