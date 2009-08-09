@@ -1,0 +1,102 @@
+<languageVersion: 1.0;>
+kernel PhongNormalMapShader
+<
+	namespace: "com.derschmale.stok3d";
+	vendor: "Der Schmale";
+	version: 1;
+	description: "Applies a phong shaded lighting effect on a planar surface, with support for normal maps.";
+>
+{
+	input image3 diffuse;
+	input image3 normalMap;
+	input image3 positionMap;
+	output pixel3 dst;
+	
+	parameter float specular
+	<
+		minValue: float(0.0);
+		maxValue: float(10.0);
+		defaultValue: float(2);
+		description: "The specular strength";
+	>;
+	
+	parameter float gloss
+	<
+		minValue: float(0.0);
+		maxValue: float(10.0);
+		defaultValue: float(10);
+		description: "The gloss";
+	>;
+	
+	parameter float3x3 normalTransformation
+	<
+		minValue: float3x3(-8000.0);
+		maxValue: float3x3(8000.0);
+		defaultValue: float3x3(0.0);
+		description: "The transformation matrix that transforms the displayObject to stage coordinates";
+	>;
+	
+	parameter float4x4 positionTransformation
+	<
+		minValue: float4x4(-8000.0);
+		maxValue: float4x4(8000.0);
+		defaultValue: float4x4(0.0);
+	>;
+	
+	parameter float3 diffuseColor
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(1.0);
+		description: "The diffuse colour of the light";
+	>;
+	
+	parameter float3 specularColor
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(1.0);
+		description: "The specular colour of the light";
+	>;
+	
+	parameter float3 lightPosition
+	<
+		minValue: float3(-8000.0, -8000.0, -8000.0);
+		maxValue: float3(8000.0, 8000.0, 8000.0);
+		defaultValue: float3(0.0, 0.0, 0.0);
+		description: "The position of the light source";
+	>;
+	
+	parameter float3 ambientColor
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(0.0);
+		description: "The ambient color of the environment";
+	>;
+	
+	parameter float3 viewPos
+	<
+		minValue: float3(0.0);
+		maxValue: float3(100000.0);
+		defaultValue: float3(0.0);
+		description: "The position of the camera";
+	>;
+	
+	void evaluatePixel()
+	{
+		float3 coord3d = sampleNearest(positionMap, outCoord());
+		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
+		float3 view = normalize(viewPos-coord3d);
+		float3 normalSample = 2.0*(sampleNearest(normalMap, outCoord())-float3(0.5));
+		
+		float3 n = normalize(normalTransformation*normalSample);
+		
+		float3 lightDir = normalize(lightPosition-coord3d);
+		
+		float nDotD = max(-dot(lightDir, n), 0.0);
+		float specStr = specular*pow(max(-dot(lightDir+2.0*nDotD*n, normalize(lightDir+view)), 0.0), gloss);
+		
+		dst = sampleNearest(diffuse, outCoord())*diffuseColor*nDotD+ambientColor + specularColor*specStr;
+	}
+}

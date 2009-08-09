@@ -1,0 +1,103 @@
+<languageVersion: 1.0;>
+kernel PlanarEnvMapCubeShader
+<
+	namespace: "com.derschmale.stok3d";
+	vendor: "Der Schmale";
+	version: 1;
+	description: "Applies an environment map on a planar surface with support for normal maps.";
+>
+{
+	input image3 diffuse;
+	input image3 left;
+	input image3 right;
+	input image3 back;
+	input image3 front;
+	input image3 top;
+	input image3 bottom;
+	input image3 normalMap;
+	input image3 positionMap;
+	output pixel3 dst;
+	
+	parameter float alpha
+	<
+		minValue: float(0.0);
+		maxValue: float(1.0);
+		defaultValue: float(0.5);
+		description: "The alpha of the environment map";
+	>;
+	
+	parameter float cubeDim
+	<
+		minValue: float(0.0);
+		maxValue: float(1024.0);
+		defaultValue: float(160.0);
+		description: "Half the size of the cube map's edges";
+	>;
+
+	parameter float3x3 normalTransformation
+	<
+		minValue: float3x3(-8000.0);
+		maxValue: float3x3(8000.0);
+		defaultValue: float3x3(0.0);
+		description: "The transformation matrix that transforms the displayObject to stage coordinates";
+	>;
+	
+	parameter float4x4 positionTransformation
+	<
+		minValue: float4x4(-8000.0);
+		maxValue: float4x4(8000.0);
+		defaultValue: float4x4(0.0);
+	>;
+	
+	parameter float3 viewPos
+	<
+		minValue: float3(0.0);
+		maxValue: float3(100000.0);
+		defaultValue: float3(0.0);
+		description: "The position of the camera";
+	>;
+	
+	void evaluatePixel()
+	{
+		float3 coord3d = sampleNearest(positionMap, outCoord());
+		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
+		float3 view = normalize(viewPos-coord3d);
+		float3 normalSample = normalize(2.0*(sampleNearest(normalMap, outCoord())-float3(0.5)));
+		float3 n = normalize(normalTransformation*normalSample);
+		
+		pixel3 reflection;
+
+		float3 refl = view - 2.0*dot(n, view)*n;
+		refl.y = -refl.y;
+		// determine which face of the cube will be used
+		float maxcoord = abs(refl.x);
+		int face = refl.x > 0.0 ? 0 : 1;
+
+		float absN;
+		if ((absN = abs(refl.y)) > maxcoord) {
+			 maxcoord = absN;
+			 face = refl.y > 0.0? 2 : 3;
+		}
+		if ((absN = abs(refl.z)) > maxcoord) {
+			maxcoord = absN;
+			face = refl.z > 0.0? 4 : 5;
+		}
+		
+		float invMax = 1.0/maxcoord;
+		// sample the cube
+		if (face == 0)
+			reflection = sampleNearest(right, float2(1.0-refl.z*invMax, 1.0-refl.y*invMax)*cubeDim);
+		else if (face == 1)
+			reflection = sampleNearest(left, float2(1.0+refl.z*invMax, 1.0-refl.y*invMax)*cubeDim);
+		else if (face == 2)
+			reflection = sampleNearest(top, float2(1.0+refl.x*invMax, 1.0+refl.z*invMax)*cubeDim);
+		else if (face == 3)
+			reflection = sampleNearest(bottom, float2(1.0+refl.x*invMax, 1.0-refl.z*invMax)*cubeDim);
+		else if (face == 4)
+			reflection = sampleNearest(back, float2(1.0+refl.x*invMax, 1.0-refl.y*invMax)*cubeDim);
+		else if (face == 5)
+			reflection = sampleNearest(front, float2(1.0-refl.x*invMax, 1.0-refl.y*invMax)*cubeDim);
+		
+		dst = sampleNearest(diffuse, outCoord())*(1.0-alpha)+reflection*alpha;
+	}
+}

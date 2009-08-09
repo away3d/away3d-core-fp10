@@ -1,0 +1,99 @@
+<languageVersion: 1.0;>
+kernel PositionInterpolator
+<
+	namespace: "com.derschmale";
+	vendor: "Der Schmale";
+	version: 1;
+	description: "When used as a shaderFill, draws interpolated 3D positions to a Triangle3D's uv coordinates";
+>
+{
+	output pixel4 dst;
+	
+	parameter float2 uv0
+	<
+		minValue: float2(0.0);
+		maxValue: float2(1024.0);
+		defaultValue: float2(0.0);
+		description: "The first uv coordinate";
+	>;
+	
+	parameter float2 uvEdge1
+	<
+		minValue: float2(-1024.0);
+		maxValue: float2(1024.0);
+		defaultValue: float2(0.0);
+		description: "The edge vector from uv0->uv1";
+	>;
+	
+	parameter float2 uvEdge2
+	<
+		minValue: float2(-1024.0);
+		maxValue: float2(1024.0);
+		defaultValue: float2(0.0);
+		description: "The edge vector from uv0->uv2";
+	>;
+	
+	parameter float dot00
+	<
+		minValue: float(-10000.0);
+		maxValue: float(10000.0);
+		defaultValue: float(0.0);
+		description: "dot(edge1, edge1)";
+	>;
+	
+	parameter float dot01
+	<
+		minValue: float(-10000.0);
+		maxValue: float(10000.0);
+		defaultValue: float(0.0);
+		description: "dot(edge1, edge2)";
+	>;
+	
+	parameter float dot11
+	<
+		minValue: float(-10000.0);
+		maxValue: float(10000.0);
+		defaultValue: float(0.0);
+		description: "dot(edge2, edge2)";
+	>;
+	
+	parameter float3 pos0
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(0.0);
+		description: "The first vertex position mapped to from [min, max] -> [0, 1]";
+	>;
+	
+	parameter float3 posEdge1
+	<
+		minValue: float3(-1.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(0.0);
+		description: "The second vertex position mapped to from [min, max] -> [0, 1] - pos0";
+	>;
+	
+	parameter float3 posEdge2
+	<
+		minValue: float3(-1.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(0.0);
+		description: "The third vertex position mapped to from [min, max] -> [0, 1] - pos0";
+	>;
+	
+	void evaluatePixel()
+	{
+		float2 diff = outCoord()-uv0;
+		float dot02 = dot(uvEdge1, diff);
+		float dot12 = dot(uvEdge2, diff);
+		
+		// Compute barycentric coordinates
+		float invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
+		float s = (dot11 * dot02 - dot01 * dot12) * invDenom;
+		float t = (dot00 * dot12 - dot01 * dot02) * invDenom;
+		
+		// actually outputting 4 channels, 3 seems buggy
+		dst.a = 1.0;
+		dst.xyz = pos0+posEdge1*s+posEdge2*t;
+	}
+}
