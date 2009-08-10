@@ -10,7 +10,7 @@ package away3d.materials
 	 */
 	public class SphericEnvMapPBMaterial extends PixelShaderMaterial
 	{
-		[Embed(source="/../pbj/SphericEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../pbks/SphericEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
 		
 		protected var _envMap : BitmapData;

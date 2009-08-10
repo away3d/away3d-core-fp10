@@ -17,10 +17,10 @@ package away3d.materials
 	 */
 	public class PhongPBMaterial extends PixelShaderMaterial
 	{
-		[Embed(source="/../pbj/PhongNormalMapShader.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../pbks/PhongNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var NormalKernel : Class;
 		
-		[Embed(source="/../pbj/PhongNormalSpecularShader.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../pbks/PhongNormalSpecularShader.pbj", mimeType="application/octet-stream")]
 		private var SpecularKernel : Class;
 		
 		private var _specularColor : uint;

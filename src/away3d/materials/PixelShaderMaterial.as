@@ -25,7 +25,7 @@ package away3d.materials
 		protected var _positionMap : BitmapData;
 		protected var _normalMap : BitmapData;
 		
-		[Embed(source="/../pbj/PositionInterpolator.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../pbks/PositionInterpolator.pbj", mimeType="application/octet-stream")]
 		private var PositionInterpolator : Class;
 		
 		private var _posMtx : MatrixAway3D = new MatrixAway3D();		

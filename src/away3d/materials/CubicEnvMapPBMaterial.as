@@ -11,7 +11,7 @@ package away3d.materials
 	 */
 	public class CubicEnvMapPBMaterial extends PixelShaderMaterial
 	{
-		[Embed(source="/../pbj/CubicEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../pbks/CubicEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
 		
 		private var _faces : Array;

@@ -17,7 +17,7 @@ package away3d.materials.utils
 	{
 		private static var _objectMap : BitmapData;
 		
-		[Embed(source="/../pbj/TangentToObject.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../../pbks/TangentToObject.pbj", mimeType="application/octet-stream")]
 		private static var TangentToObjectKernel : Class;
 		
 		/**
