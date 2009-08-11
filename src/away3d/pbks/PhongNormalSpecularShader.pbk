@@ -1,5 +1,5 @@
 <languageVersion: 1.0;>
-kernel PhongNormalMapShader
+kernel PhongNormalSpecularMapShader
 <
 	namespace: "com.away3d";
 	vendor: "Away3d";
