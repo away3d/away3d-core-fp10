@@ -772,17 +772,14 @@ package away3d.core.render
                 graphics.lineStyle();
         	
         	if(endIndex - startIndex > 3) {
+        		if(alpha > 0)
+					graphics.beginFill(color, alpha);
+				
 	            while(startIndex < endIndex) {
 	            	_index0 = screenIndices[startIndex]*3;
 					switch (commands[startIndex++]) {
 						case "M":
-							if(alpha > 0)
-								graphics.endFill();
-							
 							graphics.moveTo(screenVertices[_index0], screenVertices[_index0+1]);
-							
-							if(alpha > 0)
-								graphics.beginFill(color, alpha);
 							break;
 						case "L":
 							graphics.lineTo(screenVertices[_index0], screenVertices[_index0+1]);
