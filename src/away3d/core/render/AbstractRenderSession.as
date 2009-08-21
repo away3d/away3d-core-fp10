@@ -113,6 +113,7 @@ package away3d.core.render
         private var d:Number;
         private var tx:Number;
         private var ty:Number;
+        private var _i:int;
         private var _index0:int;
         private var _index1:int;
         private var _index2:int;
@@ -689,19 +690,21 @@ package away3d.core.render
         	if(endIndex - startIndex > 3) {
         		
         		applicableGraphics.lineStyle();
-        		applicableGraphics.beginFill(color, alpha);
         		
-	            while(startIndex < endIndex) {
-	            	_index0 = screenIndices[startIndex]*3;
-					switch (commands[startIndex++]) {
+        		_i = startIndex;
+	            while(_i < endIndex) {
+	            	_index0 = screenIndices[_i]*3;
+					switch (commands[_i++]) {
 						case "M":
 							applicableGraphics.moveTo(screenVertices[_index0], screenVertices[_index0+1]);
+							if (_i - 1 == startIndex)
+								applicableGraphics.beginFill(color, alpha);
 							break;
 						case "L":
 							applicableGraphics.lineTo(screenVertices[_index0], screenVertices[_index0+1]);
 							break;
 						case "C":
-							_index1 = screenIndices[startIndex++]*3;
+							_index1 = screenIndices[_i++]*3;
 							applicableGraphics.curveTo(screenVertices[_index0], screenVertices[_index0+1], screenVertices[_index1], screenVertices[_index1+1]);
 							break;
 					}
@@ -772,20 +775,21 @@ package away3d.core.render
                 graphics.lineStyle();
         	
         	if(endIndex - startIndex > 3) {
-        		if(alpha > 0)
-					graphics.beginFill(color, alpha);
-				
-	            while(startIndex < endIndex) {
-	            	_index0 = screenIndices[startIndex]*3;
-					switch (commands[startIndex++]) {
+        		
+				_i = startIndex;
+	            while(_i < endIndex) {
+	            	_index0 = screenIndices[_i]*3;
+					switch (commands[_i++]) {
 						case "M":
 							graphics.moveTo(screenVertices[_index0], screenVertices[_index0+1]);
+							if (_i - 1 == _i && alpha > 0)
+								graphics.beginFill(color, alpha);
 							break;
 						case "L":
 							graphics.lineTo(screenVertices[_index0], screenVertices[_index0+1]);
 							break;
 						case "C":
-							_index1 = screenIndices[startIndex++]*3;
+							_index1 = screenIndices[_i++]*3;
 							graphics.curveTo(screenVertices[_index0], screenVertices[_index0+1], screenVertices[_index1], screenVertices[_index1+1]);
 							break;
 					}
