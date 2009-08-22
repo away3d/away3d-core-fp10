@@ -135,7 +135,7 @@ package away3d.materials
 			// use first point light
 			if (source.lightarray.points.length > 0) {
 				point = source.lightarray.points[0];
-				_objectLightPos.transform(point.light.position, invSceneTransform);
+				_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
 				

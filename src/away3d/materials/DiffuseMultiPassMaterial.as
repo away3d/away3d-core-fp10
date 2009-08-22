@@ -62,7 +62,7 @@ package away3d.materials
 			        }
 		        	
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {
-			        	_objectLightPos.transform(point.light.position, invSceneTransform);
+			        	_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 		        		_pointLightShader.data.diffuseColor.value = [ point.red*.5, point.green*.5, point.blue*.5 ];
 		        		_pointLightShader.data.lightRadius.value = [ point.radius ];
