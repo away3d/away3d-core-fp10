@@ -62,13 +62,13 @@ kernel CubicEnvMapShader
 		float3 coord3d = sampleNearest(positionMap, outCoord());
 		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
 		float3 view = normalize(viewPos-coord3d);
-		float3 normalSample = normalize(2.0*(sampleNearest(normalMap, outCoord())-float3(0.5)));
+		view.y = -view.y;
+		float3 normalSample = 2.0*(sampleNearest(normalMap, outCoord())-float3(0.5));
 		float3 n = normalize(normalTransformation*normalSample);
-		
 		pixel3 reflection;
 
 		float3 refl = view - 2.0*dot(n, view)*n;
-		refl.y = -refl.y;
+		//refl.y = -refl.y;
 		// determine which face of the cube will be used
 		float maxcoord = abs(refl.x);
 		int face = refl.x > 0.0 ? 0 : 1;

@@ -1,6 +1,8 @@
 package away3d.materials
 {
+	import away3d.containers.View3D;
 	import away3d.core.base.Mesh;
+	import away3d.core.base.Object3D;
 	
 	import flash.display.BitmapData;
 	import flash.display.Shader;
@@ -8,7 +10,7 @@ package away3d.materials
 	/**
 	 * BitmapData material which creates reflections based on a spherical map.
 	 */
-	public class SphericEnvMapPBMaterial extends PixelShaderMaterial
+	public class SphericEnvMapPBMaterial extends SinglePassShaderMaterial
 	{
 		[Embed(source="../pbks/SphericEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
@@ -31,10 +33,10 @@ package away3d.materials
 			
 			_envMapAlpha = ini.getNumber("envMapAlpha", 1);
 			_envMap = envMap;
-			
-			_pixelShader.data.alpha.value = [ _envMapAlpha ];
-			_pixelShader.data.envMap.input = envMap;
-			_pixelShader.data.envMapDim.value = [ envMap.width*.5 ];
+			_useWorldCoords = true;
+			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
+			_pointLightShader.data.envMap.input = envMap;
+			_pointLightShader.data.envMapDim.value = [ envMap.width*.5 ];
 		}
 		
 		/**
@@ -48,7 +50,13 @@ package away3d.materials
 		public function set envMapAlpha(value : Number) : void
 		{
 			_envMapAlpha = value;
-			_pixelShader.data.alpha.value = [ value ];
+			_pointLightShader.data.alpha.value = [ value ];
+		}
+		
+		override protected function updatePixelShader(source:Object3D, view:View3D):void
+		{
+			_pointLightShader.data.viewPos.value = [ view.camera.x, view.camera.y, view.camera.z ];
+			super.updatePixelShader(source, view);
 		}
 	}
 }

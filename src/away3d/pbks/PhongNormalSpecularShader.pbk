@@ -13,34 +13,15 @@ kernel PhongNormalSpecularMapShader
 	input image3 positionMap;
 	output pixel3 dst;
 	
-	parameter float specular
+	parameter float2 phongComponents
 	<
-		minValue: float(0.0);
-		maxValue: float(10.0);
-		defaultValue: float(2);
-		description: "The specular strength";
-	>;
-	
-	parameter float gloss
-	<
-		minValue: float(0.0);
-		maxValue: float(10.0);
-		defaultValue: float(10);
-		description: "The gloss";
-	>;
-	
-	parameter float3x3 normalTransformation
-	<
-		minValue: float3x3(-8000.0);
-		maxValue: float3x3(8000.0);
-		defaultValue: float3x3(0.0);
-		description: "The transformation matrix that transforms the displayObject to stage coordinates";
+		minValue: float2(0.0);
+		defaultValue: float2(2.0);
+		description: "Gloss (x) and specular strength (y)";
 	>;
 	
 	parameter float4x4 positionTransformation
 	<
-		minValue: float4x4(-8000.0);
-		maxValue: float4x4(8000.0);
 		defaultValue: float4x4(0.0);
 	>;
 	
@@ -62,8 +43,6 @@ kernel PhongNormalSpecularMapShader
 	
 	parameter float3 lightPosition
 	<
-		minValue: float3(-8000.0, -8000.0, -8000.0);
-		maxValue: float3(8000.0, 8000.0, 8000.0);
 		defaultValue: float3(0.0, 0.0, 0.0);
 		description: "The position of the light source";
 	>;
@@ -78,26 +57,49 @@ kernel PhongNormalSpecularMapShader
 	
 	parameter float3 viewPos
 	<
-		minValue: float3(0.0);
-		maxValue: float3(100000.0);
 		defaultValue: float3(0.0);
 		description: "The position of the camera";
+	>;
+	
+	parameter float2 lightRadiusFalloff
+	<
+		defaultValue: float2(200.0, 1000.0);
+		description: "The radius within the light intensity will be maximum (x) and the distance between radius and falloff (y)";
+	>;
+	
+	parameter float3 objectScale
+	<
+		defaultValue: float3(1.0);
+		description: "The scale of the object, used to correct the light direction";
 	>;
 	
 	void evaluatePixel()
 	{
 		float3 coord3d = sampleNearest(positionMap, outCoord());
-		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
+		coord3d.x = coord3d.x*positionTransformation[0][0]+positionTransformation[3][0];
+		coord3d.y = coord3d.y*positionTransformation[1][1]+positionTransformation[3][1];
+		coord3d.z = coord3d.z*positionTransformation[2][2]+positionTransformation[3][2];
+		
 		float3 view = normalize(viewPos-coord3d);
-		float3 normalSample = 2.0*(sampleNearest(normalMap, outCoord())-float3(0.5));
+		view.y = -view.y;
 		
-		float3 n = normalize(normalTransformation*normalSample);
+		float3 n = normalize(sampleNearest(normalMap, outCoord())-float3(0.5));
 		
-		float3 lightDir = normalize(lightPosition-coord3d);
+		float3 lightDir = (lightPosition-coord3d)*objectScale;
 		
+		float l = length(lightDir);
+		float f;
+		
+		if (lightRadiusFalloff.x < 0.0)
+			f = 1.0;
+		else
+			f = 1.0-min(max((l-lightRadiusFalloff.x)/lightRadiusFalloff.y, 0.0), 1.0);
+			
+		lightDir /= l;
+		lightDir.y = -lightDir.y;
 		float nDotD = max(-dot(lightDir, n), 0.0);
-		float specStr = specular*pow(max(-dot(lightDir+2.0*nDotD*n, normalize(lightDir+view)), 0.0), gloss)*sampleNearest(specularMap, outCoord()).x;
+		float specStr = phongComponents.x*pow(max(-dot(lightDir+2.0*nDotD*n, normalize(lightDir+view)), 0.0), phongComponents.y)*sampleNearest(specularMap, outCoord()).x;
 		
-		dst = sampleNearest(diffuse, outCoord())*diffuseColor*nDotD+ambientColor + specularColor*specStr;
+		dst = (sampleNearest(diffuse, outCoord())*diffuseColor*nDotD + specularColor*specStr)*f + ambientColor;
 	}
 }

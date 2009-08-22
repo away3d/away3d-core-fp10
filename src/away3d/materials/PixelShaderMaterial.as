@@ -13,6 +13,7 @@ package away3d.materials
 	import flash.display.Shader;
 	import flash.display.ShaderJob;
 	import flash.display.Sprite;
+	import flash.geom.ColorTransform;
 	
 	use namespace arcane;
 	
@@ -25,15 +26,17 @@ package away3d.materials
 		protected var _positionMap : BitmapData;
 		protected var _normalMap : BitmapData;
 		
+		protected var _useWorldCoords : Boolean = false;
+		
+		protected var _pointLightShader : Shader;
+		
 		[Embed(source="../pbks/PositionInterpolator.pbj", mimeType="application/octet-stream")]
 		private var PositionInterpolator : Class;
 		
 		private var _posMtx : MatrixAway3D = new MatrixAway3D();		
 		
-		private var _shaderJob : ShaderJob;
-		protected var _pixelShader : Shader;
-		
 		private var _positionMapMatrix : MatrixAway3D;
+		
 		
 		/**
 		 * Creates a new PixelShaderMaterial object.
@@ -42,7 +45,6 @@ package away3d.materials
 		 * 	- diffuse input image
 		 *	- normalMap input image
 		 *  - positionMap input image
-		 *  - float3x3 normalTransformation
 		 *  - float4x4 positionTransformation
 		 * 
 		 * @param bitmap The texture to be used for the diffuse shading
@@ -55,38 +57,19 @@ package away3d.materials
 		public function PixelShaderMaterial(bitmap:BitmapData, normalMap : BitmapData, pixelShader : Shader, targetModel:Mesh, init:Object=null)
 		{
 			super(bitmap, init);
-			
 			_mesh = targetModel;
-			_pixelShader = pixelShader;
-			_shaderJob = new ShaderJob(pixelShader);
+			_pointLightShader = pixelShader;
 			_normalMap = normalMap;
 			createPositionMap();
 			
-			_pixelShader.data.normalMap.input = _normalMap;
-			_pixelShader.data.positionMap.input = _positionMap;
+			_pointLightShader.data.normalMap.input = _normalMap;
+			_pointLightShader.data.positionMap.input = _positionMap;
 		}
 		
-		override protected function updateRenderBitmap():void
-        {
-        	_bitmapDirty = false; 
-        	if (_colorTransform) {
-				if (!_bitmap.transparent && _alpha != 1) {
-	                _renderBitmap = new BitmapData(_bitmap.width, _bitmap.height, true);
-	                _renderBitmap.draw(_bitmap);
-	         	}
-	            else _renderBitmap = _bitmap.clone();
-	            
-				_renderBitmap.colorTransform(_renderBitmap.rect, _colorTransform);
-	        }
-	        else
-	        	_renderBitmap = _bitmap.clone();
-	        
-	        _pixelShader.data.diffuse.input = _renderBitmap;
-	        _shaderJob = new ShaderJob(_pixelShader, _renderBitmap);
-	        _shaderJob.start(true);
-	        
-	        invalidateFaces();
-        }
+		public function get normalMap() : BitmapData
+		{
+			return _normalMap;
+		}
 		
 		private function createPositionMap() : void
 		{
@@ -117,7 +100,11 @@ package away3d.materials
 			_positionMapMatrix.tx = min.x;
 			_positionMapMatrix.ty = min.y;
 			_positionMapMatrix.tz = min.z;
-			
+			_pointLightShader.data.positionTransformation.value = [ _positionMapMatrix.sxx, 0, 0, 0,
+															 		0, _positionMapMatrix.syy, 0, 0,
+														 			0, 0, _positionMapMatrix.szz, 0,
+														 			_positionMapMatrix.tx, _positionMapMatrix.ty, _positionMapMatrix.tz, 1
+																	];
 			diffExtr.x = 1/diffExtr.x;
 			diffExtr.y = 1/diffExtr.y;
 			diffExtr.z = 1/diffExtr.z;
@@ -175,24 +162,50 @@ package away3d.materials
 		 */
 		override public function updateMaterial(source:Object3D, view:View3D):void
 		{
-			var sceneTransform : MatrixAway3D = _mesh.sceneTransform;
-			
-			_posMtx.multiply(sceneTransform, _positionMapMatrix);
-			
-			_pixelShader.data.viewPos.value = [ view.camera.x, view.camera.y, view.camera.z ];
-			_pixelShader.data.normalTransformation.value = [ 	sceneTransform.sxx, -sceneTransform.syx, sceneTransform.szx,
-																sceneTransform.sxy, -sceneTransform.syy, sceneTransform.szy,
-																sceneTransform.sxz, -sceneTransform.syz, sceneTransform.szz
-															];
-															
-			_pixelShader.data.positionTransformation.value = [ 	_posMtx.sxx, _posMtx.syx, _posMtx.szx, 0,
-														 		_posMtx.sxy, _posMtx.syy, _posMtx.szy, 0,
-														 		_posMtx.sxz, _posMtx.syz, _posMtx.szz, 0,
-														 		_posMtx.tx, _posMtx.ty, _posMtx.tz, 1
-																];
+			updatePixelShader(source, view);
 			_bitmapDirty = true;
-			
 			super.updateMaterial(source, view);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateRenderBitmap():void
+		{
+			if (_colorTransform) {
+				if (!_bitmap.transparent && _alpha != 1) {
+	                _renderBitmap = new BitmapData(_bitmap.width, _bitmap.height, true);
+	                _renderBitmap.draw(_bitmap);
+	         	}
+	            else _renderBitmap = _bitmap.clone();
+	            
+				_renderBitmap.colorTransform(_renderBitmap.rect, _colorTransform);
+	        }
+	        else
+	        	_renderBitmap = _bitmap.clone();
+		}
+		
+		/**
+		 * Updates the pixel bender shader
+		 */
+		protected function updatePixelShader(source:Object3D, view : View3D) : void
+		{
+			if (_useWorldCoords) {
+				var sceneTransform : MatrixAway3D = _mesh.sceneTransform;
+				
+				_posMtx.multiply(sceneTransform, _positionMapMatrix);
+				
+				_pointLightShader.data.normalTransformation.value = [ 	sceneTransform.sxx, sceneTransform.syx, sceneTransform.szx,
+																		sceneTransform.sxy, sceneTransform.syy, sceneTransform.szy,
+																		sceneTransform.sxz, sceneTransform.syz, sceneTransform.szz
+																	];
+																
+				_pointLightShader.data.positionTransformation.value = [ 	_posMtx.sxx, _posMtx.syx, _posMtx.szx, 0,
+															 				_posMtx.sxy, _posMtx.syy, _posMtx.szy, 0,
+															 				_posMtx.sxz, _posMtx.syz, _posMtx.szz, 0,
+															 				_posMtx.tx, _posMtx.ty, _posMtx.tz, 1
+																		];
+			}
 		}
 	}
 }

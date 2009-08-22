@@ -6,6 +6,8 @@ package away3d.materials
 	import away3d.core.base.Object3D;
 	import away3d.core.light.AmbientLight;
 	import away3d.core.light.PointLight;
+	import away3d.core.math.MatrixAway3D;
+	import away3d.core.math.Number3D;
 	
 	import flash.display.BitmapData;
 	import flash.display.Shader;
@@ -15,10 +17,12 @@ package away3d.materials
 	/**
 	 * Bitmap material with per-texel diffuse (Lambert) shading.
 	 */
-	public class DiffusePBMaterial extends PixelShaderMaterial
+	public class DiffusePBMaterial extends SinglePassShaderMaterial
 	{
 		[Embed(source="../pbks/LambertNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
+		
+		private var _objectLightPos : Number3D = new Number3D();
 		
 		/**
 		 * Creates a new DiffusePBMaterial object.
@@ -33,11 +37,9 @@ package away3d.materials
 			super(bitmap, normalMap, new Shader(new Kernel()), targetModel, init);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override public function updateMaterial(source:Object3D, view:View3D):void
+		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
+			var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
 			var point : PointLight;
 			var ambient : AmbientLight;
 			var ar : Number = 0,
@@ -58,19 +60,24 @@ package away3d.materials
 			if (ab >= 0xff) ab = 1;
 			else ab /= 0xff;
 			
-			_pixelShader.data.ambientColor.value = [ar, ag, ab];
+			_pointLightShader.data.ambientColor.value = [ar, ag, ab];
 			
 			// use first point light
 			if (source.lightarray.points.length > 0) {
 				point = source.lightarray.points[0];
-        		_pixelShader.data.lightPosition.value = [ point.light.x, point.light.y, point.light.z ];
-        		_pixelShader.data.diffuseColor.value = [ point.red, point.green, point.blue ];
+				_objectLightPos.transform(point.light.position, invSceneTransform);
+				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
+				_pointLightShader.data.lightRadius.value = [ point.radius ];
+				
+				if (point.fallOff == Number.POSITIVE_INFINITY || point.fallOff == Number.NEGATIVE_INFINITY)
+					_pointLightShader.data.lightFalloff.value = [ -1 ];
+				else
+					_pointLightShader.data.lightFalloff.value = [ point.fallOff - point.radius ];
+				
+				_pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
+        		_pointLightShader.data.diffuseColor.value = [ point.red, point.green, point.blue ];
         	}
-        	else _pixelShader.data.diffuseColor.value = [ 0, 0, 0 ];
-        	
-        	_bitmapDirty = true;
-        	
-        	super.updateMaterial(source, view);
+        	else _pointLightShader.data.diffuseColor.value = [ 0, 0, 0 ];
 		}
 	}
 }

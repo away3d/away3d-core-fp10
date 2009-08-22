@@ -1,6 +1,8 @@
 package away3d.materials
 {
+	import away3d.containers.View3D;
 	import away3d.core.base.Mesh;
+	import away3d.core.base.Object3D;
 	import away3d.primitives.utils.CubeFaces;
 	
 	import flash.display.BitmapData;
@@ -9,7 +11,7 @@ package away3d.materials
 	/**
 	 * BitmapData material which creates reflections based on a cube map.
 	 */
-	public class CubicEnvMapPBMaterial extends PixelShaderMaterial
+	public class CubicEnvMapPBMaterial extends SinglePassShaderMaterial
 	{
 		[Embed(source="../pbks/CubicEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
@@ -29,19 +31,19 @@ package away3d.materials
 		public function CubicEnvMapPBMaterial(bitmap:BitmapData, normalMap:BitmapData, faces : Array, targetModel:Mesh, init:Object=null)
 		{
 			super(bitmap, normalMap, new Shader(new Kernel()), targetModel, init);
-			
+			_useWorldCoords = true;
 			_envMapAlpha = ini.getNumber("envMapAlpha", 1);
 			
 			_faces = faces;
 			
-			_pixelShader.data.alpha.value = [ _envMapAlpha ];
-			_pixelShader.data.left.input = faces[CubeFaces.LEFT];
-			_pixelShader.data.right.input = faces[CubeFaces.RIGHT];
-			_pixelShader.data.top.input = faces[CubeFaces.TOP];
-			_pixelShader.data.bottom.input = faces[CubeFaces.BOTTOM];
-			_pixelShader.data.front.input = faces[CubeFaces.FRONT];
-			_pixelShader.data.back.input = faces[CubeFaces.BACK];
-			_pixelShader.data.cubeDim.value = [ faces[CubeFaces.LEFT].width*.5 ];
+			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
+			_pointLightShader.data.left.input = faces[CubeFaces.LEFT];
+			_pointLightShader.data.right.input = faces[CubeFaces.RIGHT];
+			_pointLightShader.data.top.input = faces[CubeFaces.TOP];
+			_pointLightShader.data.bottom.input = faces[CubeFaces.BOTTOM];
+			_pointLightShader.data.front.input = faces[CubeFaces.FRONT];
+			_pointLightShader.data.back.input = faces[CubeFaces.BACK];
+			_pointLightShader.data.cubeDim.value = [ faces[CubeFaces.LEFT].width*.5 ];
 		}
 		
 		/**
@@ -55,7 +57,13 @@ package away3d.materials
 		public function set envMapAlpha(value : Number) : void
 		{
 			_envMapAlpha = value;
-			_pixelShader.data.alpha.value = [ value ];
+			_pointLightShader.data.alpha.value = [ value ];
+		}
+		
+		override protected function updatePixelShader(source:Object3D, view:View3D):void
+		{
+			_pointLightShader.data.viewPos.value = [ view.camera.x, view.camera.y, view.camera.z ];
+			super.updatePixelShader(source, view);
 		}
 	}
 }

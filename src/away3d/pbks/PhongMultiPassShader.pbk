@@ -1,16 +1,23 @@
 <languageVersion: 1.0;>
-kernel LambertNormalMapShader
+kernel PhongMultiPassShader
 <
 	namespace: "com.away3d";
 	vendor: "Away3d";
 	version: 1;
-	description: "Applies a Lambert (diffuse) shaded lighting effect with support for normal maps.";
+	description: "Applies phong shading for point lights";
 >
 {
-	input image3 diffuse;
+	input image3 lightMap;
 	input image3 normalMap;
 	input image3 positionMap;
 	output pixel3 dst;
+	
+	parameter float2 phongComponents
+	<
+		minValue: float2(0.0);
+		defaultValue: float2(2.0);
+		description: "Gloss (x) and specular strength (y)";
+	>;
 	
 	parameter float4x4 positionTransformation
 	<
@@ -27,6 +34,14 @@ kernel LambertNormalMapShader
 		description: "The diffuse colour of the light";
 	>;
 	
+	parameter float3 specularColor
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(1.0);
+		description: "The specular colour of the light";
+	>;
+	
 	parameter float3 lightPosition
 	<
 		minValue: float3(-8000.0, -8000.0, -8000.0);
@@ -35,24 +50,18 @@ kernel LambertNormalMapShader
 		description: "The position of the light source";
 	>;
 	
-	parameter float3 ambientColor
+	parameter float3 viewPos
 	<
 		minValue: float3(0.0);
-		maxValue: float3(1.0);
+		maxValue: float3(100000.0);
 		defaultValue: float3(0.0);
-		description: "The ambient color of the environment";
+		description: "The position of the camera";
 	>;
 	
-	parameter float lightRadius
+	parameter float2 lightRadiusFalloff
 	<
-		defaultValue: float(200.0);
-		description: "The radius within the light intensity will be maximum";
-	>;
-	
-	parameter float lightFalloff
-	<
-		defaultValue: float(1000.0);
-		description: "The radius within the light intensity will be maximum";
+		defaultValue: float2(200.0, 1000.0);
+		description: "The radius within the light intensity will be maximum (x) and the distance between radius and falloff (y)";
 	>;
 	
 	parameter float3 objectScale
@@ -68,6 +77,9 @@ kernel LambertNormalMapShader
 		coord3d.y = coord3d.y*positionTransformation[1][1]+positionTransformation[3][1];
 		coord3d.z = coord3d.z*positionTransformation[2][2]+positionTransformation[3][2];
 		
+		float3 view = normalize(viewPos-coord3d);
+		view.y = -view.y;
+		
 		float3 n = normalize(sampleNearest(normalMap, outCoord())-float3(0.5));
 		
 		float3 lightDir = (lightPosition-coord3d)*objectScale;
@@ -75,15 +87,16 @@ kernel LambertNormalMapShader
 		float l = length(lightDir);
 		float f;
 		
-		if (lightFalloff < 0.0)
+		if (lightRadiusFalloff.x < 0.0)
 			f = 1.0;
 		else
-			f = 1.0-min(max((l-lightRadius)/lightFalloff, 0.0), 1.0);
+			f = 1.0-min(max((l-lightRadiusFalloff.x)/lightRadiusFalloff.y, 0.0), 1.0);
 			
 		lightDir /= l;
 		lightDir.y = -lightDir.y;
 		float nDotD = max(-dot(lightDir, n), 0.0);
+		float specStr = phongComponents.x*pow(max(-dot(lightDir+2.0*nDotD*n, normalize(lightDir+view)), 0.0), phongComponents.y);
 		
-		dst = sampleNearest(diffuse, outCoord())*diffuseColor*nDotD*f+ambientColor;
+		dst = sampleNearest(lightMap, outCoord())+(diffuseColor*nDotD+specularColor*specStr)*f;
 	}
 }

@@ -1,0 +1,78 @@
+<languageVersion: 1.0;>
+kernel MultiPassPhongSpecularDirShader
+<
+	namespace: "com.away3d";
+	vendor: "Away3d";
+	version: 1;
+	description: "Applies phong shading for directional lights, supporting a specular map";
+>
+{
+	input image3 lightMap;
+	input image3 normalMap;
+	input image3 specularMap;
+	input image3 positionMap;
+	output pixel3 dst;
+	
+	parameter float2 phongComponents
+	<
+		minValue: float2(0.0);
+		defaultValue: float2(2.0);
+		description: "Gloss (x) and specular strength (y)";
+	>;
+	
+	parameter float4x4 positionTransformation
+	<
+		minValue: float4x4(-8000.0);
+		maxValue: float4x4(8000.0);
+		defaultValue: float4x4(0.0);
+	>;
+	
+	parameter float3 diffuseColor
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(1.0);
+		description: "The diffuse colour of the light";
+	>;
+	
+	parameter float3 specularColor
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(1.0);
+		description: "The specular colour of the light";
+	>;
+	
+	parameter float3 lightDirection
+	<
+		minValue: float3(-1.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(0.0, 0.0, 1.0);
+		description: "The direction of the light source";
+	>;
+	
+	parameter float3 viewPos
+	<
+		minValue: float3(0.0);
+		maxValue: float3(100000.0);
+		defaultValue: float3(0.0);
+		description: "The position of the camera";
+	>;
+	
+	void evaluatePixel()
+	{
+		float3 coord3d = sampleNearest(positionMap, outCoord());
+		coord3d.x = coord3d.x*positionTransformation[0][0]+positionTransformation[3][0];
+		coord3d.y = coord3d.y*positionTransformation[1][1]+positionTransformation[3][1];
+		coord3d.z = coord3d.z*positionTransformation[2][2]+positionTransformation[3][2];
+		
+		float3 view = normalize(viewPos-coord3d);
+		view.y = -view.y;
+		float3 n = normalize(2.0*(sampleNearest(normalMap, outCoord())-float3(0.5)));
+		
+		float nDotD = max(-dot(lightDirection, n), 0.0);
+		float specStr = phongComponents.x*pow(max(-dot(lightDirection+2.0*nDotD*n, normalize(lightDirection+view)), 0.0), phongComponents.y)*sampleNearest(specularMap, outCoord()).x;
+		
+		dst = sampleNearest(lightMap, outCoord())+diffuseColor*nDotD+specularColor*specStr;
+	}
+}
