@@ -23,6 +23,9 @@ package away3d.materials
 		protected var _directionalLightShader : Shader;
 		protected var _lightMap : BitmapData;
 		
+		/**
+	 	 * The base class for Pixel Bender texel shader materials that support multiple and directional lights
+	 	 */
 		public function MultiPassShaderMaterial(bitmap:BitmapData, normalMap:BitmapData, pointShader:Shader, directionalShader:Shader, targetModel:Mesh, init:Object=null)
 		{
 			super(bitmap, normalMap, pointShader, targetModel, init);
@@ -35,6 +38,9 @@ package away3d.materials
 			_directionalLightShader.data.positionMap.input = _positionMap;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateRenderBitmap():void
 		{
 			_bitmapDirty = false; 
@@ -50,11 +56,17 @@ package away3d.materials
 	        
 		}
 		
+		/**
+		 * Renders the multiple passes to the light map
+		 */
 		protected function renderLightMap() : void
 		{
 			// must be overridden
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
 			var ar : Number = 0,

@@ -13,6 +13,9 @@ package away3d.materials
 	
 	use namespace arcane;
 	
+	/**
+	 * A diffuse texel shader material with support for multiple and directional lights
+	 */
 	public class DiffuseMultiPassMaterial extends MultiPassShaderMaterial
 	{
 		[Embed(source="../pbks/LambertMultiPassShader.pbj", mimeType="application/octet-stream")]
@@ -24,11 +27,22 @@ package away3d.materials
 		private var _objectLightPos : Number3D = new Number3D();
 		private var _objectDirMatrix : MatrixAway3D = new MatrixAway3D();
 		
+		/**
+		 * Create a DiffuseMultiPassMaterial
+		 * 
+		 * @param bitmap The texture to be used for the diffuse shading
+		 * @param normalMap An object-space normal map
+		 * @param targetModel The target mesh for which this shader is applied
+		 * @param init An initialisation object
+		 */
 		public function DiffuseMultiPassMaterial(bitmap:BitmapData, normalMap:BitmapData, targetModel:Mesh, specularMap : BitmapData = null, init:Object=null)
 		{
  			super(bitmap, normalMap, new Shader(new NormalKernel()), new Shader(new NormalKernelDir()), targetModel, init);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function renderLightMap():void
         {
         	var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;

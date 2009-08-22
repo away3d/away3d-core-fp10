@@ -16,6 +16,9 @@ package away3d.materials
 	
 	use namespace arcane;
 	
+	/**
+	 * A Phong texel shader material supporting multiple lights.
+	 */
 	public class PhongMultiPassMaterial extends MultiPassShaderMaterial
 	{
 		[Embed(source="../pbks/PhongMultiPassShader.pbj", mimeType="application/octet-stream")]
@@ -35,6 +38,15 @@ package away3d.materials
 		private var _objectLightPos : Number3D = new Number3D();
 		private var _objectDirMatrix : MatrixAway3D = new MatrixAway3D();
 		
+		/**
+		 * Creates a PhongMultiPassMaterial.
+		 * 
+		 * @param bitmap The texture to be used for the diffuse shading
+		 * @param normalMap An object-space normal map
+		 * @param targetModel The target mesh for which this shader is applied
+		 * @param specularMap An optional specular map BitmapData, which modulates the specular reflections
+		 * @param init An initialisation object
+		 */
 		public function PhongMultiPassMaterial(bitmap:BitmapData, normalMap:BitmapData, targetModel:Mesh, specularMap : BitmapData = null, init:Object=null)
 		{
 			var shaderPt : Shader;
@@ -86,10 +98,12 @@ package away3d.materials
 		public function set specular(value : Number) : void
 		{
 			_pointLightShader.data.phongComponents.value[0] = value;
-			_directionalLightShader.data.phongComponents.value[1] = value;
+			_directionalLightShader.data.phongComponents.value[0] = value;
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
 			var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
@@ -98,6 +112,9 @@ package away3d.materials
 			super.updatePixelShader(source, view);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function renderLightMap():void
         {
         	var scenePosition : Number3D = _mesh.scenePosition;

@@ -9,6 +9,9 @@ package away3d.materials
 	
 	use namespace arcane;
 	
+	/**
+	 * The base class for Pixel Bender texel shader materials which use a single point light (the first to be added to the scene).
+	 */
 	internal class SinglePassShaderMaterial extends PixelShaderMaterial
 	{
 		public function SinglePassShaderMaterial(bitmap:BitmapData, normalMap:BitmapData, pixelShader:Shader, targetModel:Mesh, init:Object=null)
