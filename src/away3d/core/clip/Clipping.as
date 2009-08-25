@@ -55,8 +55,10 @@ package away3d.core.clip
     	private var _stage:Stage;
     	private var _stageWidth:Number;
     	private var _stageHeight:Number;
-    	private var _zeroPoint:Point = new Point(0, 0);
-		private var _globalPoint:Point;
+    	private var _localPointTL:Point = new Point(0, 0);
+    	private var _localPointBR:Point = new Point(0, 0);
+		private var _globalPointTL:Point = new Point(0, 0);
+		private var _globalPointBR:Point = new Point(0, 0);
 		private var _view:View3D;
 		private var _minX:Number;
 		private var _minY:Number;
@@ -296,7 +298,7 @@ package away3d.core.clip
         	}
         	
 			_stage = container.stage;
-
+			
         	if (_stage.scaleMode == StageScaleMode.NO_SCALE) {
         		_stageWidth = _stage.stageWidth;
         		_stageHeight = _stage.stageHeight;
@@ -320,95 +322,88 @@ package away3d.core.clip
         			_stageWidth = _stage.stageWidth*_stageHeight/_stage.stageHeight;
         		}
         	}
-        		
         	
-        	if(_stage.align==StageAlign.TOP_LEFT)
-        	{
-            	_zeroPoint.x = 0;
-            	_zeroPoint.y = 0;
-                _globalPoint = container.globalToLocal(_zeroPoint);
+        	if(_stage.align == StageAlign.TOP_LEFT) {
+        		
+            	_localPointTL.x = 0;
+            	_localPointTL.y = 0;
                 
-                _maX = (_miX = _globalPoint.x) + _stageWidth;
-                _maY = (_miY = _globalPoint.y) + _stageHeight;
-	        }
-	        else if(_stage.align==StageAlign.TOP_RIGHT)
-	        {
-            	_zeroPoint.x = _loaderWidth;
-            	_zeroPoint.y = 0;
-                _globalPoint = container.globalToLocal(_zeroPoint);
+                _localPointBR.x = _stageWidth;
+            	_localPointBR.y = _stageHeight;
                 
-                _miX = (_maX = _globalPoint.x) - _stageWidth;
-                _maY = (_miY = _globalPoint.y) + _stageHeight;
-	        }
-	        else if(_stage.align==StageAlign.BOTTOM_LEFT)
-	        {
-            	_zeroPoint.x = 0;
-            	_zeroPoint.y = _loaderHeight;
-                _globalPoint = container.globalToLocal(_zeroPoint);
-                _maX = (_miX = _globalPoint.x) + _stageWidth;
-                _miY = (_maY = _globalPoint.y) - _stageHeight;
-	        }
-	        else if(_stage.align==StageAlign.BOTTOM_RIGHT)
-	        {
-            	_zeroPoint.x = _loaderWidth;
-            	_zeroPoint.y = _loaderHeight;
-                _globalPoint = container.globalToLocal(_zeroPoint);
-                
-                _miX = (_maX = _globalPoint.x) - _stageWidth;
-                _miY = (_maY = _globalPoint.y) - _stageHeight;
-	        }
-	        else if(_stage.align==StageAlign.TOP)
-	        {
-            	_zeroPoint.x = _loaderWidth/2;
-            	_zeroPoint.y = 0;
-                _globalPoint = container.globalToLocal(_zeroPoint);
-                
-                _miX = _globalPoint.x - _stageWidth/2;
-                _maX = _globalPoint.x + _stageWidth/2;
-                _maY = (_miY = _globalPoint.y) + _stageHeight;
-	        }
-	        else if(_stage.align==StageAlign.BOTTOM)
-	        {
-            	_zeroPoint.x = _loaderWidth/2;
-            	_zeroPoint.y = _loaderHeight;
-                _globalPoint = container.globalToLocal(_zeroPoint);
-                
-                _miX = _globalPoint.x - _stageWidth/2;
-                _maX = _globalPoint.x + _stageWidth/2;
-                _miY = (_maY = _globalPoint.y) - _stageHeight;
-	        }
-	        else if(_stage.align==StageAlign.LEFT)
-	        {
-            	_zeroPoint.x = 0;
-            	_zeroPoint.y = _loaderHeight/2;
-                _globalPoint = container.globalToLocal(_zeroPoint);
-                
-                _maX = (_miX = _globalPoint.x) + _stageWidth;
-                _miY = _globalPoint.y - _stageHeight/2;
-                _maY = _globalPoint.y + _stageHeight/2;
-	        }
-	        else if(_stage.align==StageAlign.RIGHT)
-	        {
-            	_zeroPoint.x = _loaderWidth;
-            	_zeroPoint.y = _loaderHeight/2;
-                _globalPoint = container.globalToLocal(_zeroPoint);
-                
-                _miX = (_maX = _globalPoint.x) - _stageWidth;
-                _miY = _globalPoint.y - _stageHeight/2;
-                _maY = _globalPoint.y + _stageHeight/2;
-	        }
-	        else
-	        {
-            	_zeroPoint.x = _loaderWidth/2;
-            	_zeroPoint.y = _loaderHeight/2;
-                _globalPoint = container.globalToLocal(_zeroPoint);
+	        } else if(_stage.align == StageAlign.TOP_RIGHT) {
+	        	
+	        	_localPointTL.x = _loaderWidth - _stageWidth;
+            	_localPointTL.y = 0;
             	
-                _miX = _globalPoint.x - _stageWidth/2;
-                _maX = _globalPoint.x + _stageWidth/2;
-                _miY = _globalPoint.y - _stageHeight/2;
-                _maY = _globalPoint.y + _stageHeight/2;
+            	_localPointBR.x = _loaderWidth;
+            	_localPointBR.y = _stageHeight;
+                
+	        } else if(_stage.align==StageAlign.BOTTOM_LEFT) {
+	        	
+	        	_localPointTL.x = 0;
+            	_localPointTL.y = _loaderHeight - _stageHeight;
+            	
+            	_localPointBR.x = _stageWidth;
+            	_localPointBR.y = _loaderHeight;
+            	
+	        } else if(_stage.align==StageAlign.BOTTOM_RIGHT) {
+	        	
+	        	_localPointTL.x = _loaderWidth - _stageWidth;
+	        	_localPointTL.y = _loaderHeight - _stageHeight;
+	        	
+	        	_localPointBR.x = _loaderWidth;
+	        	_localPointBR.y = _loaderHeight;
+	        	
+	        } else if(_stage.align == StageAlign.TOP) {
+	        	
+	        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
+            	_localPointTL.y = 0;
+            	
+            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
+            	_localPointBR.y = _stageHeight;
+            	
+	        } else if(_stage.align==StageAlign.BOTTOM) {
+            	
+	        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
+            	_localPointTL.y = _loaderHeight - _stageHeight;
+            	
+            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
+            	_localPointBR.y = _loaderHeight;
+            	
+	        } else if(_stage.align==StageAlign.LEFT) {
+	        	
+	        	_localPointTL.x = 0;
+            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
+            	
+            	_localPointBR.x = _stageWidth;
+            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
+            	
+	        } else if(_stage.align==StageAlign.RIGHT) {
+            	
+	        	_localPointTL.x = _loaderWidth - _stageWidth;
+            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
+            	
+            	_localPointBR.x = _loaderWidth;
+            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
+            	
+	        } else {
+            	
+	        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
+            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
+            	
+            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
+            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
         	}
-			
+        	
+        	_globalPointTL = container.globalToLocal(_localPointTL);
+        	_globalPointBR = container.globalToLocal(_localPointBR);
+        	
+			_miX = _globalPointTL.x;
+            _miY = _globalPointTL.y;
+            _maX = _globalPointBR.x;
+            _maY = _globalPointBR.y;
+            
             if (_minX > _miX)
             	_clippingClone.minX = _minX;
             else
