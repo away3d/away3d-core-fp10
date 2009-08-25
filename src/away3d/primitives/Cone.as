@@ -95,6 +95,9 @@
                         addFace(createFace(a,c,d, null, uva,uvc,uvd));
                 }
             }
+            
+            if (!_openEnded)
+				_segmentsH -= 1;
     	}
         
     	/**
