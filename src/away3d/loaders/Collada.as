@@ -1051,7 +1051,7 @@
 			var _channel_id:uint = 0;
 			for each (channel in anims["animation"]["animation"])
 			{
-				if(String(channel.@id).length>0)
+				if(String(channel.@id).length > 0)
 				{
 					channelLibrary.addChannel(channel.@id, channel);
 				}else{
@@ -1059,7 +1059,7 @@
 					channelLibrary.addChannel("_"+String(_channel_id++), channel);
 				}
 			}
-				
+					
 			if (clips) {
 				//loop through all animation clips
 				for each (var clip:XML in clips["animation_clip"])
@@ -1099,19 +1099,23 @@
             	return;
             }
             
-            // C4D : didn't have @id
-            var isC4D:Boolean = (String(node.@id).length<=0);
-            var isC4DType:String = type.split(".").join("");
-            
-            type = type.split(".")[0];
-			
-            if (!isC4D && (type == "image" || node.@id.split(".")[1] == "frameExtension"))
-            {
-                //TODO : Material Animation
-				Debug.trace(" ! Material animation not yet implemented");
-				return;
+            // C4D : didn't have @id, Maya 7 exporter has X/Y/Z split on translate
+            if (String(node.@id).length > 0 && (type.split(".").length == 1 || type.split(".")[1].length > 1)) {
+            	type = type.split(".")[0];
+            	
+            	if ((type == "image" || node.@id.split(".")[1] == "frameExtension")) {
+	                //TODO : Material Animation
+					Debug.trace(" ! Material animation not yet implemented");
+					return;
+            	}
+            	
+            } else {
+            	type = type.split(".").join("")
             }
+            
 			
+
+            
             var channel:Channel = channelData.channel = new Channel(name);
 			var i:int;
 			var j:int;
@@ -1201,8 +1205,7 @@
                 }
             }
             
-			channelData.type = isC4D?isC4DType:type;
-			Debug.trace("channelData.type:"+channelData.type);
+			channelData.type = type;
         }
 		
 		/**
