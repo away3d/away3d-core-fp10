@@ -264,6 +264,7 @@
 				            switch(channelData.type)
 				            {
 				                case "translateX":
+				                case "translationX":
 								case "transform(3)(0)":
 				                	channel.type = ["x"];
 									if (yUp)
@@ -271,6 +272,7 @@
 											param[0] *= -1*scaling;
 				                	break;
 								case "translateY":
+								case "translationY":
 								case "transform(3)(1)":
 									if (yUp)
 										channel.type = ["y"];
@@ -280,6 +282,7 @@
 										param[0] *= scaling;
 				     				break;
 								case "translateZ":
+								case "translationZ":
 								case "transform(3)(2)":
 									if (yUp)
 										channel.type = ["z"];
@@ -1032,7 +1035,14 @@
 			for each (var channel:XML in anims["animation"])
 			{
 				if(String(channel.@id).length>0)
+				{
 					channelLibrary.addChannel(channel.@id, channel);
+				}else{
+					// COLLADAMax NextGen;  Version: 1.1.0;  Platform: Win32;  Configuration: Release Max2009
+					// issue#1 : missing channel.@id -> use automatic id instead
+					Debug.trace(" ! COLLADAMax2009 id : _"+_channel_id);
+					channelLibrary.addChannel("_"+String(_channel_id++), channel);
+				}
 			}
 
 			// C4D 
@@ -1045,10 +1055,9 @@
 				{
 					channelLibrary.addChannel(channel.@id, channel);
 				}else{
-					Debug.trace(" ! C4D id : C4D_"+_channel_id);
-					channelLibrary.addChannel("C4D_"+String(_channel_id), channel);
+					Debug.trace(" ! C4D id : _"+_channel_id);
+					channelLibrary.addChannel("_"+String(_channel_id++), channel);
 				}
-				++_channel_id;
 			}
 				
 			if (clips) {
