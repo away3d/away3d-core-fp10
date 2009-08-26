@@ -9,7 +9,6 @@ package away3d.materials
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.Shader;
-	import flash.display.ShaderPrecision;
 
 	use namespace arcane;
 	
@@ -22,6 +21,8 @@ package away3d.materials
 		
 		protected var _directionalLightShader : Shader;
 		protected var _lightMap : BitmapData;
+		
+		protected var _blendMode : String = BlendMode.HARDLIGHT;
 		
 		/**
 	 	 * The base class for Pixel Bender texel shader materials that support multiple and directional lights
@@ -51,7 +52,7 @@ package away3d.materials
 			
 			renderLightMap();
 			
-			_renderBitmap.draw(_lightMap, null, null, BlendMode.HARDLIGHT);
+			_renderBitmap.draw(_lightMap, null, null, _blendMode);
 	        invalidateFaces();
 	        
 		}

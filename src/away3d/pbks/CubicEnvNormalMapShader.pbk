@@ -7,7 +7,7 @@ kernel CubicEnvMapShader
 	description: "Applies an environment map with support for normal maps.";
 >
 {
-	input image3 diffuse;
+	input image4 diffuse;
 	input image3 left;
 	input image3 right;
 	input image3 back;
@@ -16,7 +16,7 @@ kernel CubicEnvMapShader
 	input image3 bottom;
 	input image3 normalMap;
 	input image3 positionMap;
-	output pixel3 dst;
+	output pixel4 dst;
 	
 	parameter float alpha
 	<
@@ -86,18 +86,19 @@ kernel CubicEnvMapShader
 		float invMax = 1.0/maxcoord;
 		// sample the cube
 		if (face == 0)
-			reflection = sampleNearest(right, float2(1.0-refl.z*invMax, 1.0-refl.y*invMax)*cubeDim);
+			reflection = sampleNearest(left, float2(1.0-refl.z*invMax, 1.0-refl.y*invMax)*cubeDim);
 		else if (face == 1)
-			reflection = sampleNearest(left, float2(1.0+refl.z*invMax, 1.0-refl.y*invMax)*cubeDim);
+			reflection = sampleNearest(right, float2(1.0+refl.z*invMax, 1.0-refl.y*invMax)*cubeDim);
 		else if (face == 2)
-			reflection = sampleNearest(top, float2(1.0+refl.x*invMax, 1.0+refl.z*invMax)*cubeDim);
+			reflection = sampleNearest(top, float2(1.0-refl.x*invMax, 1.0-refl.z*invMax)*cubeDim);
 		else if (face == 3)
-			reflection = sampleNearest(bottom, float2(1.0+refl.x*invMax, 1.0-refl.z*invMax)*cubeDim);
+			reflection = sampleNearest(bottom, float2(1.0-refl.x*invMax, 1.0+refl.z*invMax)*cubeDim);
 		else if (face == 4)
-			reflection = sampleNearest(back, float2(1.0+refl.x*invMax, 1.0-refl.y*invMax)*cubeDim);
+			reflection = sampleNearest(front, float2(1.0+refl.x*invMax, 1.0-refl.y*invMax)*cubeDim);
 		else if (face == 5)
-			reflection = sampleNearest(front, float2(1.0-refl.x*invMax, 1.0-refl.y*invMax)*cubeDim);
+			reflection = sampleNearest(back, float2(1.0-refl.x*invMax, 1.0-refl.y*invMax)*cubeDim);
 		
-		dst = sampleNearest(diffuse, outCoord())*(1.0-alpha)+reflection*alpha;
+		dst = sampleNearest(diffuse, outCoord());
+		dst.xyz = dst.xyz*(1.0-alpha)+reflection*alpha*dst.a;
 	}
 }

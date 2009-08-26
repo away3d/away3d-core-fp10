@@ -8,6 +8,7 @@ package away3d.materials
 	import away3d.core.light.PointLight;
 	import away3d.core.math.MatrixAway3D;
 	import away3d.core.math.Number3D;
+	import away3d.loaders.Obj;
 	
 	import flash.display.BitmapData;
 	import flash.display.Shader;
@@ -103,7 +104,6 @@ package away3d.materials
 		/**
 		 * @inheritDoc
 		 */
-		
 		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
 			var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;

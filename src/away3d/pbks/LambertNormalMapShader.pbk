@@ -7,10 +7,10 @@ kernel LambertNormalMapShader
 	description: "Applies a Lambert (diffuse) shaded lighting effect with support for normal maps.";
 >
 {
-	input image3 diffuse;
+	input image4 diffuse;
 	input image3 normalMap;
 	input image3 positionMap;
-	output pixel3 dst;
+	output pixel4 dst;
 	
 	parameter float4x4 positionTransformation
 	<
@@ -84,6 +84,7 @@ kernel LambertNormalMapShader
 		lightDir.y = -lightDir.y;
 		float nDotD = max(-dot(lightDir, n), 0.0);
 		
-		dst = sampleNearest(diffuse, outCoord())*diffuseColor*nDotD*f+ambientColor;
+		dst = sampleNearest(diffuse, outCoord());
+		dst.xyz = dst.xyz*diffuseColor*nDotD*f+ambientColor*dst.a;
 	}
 }

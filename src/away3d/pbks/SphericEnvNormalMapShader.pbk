@@ -7,11 +7,11 @@ kernel SphericEnvMapShader
 	description: "Applies a spherical environment map with support for normal maps.";
 >
 {
-	input image3 diffuse;
+	input image4 diffuse;
 	input image3 envMap;
 	input image3 normalMap;
 	input image3 positionMap;
-	output pixel3 dst;
+	output pixel4 dst;
 	
 	parameter float alpha
 	<
@@ -66,6 +66,7 @@ kernel SphericEnvMapShader
 		refl.z = refl.z-1.0;
 		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
 		
-		dst = sampleNearest(diffuse, outCoord())*(1.0-alpha)+reflection*alpha;
+		dst = sampleNearest(diffuse, outCoord());
+		dst.xyz = dst.xyz*(1.0-alpha)+reflection*alpha*dst.a;
 	}
 }

@@ -7,10 +7,10 @@ kernel PhongNormalMapShader
 	description: "Applies a phong shaded lighting effect with support for normal maps.";
 >
 {
-	input image3 diffuse;
+	input image4 diffuse;
 	input image3 normalMap;
 	input image3 positionMap;
-	output pixel3 dst;
+	output pixel4 dst;
 	
 	parameter float2 phongComponents
 	<
@@ -99,6 +99,7 @@ kernel PhongNormalMapShader
 		float nDotD = max(-dot(lightDir, n), 0.0);
 		float specStr = phongComponents.x*pow(max(-dot(lightDir+2.0*nDotD*n, normalize(lightDir+view)), 0.0), phongComponents.y);
 		
-		dst = (sampleNearest(diffuse, outCoord())*diffuseColor*nDotD + specularColor*specStr)*f + ambientColor;
+		dst = sampleNearest(diffuse, outCoord());
+		dst.xyz = (dst.xyz*diffuseColor*nDotD + specularColor*specStr*dst.a)*f + ambientColor*dst.a;
 	}
 }
