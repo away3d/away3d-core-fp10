@@ -39,7 +39,6 @@ package away3d.materials
 		public function DiffuseMultiPassMaterial(bitmap:BitmapData, normalMap:BitmapData, targetModel:Mesh, specularMap : BitmapData = null, init:Object=null)
 		{
  			super(bitmap, normalMap, new Shader(new NormalKernel()), new Shader(new NormalKernelDir()), targetModel, init);
- 			_blendMode = BlendMode.MULTIPLY;
 		}
 		
 		/**
@@ -80,7 +79,7 @@ package away3d.materials
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {
 			        	_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-		        		_pointLightShader.data.diffuseColor.value = [ point.red, point.green, point.blue ];
+		        		_pointLightShader.data.diffuseColor.value = [ point.red*.5, point.green*.5, point.blue*.5 ];
 		        		_pointLightShader.data.lightRadius.value = [ point.radius ];
 					
 						_pointLightShader.data.lightFalloff.value[0] = infinite? -1 : point.fallOff - point.radius;
@@ -104,7 +103,7 @@ package away3d.materials
 					_objectLightPos.z = -_objectDirMatrix.szz;
 					_objectLightPos.normalize();
 	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-	        		_directionalLightShader.data.diffuseColor.value = [ directional.red, directional.green, directional.blue ];
+	        		_directionalLightShader.data.diffuseColor.value = [ directional.red*.5, directional.green*.5, directional.blue*.5 ];
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);
 	        	}

@@ -21,8 +21,9 @@ package away3d.materials
 		
 		protected var _directionalLightShader : Shader;
 		protected var _lightMap : BitmapData;
+		protected var _shaderBlendMode : String = BlendMode.HARDLIGHT;
+		protected var _useAmbient : Boolean = true;
 		
-		protected var _blendMode : String = BlendMode.HARDLIGHT;
 		
 		/**
 	 	 * The base class for Pixel Bender texel shader materials that support multiple and directional lights
@@ -37,6 +38,7 @@ package away3d.materials
 			_directionalLightShader.data.positionTransformation.value = _pointLightShader.data.positionTransformation.value;
 			_directionalLightShader.data.normalMap.input = _normalMap;
 			_directionalLightShader.data.positionMap.input = _positionMap;
+			
 		}
 		
 		/**
@@ -52,7 +54,7 @@ package away3d.materials
 			
 			renderLightMap();
 			
-			_renderBitmap.draw(_lightMap, null, null, _blendMode);
+			_renderBitmap.draw(_lightMap, null, null, _shaderBlendMode);
 	        invalidateFaces();
 	        
 		}
@@ -75,17 +77,20 @@ package away3d.materials
 				ab : Number = 0;
 			var ambient : AmbientLight;
 			// calculate ambient colour
-			for each (ambient in source.lightarray.ambients) {
-				ar += ambient.red;
-				ag += ambient.green;
-				ab += ambient.blue;
+			
+			if (_useAmbient) {
+				for each (ambient in source.lightarray.ambients) {
+					ar += ambient.red;
+					ag += ambient.green;
+					ab += ambient.blue;
+				}
+				
+				if (ar >= 0xff) ar = 0xff;
+				if (ag >= 0xff) ag = 0xff;
+				if (ab >= 0xff) ab = 0xff;
+				
+				_ambient = (ar << 16) | (ag << 8) | ab;
 			}
-			
-			if (ar >= 0xff) ar = 0xff;
-			if (ag >= 0xff) ag = 0xff;
-			if (ab >= 0xff) ab = 0xff;
-			
-			_ambient = (ar << 16) | (ag << 8) | ab;
 			
 			_points = source.lightarray.points;
 			_directionals = source.lightarray.directionals;
