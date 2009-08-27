@@ -1031,7 +1031,10 @@
 			
             Debug.trace(" ! ------------- Begin Parse Animation -------------");
             
+            var _channel_id:uint = 0;
+            
             //loop through all animation channels
+            if(anims["animation"]["animation"].length()==0)
 			for each (var channel:XML in anims["animation"])
 			{
 				if(String(channel.@id).length>0)
@@ -1048,7 +1051,6 @@
 			// C4D 
 			// issue#1 : animation -> animation.animation
 			// issue#2 : missing channel.@id -> use automatic id instead
-			var _channel_id:uint = 0;
 			for each (channel in anims["animation"]["animation"])
 			{
 				if(String(channel.@id).length > 0)
@@ -1110,11 +1112,8 @@
             	}
             	
             } else {
-            	type = type.split(".").join("")
+            	type = type.split(".").join("");
             }
-            
-			
-
             
             var channel:Channel = channelData.channel = new Channel(name);
 			var i:int;
