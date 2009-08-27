@@ -246,10 +246,13 @@ package away3d.core.base
 		 * @param	v1						The second vertex object of the segment
 		 * @param	material	[optional]	The material used by the segment to render
 		 */
-        public function Segment(v0:Vertex, v1:Vertex, material:ISegmentMaterial = null)
+        public function Segment(v0:Vertex = null, v1:Vertex = null, material:ISegmentMaterial = null)
         {
-            this.v0 = v0;
-            this.v1 = v1;
+        	if(v0)
+            	this.v0 = v0;
+            if(v1)
+            	this.v1 = v1;
+            
             this.material = material;
             
             //segmentVO.segment = this;
