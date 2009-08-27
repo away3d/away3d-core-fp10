@@ -64,21 +64,24 @@ package away3d.core.base
   			vertexDirty = true;
   		}
   		
-  		public function moveTo(vertex:Vertex):void
+  		public function moveTo(x:Number, y:Number, z:Number):void
   		{
-  			addVertexAt(_vertices.length, vertex, "M");
+  			var newVertex:Vertex = new Vertex(x, y, z);
+  			addVertexAt(_vertices.length, newVertex, "M");
   		}
   		
-  		public function lineTo(vertex:Vertex):void
+  		public function lineTo(x:Number, y:Number, z:Number):void
   		{
-  			addVertexAt(_vertices.length, vertex, "L");
+  			var newVertex:Vertex = new Vertex(x, y, z);
+  			addVertexAt(_vertices.length, newVertex, "L");
   		}
   		
-  		public function curveTo(controlVertex:Vertex, endVertex:Vertex):void
+  		public function curveTo(cx:Number, cy:Number, cz:Number, ex:Number, ey:Number, ez:Number):void
   		{
-  			addVertexAt(_vertices.length, controlVertex, "C");
-  			
-  			addVertexAt(_vertices.length, endVertex, "P");
+  			var newControlVertex:Vertex = new Vertex(cx, cy, cz);
+  			var newEndVertex:Vertex = new Vertex(ex, ey, ez);
+  			addVertexAt(_vertices.length, newControlVertex, "C");
+  			addVertexAt(_vertices.length, newEndVertex, "P");
   		}
   		
 		public var segmentVO:SegmentVO = new SegmentVO();
