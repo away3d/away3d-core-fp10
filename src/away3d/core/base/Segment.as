@@ -1,12 +1,13 @@
 package away3d.core.base
 {
     import away3d.arcane;
+    import away3d.core.math.Number3D;
     import away3d.core.utils.*;
     import away3d.events.*;
     import away3d.materials.*;
     
     import flash.events.Event;
-    
+
     use namespace arcane;
     
 	 /**
@@ -82,6 +83,37 @@ package away3d.core.base
   			var newEndVertex:Vertex = new Vertex(ex, ey, ez);
   			addVertexAt(_vertices.length, newControlVertex, "C");
   			addVertexAt(_vertices.length, newEndVertex, "P");
+  		}
+  		
+  		public function continuousCurve(points:Array):void
+  		{
+  			// Find the mid points and inject them into the array.
+  			var processedPoints:Array = [];
+  			for(var i:uint; i<points.length-1; i++)
+  			{
+  				var currentPoint:Number3D = points[i];
+  				var nextPoint:Number3D = points[i+1];
+  				
+  				var X:Number = (currentPoint.x + nextPoint.x)/2;
+  				var Y:Number = (currentPoint.y + nextPoint.y)/2;
+  				var Z:Number = (currentPoint.z + nextPoint.z)/2;
+  				var midPoint:Number3D = new Number3D(X, Y, Z);
+  				
+  				if(i != 0)
+  					processedPoints.push(currentPoint);
+  				
+  				processedPoints.push(midPoint);
+  			}
+  			
+  			// Join the points.
+  			for(i = 0; i<processedPoints.length-2; i += 2)
+  			{
+  				currentPoint = processedPoints[i];
+  				var controlPoint:Number3D = processedPoints[i+1];
+  				nextPoint = processedPoints[i+2];
+  				
+  				curveTo(controlPoint.x, controlPoint.y, controlPoint.z, nextPoint.x, nextPoint.y, nextPoint.z);
+  			}
   		}
   		
 		public var segmentVO:SegmentVO = new SegmentVO();
