@@ -1,0 +1,114 @@
+<languageVersion: 1.0;>
+kernel TangentToObject
+<
+	namespace: "com.away3d";
+	vendor: "Away3d";
+	version: 1;
+	description: "When used as a shaderFill, converts tangent space normals to object space normals";
+>
+{
+	input image3 normalMap;
+	output pixel4 dst;
+	
+	parameter float2 uv0
+	<
+		minValue: float2(0.0);
+		maxValue: float2(1024.0);
+		defaultValue: float2(0.0);
+		description: "The first uv coordinate";
+	>;
+	
+	parameter float2 uvEdge1
+	<
+		minValue: float2(-1024.0);
+		maxValue: float2(1024.0);
+		defaultValue: float2(0.0);
+		description: "The edge vector from uv0->uv1";
+	>;
+	
+	parameter float2 uvEdge2
+	<
+		minValue: float2(-1024.0);
+		maxValue: float2(1024.0);
+		defaultValue: float2(0.0);
+		description: "The edge vector from uv0->uv2";
+	>;
+	
+	parameter float dot00
+	<
+		minValue: float(-10000.0);
+		maxValue: float(10000.0);
+		defaultValue: float(0.0);
+		description: "dot(edge1, edge1)";
+	>;
+	
+	parameter float dot01
+	<
+		minValue: float(-10000.0);
+		maxValue: float(10000.0);
+		defaultValue: float(0.0);
+		description: "dot(edge1, edge2)";
+	>;
+	
+	parameter float dot11
+	<
+		minValue: float(-10000.0);
+		maxValue: float(10000.0);
+		defaultValue: float(0.0);
+		description: "dot(edge2, edge2)";
+	>;
+	
+	parameter float3x3 tbn0
+	<
+		minValue: float3x3(-10.0);
+		maxValue: float3x3(10.0);
+		defaultValue: float3x3(0.0);
+		description: "The tangent space matrix for the first vertex";
+	>;
+	
+	parameter float3x3 tbn1
+	<
+		minValue: float3x3(-10.0);
+		maxValue: float3x3(10.0);
+		defaultValue: float3x3(0.0);
+		description: "The tangent space matrix for the second vertex, with the first deducted";
+	>;
+	
+	parameter float3x3 tbn2
+	<
+		minValue: float3x3(-10.0);
+		maxValue: float3x3(10.0);
+		defaultValue: float3x3(0.0);
+		description: "The tangent space matrix for the third vertex, with the first deducted";
+	>;
+	
+	void evaluatePixel()
+	{
+		float2 diff = outCoord()-uv0;
+		float dot02 = dot(uvEdge1, diff);
+		float dot12 = dot(uvEdge2, diff);
+		
+		// Compute barycentric coordinates
+		float invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
+		float s = (dot11 * dot02 - dot01 * dot12) * invDenom;
+		float t = (dot00 * dot12 - dot01 * dot02) * invDenom;
+		
+		// interpolate matrix using barycoords
+		float3x3 interp = tbn0+tbn1*s+tbn2*t;
+		
+		// normalize interpolations
+		/*interp[0] = normalize(interp[0]);
+		interp[1] = normalize(interp[1]);
+		interp[2] = normalize(interp[2]);*/
+		
+		float3 normal = 2.0*(sampleNearest(normalMap, outCoord())-float3(0.5, 0.5, 0.5));
+		// different handedness
+		normal.z = -normal.z;
+		normal = interp*normal;
+		normal /= length(normal);
+		normal.xz = -normal.xz;
+		// need to output 4 channels for fill
+		dst.xyz = (normal+float3(1.0, 1.0, 1.0))*.5;
+		dst.a = 1.0;
+	}
+}

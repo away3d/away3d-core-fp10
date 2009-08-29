@@ -17,6 +17,9 @@ package away3d.materials.utils
 	{
 		private static var _objectMap : BitmapData;
 		
+		[Embed(source="../../pbks/TangentToObjectSmooth.pbj", mimeType="application/octet-stream")]
+		private static var TangentToObjectKernelSmooth : Class;
+		
 		[Embed(source="../../pbks/TangentToObject.pbj", mimeType="application/octet-stream")]
 		private static var TangentToObjectKernel : Class;
 		
@@ -24,16 +27,23 @@ package away3d.materials.utils
 		 * Transform a tangent space normal map to an object space normal map for a specific mesh
 		 * 
 		 * @param tangentMap The source tangent space map to be transformed
-		 * @param targetMesg The target mesh for which the object space map is generated
+		 * @param targetMesh The target mesh for which the object space map is generated
+		 * @param smoothNormals Interpolates the triangle normals. Set to true for rounded surfaces, false for sharp edges.
 		 * 
 		 * @return An object space normal map for the target mesh.
 		 */
-		public static function transform(tangentMap : BitmapData, targetMesh : Mesh) : BitmapData
+		public static function transform(tangentMap : BitmapData, targetMesh : Mesh, smoothNormals : Boolean = false) : BitmapData
 		{
 			_objectMap = new BitmapData(tangentMap.width, tangentMap.height, false, 0);
 			createTriangleTBN(targetMesh);
-			createVertexTBN(targetMesh);
-			renderNormalMap(targetMesh, tangentMap);
+			if (smoothNormals) {
+				createVertexTBN(targetMesh);
+				renderNormalMapSmooth(targetMesh, tangentMap);
+			}
+			else {
+				renderNormalMap(targetMesh, tangentMap);
+			}
+			
 			return _objectMap; 
 		}
 		
@@ -121,7 +131,7 @@ package away3d.materials.utils
 			}
 		}
 		
-		private static function renderNormalMap(model : Mesh, tangentMap : BitmapData) : void
+		private static function renderNormalMapSmooth(model : Mesh, tangentMap : BitmapData) : void
 		{
 			var faces : Array = model.geometry.faces;
 			var face : Face;
@@ -139,7 +149,7 @@ package away3d.materials.utils
 			var u02 : Number, v02 : Number;
 			var w : Number = _objectMap.width;
 			var h : Number = _objectMap.height;
-			var shader : Shader = new Shader(new TangentToObjectKernel());
+			var shader : Shader = new Shader(new TangentToObjectKernelSmooth());
 			var container : Sprite = new Sprite();
 			
 			shader.data.normalMap.input = tangentMap;
@@ -186,6 +196,50 @@ package away3d.materials.utils
 				shader.data.tbn2.value = [ 	tangent.x-tangent0.x, tangent.y-tangent0.y, tangent.z-tangent0.z,
 											bitangent.x-bitangent0.x, bitangent.y-bitangent0.y, bitangent.z-bitangent0.z,
 											normal.x-normal0.x, normal.y-normal0.y, normal.z-normal0.z
+										];
+				
+				container.graphics.beginShaderFill(shader);
+				container.graphics.moveTo(uv0.u, uv0.v);
+				container.graphics.lineTo(uv1.u, uv1.v);
+				container.graphics.lineTo(uv2.u, uv2.v);
+				container.graphics.endFill();
+			}
+			_objectMap.draw(container);
+		}
+		
+		private static function renderNormalMap(model : Mesh, tangentMap : BitmapData) : void
+		{
+			var faces : Array = model.geometry.faces;
+			var face : Face;
+			var i : int = faces.length;
+			var normal : Number3D = new Number3D();
+			var tangent : Number3D = new Number3D();
+			var bitangent : Number3D = new Number3D();
+			var uv0 : UV = new UV();
+			var uv1 : UV = new UV();
+			var uv2 : UV = new UV();
+			var w : Number = _objectMap.width;
+			var h : Number = _objectMap.height;
+			var shader : Shader = new Shader(new TangentToObjectKernel());
+			var container : Sprite = new Sprite();
+			
+			shader.data.normalMap.input = tangentMap;
+			
+			while (face = Face(faces[--i])) {
+				uv0.u = face.uv0.u*w;
+				uv0.v = (1-face.uv0.v)*h;
+				uv1.u = face.uv1.u*w;
+				uv1.v = (1-face.uv1.v)*h;
+				uv2.u = face.uv2.u*w;
+				uv2.v = (1-face.uv2.v)*h;
+				
+				tangent = face.extra.tangent;
+				bitangent = face.extra.bitangent;
+				normal = face.normal;
+
+				shader.data.tbn.value = [ 	tangent.x, tangent.y, tangent.z,
+											bitangent.x, bitangent.y, bitangent.z,
+											normal.x, normal.y, normal.z
 										];
 				
 				container.graphics.beginShaderFill(shader);
