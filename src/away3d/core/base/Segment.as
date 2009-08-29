@@ -34,6 +34,8 @@ package away3d.core.base
         
         private var _index:int;
         private var _vertices:Array = new Array();
+        private var _drawingCommands:Array = new Array();
+        private var _lastAddedVertex:Vertex;
 		private var _commands:Array = new Array();
 		
         private function onVertexValueChange(event:Event):void
@@ -68,21 +70,30 @@ package away3d.core.base
   		public function moveTo(x:Number, y:Number, z:Number):void
   		{
   			var newVertex:Vertex = new Vertex(x, y, z);
-  			addVertexAt(_vertices.length, newVertex, "M");
+  			addVertexAt(_vertices.length, newVertex, DrawingCommand.MOVE);
+  			
+  			_drawingCommands.push(new DrawingCommand(DrawingCommand.MOVE, _lastAddedVertex, null, newVertex));
+  			_lastAddedVertex = newVertex;
   		}
   		
   		public function lineTo(x:Number, y:Number, z:Number):void
   		{
   			var newVertex:Vertex = new Vertex(x, y, z);
-  			addVertexAt(_vertices.length, newVertex, "L");
+  			addVertexAt(_vertices.length, newVertex, DrawingCommand.LINE);
+  			
+  			_drawingCommands.push(new DrawingCommand(DrawingCommand.LINE, _lastAddedVertex, null, newVertex));
+  			_lastAddedVertex = newVertex;
   		}
   		
   		public function curveTo(cx:Number, cy:Number, cz:Number, ex:Number, ey:Number, ez:Number):void
   		{
   			var newControlVertex:Vertex = new Vertex(cx, cy, cz);
   			var newEndVertex:Vertex = new Vertex(ex, ey, ez);
-  			addVertexAt(_vertices.length, newControlVertex, "C");
+  			addVertexAt(_vertices.length, newControlVertex, DrawingCommand.CURVE);
   			addVertexAt(_vertices.length, newEndVertex, "P");
+  			
+  			_drawingCommands.push(new DrawingCommand(DrawingCommand.CURVE, _lastAddedVertex, newControlVertex, newEndVertex));
+  			_lastAddedVertex = newEndVertex;
   		}
   		
   		public function continuousCurve(points:Array):void
@@ -132,6 +143,14 @@ package away3d.core.base
         public override function get commands():Array
         {
             return _commands;
+        }
+        
+        /**
+		 * Returns an array of drawing command objects that are used by the face.
+		 */
+        public function get drawingCommands():Array
+        {
+            return _drawingCommands;
         }
         
 		/**
