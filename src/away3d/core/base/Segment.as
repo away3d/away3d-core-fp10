@@ -96,7 +96,7 @@ package away3d.core.base
   			_lastAddedVertex = newEndVertex;
   		}
   		
-  		public function continuousCurve(points:Array):void
+  		public function continuousCurve(points:Array, closed:Boolean = false):void
   		{
   			// Find the mid points and inject them into the array.
   			var processedPoints:Array = [];
@@ -110,21 +110,37 @@ package away3d.core.base
   				var Z:Number = (currentPoint.z + nextPoint.z)/2;
   				var midPoint:Number3D = new Number3D(X, Y, Z);
   				
-  				if(i != 0)
-  					processedPoints.push(currentPoint);
+  				processedPoints.push(currentPoint);
   				
   				processedPoints.push(midPoint);
   			}
   			
+  			if(closed)
+  			{
+	  			currentPoint = points[points.length-1];
+	  			nextPoint = points[0];
+	  			X = (currentPoint.x + nextPoint.x)/2;
+  				Y = (currentPoint.y + nextPoint.y)/2;
+  				Z = (currentPoint.z + nextPoint.z)/2;
+  				midPoint = new Number3D(X, Y, Z);
+  				processedPoints.push(midPoint);
+	  		}
+  			
   			// Join the points.
-  			for(i = 0; i<processedPoints.length-2; i += 2)
+  			for(i = 1; i<processedPoints.length-2; i += 2)
   			{
   				currentPoint = processedPoints[i];
   				var controlPoint:Number3D = processedPoints[i+1];
   				nextPoint = processedPoints[i+2];
-  				
   				curveTo(controlPoint.x, controlPoint.y, controlPoint.z, nextPoint.x, nextPoint.y, nextPoint.z);
   			}
+  			
+  			if(closed)
+  			{
+	  			var last:uint = processedPoints.length-1;
+	  			curveTo(processedPoints[last].x, processedPoints[last].y, processedPoints[last].z,			
+	  								processedPoints[1].x, processedPoints[1].y, processedPoints[1].z);
+	  		}
   		}
   		
 		public var segmentVO:SegmentVO = new SegmentVO();
