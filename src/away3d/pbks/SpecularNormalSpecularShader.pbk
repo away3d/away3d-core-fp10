@@ -17,7 +17,7 @@ kernel SpecularNormalMapShader
 	<
 		minValue: float2(0.0);
 		defaultValue: float2(2.0);
-		description: "Gloss (x) and specular strength (y)";
+		description: "Specular strength (x) and gloss (y)";
 	>;
 	
 	parameter float4x4 positionTransformation

@@ -42,6 +42,7 @@ package away3d.materials
 			var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
 			var point : PointLight;
 			var ambient : AmbientLight;
+			var diffuseStr : Number;
 			var ar : Number = 0,
 				ag : Number = 0,
 				ab : Number = 0;
@@ -65,6 +66,7 @@ package away3d.materials
 			// use first point light
 			if (source.lightarray.points.length > 0) {
 				point = source.lightarray.points[0];
+				diffuseStr = point.diffuse;
 				_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadius.value = [ point.radius ];
@@ -75,7 +77,7 @@ package away3d.materials
 					_pointLightShader.data.lightFalloff.value = [ point.fallOff - point.radius ];
 				
 				_pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
-        		_pointLightShader.data.diffuseColor.value = [ point.red, point.green, point.blue ];
+        		_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
         	}
         	else _pointLightShader.data.diffuseColor.value = [ 0, 0, 0 ];
 		}

@@ -39,6 +39,8 @@ package away3d.materials
 		private var _objectLightPos : Number3D = new Number3D();
 		private var _objectDirMatrix : MatrixAway3D = new MatrixAway3D();
 		
+		private var _specular : Number;
+		
 		/**
 		 * Creates a SpecularMultiPassMaterial.
 		 * 
@@ -71,7 +73,7 @@ package away3d.materials
 			_directionalLightShader.precisionHint = ShaderPrecision.FAST;
 			
 			gloss = ini.getNumber("gloss", 10);
-			specular = ini.getNumber("specular", 1);
+			_specular = ini.getNumber("specular", 1);
 			
 			_shaderBlendMode = BlendMode.SCREEN;
 			_useAmbient = false;
@@ -96,13 +98,12 @@ package away3d.materials
 		 */
 		public function get specular() : Number
 		{
-			return _pointLightShader.data.phongComponents.value[0];
+			return _specular;
 		}
 		
 		public function set specular(value : Number) : void
 		{
-			_pointLightShader.data.phongComponents.value[0] = value;
-			_directionalLightShader.data.phongComponents.value[0] = value;
+			_specular = value;
 		}
 		
 		/**
@@ -155,8 +156,9 @@ package away3d.materials
 		        		_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
 		        		
 		        		_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
-					
 						_pointLightShader.data.lightRadiusFalloff.value[1] = infinite? -1 : point.fallOff - point.radius;
+						
+						_pointLightShader.data.phongComponents.value[0] = point.specular*_specular;
 		
 			        	shaderJob = new ShaderJob(_pointLightShader, _lightMap);
 			        	shaderJob.start(true);
@@ -180,6 +182,7 @@ package away3d.materials
 					_objectLightPos.normalize();
 	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 	        		_directionalLightShader.data.specularColor.value = [ directional.red, directional.green, directional.blue ];
+	        		_directionalLightShader.data.phongComponents.value[0] = directional.specular*_specular;
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);
 	        	}

@@ -8,7 +8,6 @@ package away3d.materials
 	import away3d.core.math.Number3D;
 	
 	import flash.display.BitmapData;
-	import flash.display.BlendMode;
 	import flash.display.Shader;
 	import flash.display.ShaderJob;
 	
@@ -51,6 +50,7 @@ package away3d.materials
         	var lightPosition : Number3D;
         	var shaderJob : ShaderJob;
 	        var i : int;
+	        var diffuseStr : Number;
 	        
 	        _pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
 	        
@@ -66,7 +66,7 @@ package away3d.materials
 		        
 		        while (--i >= 0) {
 		        	point = PointLight(_points[i]);
-		        	
+		        	diffuseStr = point.diffuse*.5;
 		        	infinite = (point.fallOff == Number.POSITIVE_INFINITY || point.fallOff == Number.NEGATIVE_INFINITY);
 		        	
 		        	if (!infinite) {
@@ -79,7 +79,7 @@ package away3d.materials
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {
 			        	_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-		        		_pointLightShader.data.diffuseColor.value = [ point.red*.5, point.green*.5, point.blue*.5 ];
+		        		_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
 		        		_pointLightShader.data.lightRadius.value = [ point.radius ];
 					
 						_pointLightShader.data.lightFalloff.value[0] = infinite? -1 : point.fallOff - point.radius;
@@ -96,7 +96,7 @@ package away3d.materials
 	        	
 	        	while (--i >= 0) {
 	        		directional = DirectionalLight(_directionals[i]);
-	        		
+	        		diffuseStr = directional.diffuse*.5;
 					_objectDirMatrix.multiply(invSceneTransform, directional.light.transform);
 					_objectLightPos.x = -_objectDirMatrix.sxz;
 					_objectLightPos.y = _objectDirMatrix.syz;

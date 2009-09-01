@@ -38,6 +38,8 @@ package away3d.materials
 		private var _objectLightPos : Number3D = new Number3D();
 		private var _objectDirMatrix : MatrixAway3D = new MatrixAway3D();
 		
+		private var _specular : Number;
+		
 		/**
 		 * Creates a PhongMultiPassMaterial.
 		 * 
@@ -70,7 +72,7 @@ package away3d.materials
 			_directionalLightShader.precisionHint = ShaderPrecision.FAST;
 			
 			gloss = ini.getNumber("gloss", 10);
-			specular = ini.getNumber("specular", 1);
+			_specular = ini.getNumber("specular", 1);
 		}
 		
 		/**
@@ -92,13 +94,12 @@ package away3d.materials
 		 */
 		public function get specular() : Number
 		{
-			return _pointLightShader.data.phongComponents.value[0];
+			return _specular;
 		}
 		
 		public function set specular(value : Number) : void
 		{
-			_pointLightShader.data.phongComponents.value[0] = value;
-			_directionalLightShader.data.phongComponents.value[0] = value;
+			_specular = value;
 		}
 		
 		/**
@@ -121,6 +122,7 @@ package away3d.materials
         	var lightPosition : Number3D;
         	var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
         	var shaderJob : ShaderJob;
+        	var diffuseStr : Number;
         	
         	_pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
         	
@@ -135,7 +137,7 @@ package away3d.materials
 		        		        
 		        while (--i >= 0) {
 		        	point = _points[i];
-		        	
+		        	diffuseStr = point.diffuse*.5;
 		        	infinite = (point.fallOff == Number.POSITIVE_INFINITY || point.fallOff == Number.NEGATIVE_INFINITY);
 		        	
 		        	if (!infinite) {
@@ -148,8 +150,9 @@ package away3d.materials
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 			        	_objectLightPos.transform(lightPosition, invSceneTransform);
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-		        		_pointLightShader.data.diffuseColor.value = [ point.red*.5, point.green*.5, point.blue*.5 ];
+		        		_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
 		        		_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
+		        		_pointLightShader.data.phongComponents.value[0] = _specular*point.specular;
 		        		
 		        		_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
 					
@@ -167,6 +170,7 @@ package away3d.materials
 	        	
 	        	while (--i >= 0) {
 	        		directional = DirectionalLight(_directionals[i]);
+	        		diffuseStr = directional.diffuse*.5;
 	        		
 	        		var transform : MatrixAway3D = directional.light.transform;
 
@@ -176,8 +180,9 @@ package away3d.materials
 					_objectLightPos.z = -_objectDirMatrix.szz;
 					_objectLightPos.normalize();
 	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-	        		_directionalLightShader.data.diffuseColor.value = [ directional.red*.5, directional.green*.5, directional.blue*.5 ];
+	        		_directionalLightShader.data.diffuseColor.value = [ directional.red*diffuseStr, directional.green*diffuseStr, directional.blue*diffuseStr ];
 	        		_directionalLightShader.data.specularColor.value = [ directional.red, directional.green, directional.blue ];
+	        		_directionalLightShader.data.phongComponents.value[0] = _specular*directional.specular;
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);
 	        	}

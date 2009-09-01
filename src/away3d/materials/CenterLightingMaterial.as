@@ -369,7 +369,7 @@
                 dfz /= df;
                 fade = 1 / df / df;
                 
-                amb = point.ambient * fade * ambient_brightness;
+                amb = point.ambient * fade * ambient_brightness * 255000;
 
                 kar += red * amb;
                 kag += green * amb;
@@ -380,7 +380,7 @@
                 if (nf < 0)
                     continue;
 
-                diff = point.diffuse * fade * nf * diffuse_brightness;
+                diff = point.diffuse * fade * nf * diffuse_brightness * 255000;
 
                 kdr += red * diff;
                 kdg += green * diff;
@@ -394,7 +394,7 @@
                 rfx = dfx - 2*nf*pa;
                 rfy = dfy - 2*nf*pb;
                 
-                spec = point.specular * fade * Math.pow(rfz, shininess) * specular_brightness;
+                spec = point.specular * fade * Math.pow(rfz, shininess) * specular_brightness * 255000;
 
                 ksr += red * spec;
                 ksg += green * spec;

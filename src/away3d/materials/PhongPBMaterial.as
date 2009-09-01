@@ -8,7 +8,6 @@ package away3d.materials
 	import away3d.core.light.PointLight;
 	import away3d.core.math.MatrixAway3D;
 	import away3d.core.math.Number3D;
-	import away3d.loaders.Obj;
 	
 	import flash.display.BitmapData;
 	import flash.display.Shader;
@@ -27,10 +26,10 @@ package away3d.materials
 		[Embed(source="../pbks/PhongNormalSpecularShader.pbj", mimeType="application/octet-stream")]
 		private var SpecularKernel : Class;
 		
-		private var _specularColor : uint;
-		
 		private var _objectLightPos : Number3D = new Number3D();
 		private var _objectViewPos : Number3D = new Number3D();
+		
+		private var _specular : Number;
 		
 		/**
 		 * Creates a new PhongPBMaterial object.
@@ -44,6 +43,7 @@ package away3d.materials
 		public function PhongPBMaterial(bitmap:BitmapData, normalMap:BitmapData, targetModel:Mesh, specularMap : BitmapData = null, init:Object=null)
 		{
 			var shader : Shader;
+			
 			if (specularMap) {
 				shader = new Shader(new SpecularKernel());
 				shader.data.specularMap.input = specularMap;
@@ -55,7 +55,6 @@ package away3d.materials
 			
 			gloss = ini.getNumber("gloss", 10);
 			specular = ini.getNumber("specular", 1);
-			specularColor = ini.getInt("specularColor", 0xffffff);
 		}
 		
 		/**
@@ -76,29 +75,12 @@ package away3d.materials
 		 */
 		public function get specular() : Number
 		{
-			return _pointLightShader.data.phongComponents.value[0];
+			return _specular;
 		}
 		
 		public function set specular(value : Number) : void
 		{
-			_pointLightShader.data.phongComponents.value[0] = value;
-		}
-		
-		/**
-		 * The colour of the specular highlight.
-		 */
-		public function get specularColor() : uint
-		{
-			return _specularColor;
-		}
-		
-		public function set specularColor(value : uint) : void
-		{
-			_specularColor = value;
-			_pointLightShader.data.specularColor.value = [ 	((value & 0xff0000) >> 16)/0xff,
-															((value & 0x00ff00) >> 8)/0xff,
-															(value & 0x0000ff)/0xff,
-														];
+			_specular = value;
 		}
 		
 		/**
@@ -109,6 +91,7 @@ package away3d.materials
 			var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
 			var point : PointLight;
 			var ambient : AmbientLight;
+			var diffuseStr : Number;
 			var ar : Number = 0,
 				ag : Number = 0,
 				ab : Number = 0;
@@ -135,6 +118,7 @@ package away3d.materials
 			// use first point light
 			if (source.lightarray.points.length > 0) {
 				point = source.lightarray.points[0];
+				diffuseStr = point.diffuse;
 				_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
@@ -145,9 +129,14 @@ package away3d.materials
 					_pointLightShader.data.lightRadiusFalloff.value[1] = point.fallOff - point.radius;
 
 				_pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
-				_pointLightShader.data.diffuseColor.value = [ point.red, point.green, point.blue ];
+				_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
+				_pointLightShader.data.phongComponents.value[0] = _specular * point.specular;
+				_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
         	}
-        	else _pointLightShader.data.diffuseColor.value = [ 0, 0, 0 ];
+        	else {
+        		_pointLightShader.data.diffuseColor.value = [ 0, 0, 0 ];
+        		_pointLightShader.data.specularColor.value = [ 0, 0, 0 ];
+        	}
 		}
 	}
 }
