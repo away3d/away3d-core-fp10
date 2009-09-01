@@ -1,11 +1,11 @@
 package away3d.core.utils
 {
 	import away3d.core.base.DrawingCommand;
-	import away3d.core.base.Face;
 	import away3d.core.base.Vertex;
+	import away3d.core.math.Number3D;
 	
 	import flash.display.Graphics;
-	
+
 	public class BezierUtils
 	{
 		public function BezierUtils()
@@ -63,6 +63,38 @@ package away3d.core.utils
 			var pY:Number = invTSqr*curve.pStart.y + 2*invT*t*curve.pControl.y + tSqr*curve.pEnd.y;
 			
 			return new Vertex(pX, pY, 0);
+		}
+		
+		static public function getDerivativeAt(t:Number, curve:DrawingCommand):Number3D
+		{
+			var pX:Number = -2*(1 - t)*curve.pStart.x + 2*(1 - 2*t)*curve.pControl.x + 2*t*curve.pEnd.x;
+			var pY:Number = -2*(1 - t)*curve.pStart.y + 2*(1 - 2*t)*curve.pControl.y + 2*t*curve.pEnd.y;
+			
+			return new Number3D(pX, pY, 0);
+		}
+		
+		static public function getArcLengthArray(curve:DrawingCommand, delta:Number):Array
+		{
+			// Get the points on the curve for the specifyed delta.
+			var curvePoints:Array = [];
+			for(var t:Number = 0; t <= 1; t += delta)
+				curvePoints.push(BezierUtils.getCoordinatesAt(t, curve));
+			
+			// Incrementally calculate lengths and put them into an array.
+			var acumLength:Number = 0;
+			var lengths:Array = [0];
+			for(var i:uint; i<curvePoints.length - 1; i++)
+			{
+				var pStart:Vertex = curvePoints[i];
+				var pEnd:Vertex = curvePoints[i+1];
+				var dX:Number = pEnd.x - pStart.x;
+				var dY:Number = pEnd.y - pStart.y;
+				var len:Number = Math.sqrt(dX*dX + dY*dY);
+				acumLength += len;
+				lengths.push(acumLength);
+			}
+			
+			return lengths;
 		}
 		
 		static public function tracePoint2D(graphics:Graphics, point:Vertex):void
