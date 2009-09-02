@@ -99,7 +99,7 @@ package away3d.geom
 					
 					// Get the normal at t.
 					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _curves[i]);
-					var p:Number3D = new Number3D(-tangent.z, tangent.x, 0);
+					var p:Number3D = new Number3D(-tangent.y, tangent.x, 0);
 					p.normalize(origVertex.y + yOffset);
 					
 					// Warp the point.
