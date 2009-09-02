@@ -61,16 +61,18 @@ package away3d.core.utils
 			
 			var pX:Number = invTSqr*curve.pStart.x + 2*invT*t*curve.pControl.x + tSqr*curve.pEnd.x;
 			var pY:Number = invTSqr*curve.pStart.y + 2*invT*t*curve.pControl.y + tSqr*curve.pEnd.y;
+			var pZ:Number = invTSqr*curve.pStart.z + 2*invT*t*curve.pControl.z + tSqr*curve.pEnd.z;
 			
-			return new Vertex(pX, pY, 0);
+			return new Vertex(pX, pY, pZ);
 		}
 		
 		static public function getDerivativeAt(t:Number, curve:DrawingCommand):Number3D
 		{
 			var pX:Number = -2*(1 - t)*curve.pStart.x + 2*(1 - 2*t)*curve.pControl.x + 2*t*curve.pEnd.x;
 			var pY:Number = -2*(1 - t)*curve.pStart.y + 2*(1 - 2*t)*curve.pControl.y + 2*t*curve.pEnd.y;
+			var pZ:Number = -2*(1 - t)*curve.pStart.z + 2*(1 - 2*t)*curve.pControl.z + 2*t*curve.pEnd.z;
 			
-			return new Number3D(pX, pY, 0);
+			return new Number3D(pX, pY, pZ);
 		}
 		
 		static public function getArcLengthArray(curve:DrawingCommand, delta:Number):Array
@@ -89,32 +91,13 @@ package away3d.core.utils
 				var pEnd:Vertex = curvePoints[i+1];
 				var dX:Number = pEnd.x - pStart.x;
 				var dY:Number = pEnd.y - pStart.y;
-				var len:Number = Math.sqrt(dX*dX + dY*dY);
+				var dZ:Number = pEnd.z - pStart.z;
+				var len:Number = Math.sqrt(dX*dX + dY*dY + dZ*dZ);
 				acumLength += len;
 				lengths.push(acumLength);
 			}
 			
 			return lengths;
-		}
-		
-		static public function tracePoint2D(graphics:Graphics, point:Vertex):void
-		{
-			graphics.lineStyle();
-			graphics.beginFill(0xFFFFFF, 0.5);
-			graphics.drawCircle(point.x, -point.y, 5);
-			graphics.endFill();
-		}
-		
-		static public function traceCurve2D(graphics:Graphics, curve:DrawingCommand):void
-		{
-			graphics.lineStyle(1, 0x00FF00, 1);
-			
-			graphics.moveTo(curve.pStart.x, -curve.pStart.y);
-			
-			if(curve.type == DrawingCommand.LINE)
-				graphics.lineTo(curve.pEnd.x, -curve.pEnd.y);
-			else if(curve.type == DrawingCommand.CURVE)
-				graphics.curveTo(curve.pControl.x, -curve.pControl.y, curve.pEnd.x, -curve.pEnd.y);
 		}
 	}
 }

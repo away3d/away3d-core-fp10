@@ -161,7 +161,6 @@ package away3d.primitives
 			
 			type = "TextField3D";
         	url = "primitive";
-        	
 		}
 	}
 }
