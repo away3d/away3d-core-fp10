@@ -30,9 +30,6 @@ package away3d.core.base
 		private var _height:Number;
 		private var _rotation:Number;
 		private var _scaling:Number;
-		private var _index:int;
-		private var _vertices:Array = new Array();
-		private var _commands:Array = new Array();
 		
 		public var billboardVO:BillboardVO = new BillboardVO();
 		

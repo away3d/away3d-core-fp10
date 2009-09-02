@@ -34,6 +34,12 @@ package away3d.core.base
 	 */
     public class Element extends EventDispatcher
     {
+    	protected var _index:int;
+		protected var _vertices:Array = new Array();
+		protected var _commands:Array = new Array();
+		protected var _drawingCommands:Array = new Array();
+		protected var _lastAddedVertex:Vertex;
+    	
 		/** @private */
         arcane var _visible:Boolean = true;
 		/** @private */
@@ -110,6 +116,14 @@ package away3d.core.base
 		 * Returns an array of drawing command strings that make up the 3d element.
 		 */
         public function get commands():Array
+        {
+            throw new Error("Not implemented");
+        }
+        
+        /**
+		 * Returns an array of drawing command objects that are used by the face.
+		 */
+        public function get drawingCommands():Array
         {
             throw new Error("Not implemented");
         }

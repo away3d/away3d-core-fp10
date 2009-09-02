@@ -32,12 +32,6 @@ package away3d.core.base
 		/** @private */
         arcane var _material:ISegmentMaterial;
         
-        private var _index:int;
-        private var _vertices:Array = new Array();
-        private var _drawingCommands:Array = new Array();
-        private var _lastAddedVertex:Vertex;
-		private var _commands:Array = new Array();
-		
         private function onVertexValueChange(event:Event):void
         {
             notifyVertexValueChange();
@@ -164,7 +158,7 @@ package away3d.core.base
         /**
 		 * Returns an array of drawing command objects that are used by the face.
 		 */
-        public function get drawingCommands():Array
+        public override function get drawingCommands():Array
         {
             return _drawingCommands;
         }
