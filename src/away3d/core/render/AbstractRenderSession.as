@@ -782,7 +782,7 @@ package away3d.core.render
 					switch (commands[_i++]) {
 						case "M":
 							graphics.moveTo(screenVertices[_index0], screenVertices[_index0+1]);
-							if (_i - 1 == _i && alpha > 0)
+							if (_i - 1 == startIndex && alpha > 0)
 								graphics.beginFill(color, alpha);
 							break;
 						case "L":
