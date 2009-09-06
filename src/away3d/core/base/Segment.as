@@ -105,7 +105,6 @@ package away3d.core.base
   				var midPoint:Number3D = new Number3D(X, Y, Z);
   				
   				processedPoints.push(currentPoint);
-  				
   				processedPoints.push(midPoint);
   			}
   			
@@ -121,6 +120,8 @@ package away3d.core.base
 	  		}
   			
   			// Join the points.
+  			currentPoint = processedPoints[0];
+  			moveTo(currentPoint.x, currentPoint.y, currentPoint.z);
   			for(i = 1; i<processedPoints.length-2; i += 2)
   			{
   				currentPoint = processedPoints[i];

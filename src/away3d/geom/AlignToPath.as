@@ -20,12 +20,55 @@ package away3d.geom
 		
 		private var _arcLengthPrecision:Number = 0.01;
 		
+		public function get arcLengthPrecision():Number
+		{
+			return _arcLengthPrecision;
+		}
+		public function set arcLengthPrecision(value:Number):void
+		{
+			_arcLengthPrecision = value;
+			
+			if(_path)
+				updatePath(_path);
+		}
+		
 		public function AlignToPath(mesh:Mesh, path:Element)
 		{
 			duplicateMesh(mesh);
-			
+			updatePath(path);
+		}
+		
+		public function updatePath(path:Element, precision:Number = -1):Number
+		{
+			if(precision > 0)
+				_arcLengthPrecision = precision;
+				
 			_path = path;
-			analyzePath();
+			
+			_totalLength = 0;
+			_lengthArrays = [];
+			_lengths = [];
+			_curves = [];
+			
+			// Identify the curves in the segment.
+			for each(var command:DrawingCommand in _path.drawingCommands)
+			{
+				if(command.type != DrawingCommand.MOVE)
+					_curves.push(command);
+			}
+			
+			// Get arc length info for all curves.
+			for each(command in _curves)
+			{
+				var commandLengthsArray:Array = BezierUtils.getArcLengthArray(command, _arcLengthPrecision);
+				_lengthArrays.push(commandLengthsArray);
+				
+				var commandTotalLength:Number = commandLengthsArray[commandLengthsArray.length-1];
+				_lengths.push(commandTotalLength);
+				_totalLength += commandTotalLength;
+			}
+			
+			return _totalLength;
 		}
 		
 		public function apply(xOffset:Number = 0, yOffset:Number = 0):void
@@ -99,7 +142,7 @@ package away3d.geom
 					
 					// Get the normal at t.
 					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _curves[i]);
-					var p:Number3D = new Number3D(-tangent.y, tangent.x, 0);
+					var p:Number3D = new Number3D(-Math.abs(tangent.y), Math.abs(tangent.x), 0);
 					p.normalize(origVertex.y + yOffset);
 					
 					// Warp the point.
@@ -118,27 +161,6 @@ package away3d.geom
 			for each(var face:Face in mesh.faces)
 			{
 				_originalMesh.addFace(face.clone());
-			}
-		}
-		
-		private function analyzePath():void
-		{
-			// Identify the curves in the segment.
-			for each(var command:DrawingCommand in _path.drawingCommands)
-			{
-				if(command.type != DrawingCommand.MOVE)
-					_curves.push(command);
-			}
-			
-			// Get arc length info for all curves.
-			for each(command in _curves)
-			{
-				var commandLengthsArray:Array = BezierUtils.getArcLengthArray(command, _arcLengthPrecision);
-				_lengthArrays.push(commandLengthsArray);
-				
-				var commandTotalLength:Number = commandLengthsArray[commandLengthsArray.length-1];
-				_lengths.push(commandTotalLength);
-				_totalLength += commandTotalLength;
 			}
 		}
 	}
