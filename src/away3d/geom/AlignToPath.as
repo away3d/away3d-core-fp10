@@ -20,10 +20,28 @@ package away3d.geom
 		
 		private var _arcLengthPrecision:Number = 0.01;
 		
+		/**
+		 * Returns the quality of aligment parameter.
+		 * @return Number
+		 * 
+		 */		
 		public function get arcLengthPrecision():Number
 		{
 			return _arcLengthPrecision;
 		}
+		
+		/**
+		 * Determines the quality of the alignment.
+		 * 
+		 * The value is used to arc length parameterize the path. Without this technique
+		 * the alignment would produce undesired scaling and squashing of the text.
+		 * 
+		 * The closer to zero, the better the quality of the alignment is, the larger the value
+		 * the faster the performance of the aligment is.
+		 * 
+		 * @param value Number
+		 * 
+		 */		
 		public function set arcLengthPrecision(value:Number):void
 		{
 			_arcLengthPrecision = value;
@@ -32,12 +50,28 @@ package away3d.geom
 				updatePath(_path);
 		}
 		
+		/**
+		 * Constructor. 
+		 * @param mesh Mesh A mesh containing the elements to be aligned.
+		 * @param path Element A Segment or a Face containing the path's vector data for the alignment.
+		 * 
+		 * NOTE: The inputed mesh will be cached, so updates to the mesh will need a new instance
+		 * of the aligner.
+		 * 
+		 */		
 		public function AlignToPath(mesh:Mesh, path:Element)
 		{
 			duplicateMesh(mesh);
 			updatePath(path);
 		}
 		
+		/**
+		 * Updates the path of the alignment. 
+		 * @param path Element A Segment or a Face containing the path's vector data for the alignment.
+		 * @param precision Number Sets the arcLengthPrecision value.
+		 * @return Number The aproximated arc length of the path.
+		 * 
+		 */		
 		public function updatePath(path:Element, precision:Number = -1):Number
 		{
 			if(precision > 0)
@@ -71,6 +105,12 @@ package away3d.geom
 			return _totalLength;
 		}
 		
+		/**
+		 * Performs the alignment. 
+		 * @param xOffset Number Determines the displacement of the alignment along the path.
+		 * @param yOffset Number Determines the displacement of the alignment perpendicular to the path.
+		 * 
+		 */		
 		public function apply(xOffset:Number = 0, yOffset:Number = 0):void
 		{
 			// NOTE: This method is yet to be optimized.
@@ -153,6 +193,14 @@ package away3d.geom
 			}
 		}
 		
+		/**
+		 * Duplicates the mesh to be aligned.
+		 * This is necessary in order to store an unaltered version of the mesh,
+		 * otherwise alignments would be applied over each other and produce
+		 * some pretty destructive effects.
+		 * @param mesh Mesh
+		 * 
+		 */		
 		private function duplicateMesh(mesh:Mesh):void
 		{
 			_activeMesh = mesh;
