@@ -239,5 +239,10 @@ package away3d.core.geom
 			
 			normalize();
 		}
+		
+		public function toString():String
+		{
+			return "Plane3D [a:" + a + ", b:" + b + ", c:" + c + ", d:" + d + "].";
+		}
     }
 }
