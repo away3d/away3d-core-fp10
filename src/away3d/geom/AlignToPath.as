@@ -109,9 +109,9 @@ package away3d.geom
 		 * Performs the alignment. 
 		 * @param xOffset Number Determines the displacement of the alignment along the path.
 		 * @param yOffset Number Determines the displacement of the alignment perpendicular to the path.
-		 * 
+		 * @param restrain Boolean Forces the y alignment to face only 1 direction.
 		 */		
-		public function apply(xOffset:Number = 0, yOffset:Number = 0):void
+		public function apply(xOffset:Number = 0, yOffset:Number = 0, restrain:Boolean = false):void
 		{
 			// NOTE: This method is yet to be optimized.
 			
@@ -133,8 +133,17 @@ package away3d.geom
 					
 					// Get the x position marker for the vertex.
 					var X:Number = origVertex.x + xOffset;
-					while(X > _totalLength)
-						X -= _totalLength;
+					
+					if(X > 0)
+					{
+						while(X > _totalLength)
+							X -= _totalLength;
+					}
+					else
+					{
+						while(X < 0)
+							X += _totalLength;
+					}
 					
 					// Evaluate into which curve the X marker falls.
 					var acumLength:Number = 0;
@@ -182,7 +191,10 @@ package away3d.geom
 					
 					// Get the normal at t.
 					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _curves[i]);
-					var p:Number3D = new Number3D(-Math.abs(tangent.y), Math.abs(tangent.x), 0);
+					
+					var tX:Number = restrain ? -Math.abs(tangent.y) : -tangent.y;
+					var tY:Number = restrain ? Math.abs(tangent.x) : tangent.x;
+					var p:Number3D = new Number3D(tX, tY, 0);
 					p.normalize(origVertex.y + yOffset);
 					
 					// Warp the point.
