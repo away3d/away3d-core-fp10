@@ -42,6 +42,7 @@ package away3d.audio
 		 * @param sound 		The flash Sound object that is played back from this Sound3D object's position.
 		 * For realistic results, this should be a <em>mono</em> (single-channel, non-stereo) sound stream.
 		 * @param reference 	The reference, or "listener" object, typically a camera.
+		 * @param driver		Sound3D driver to use when applying simulation effects. Defaults to SimplePanVolumeDriver.
 		 * @param init 			[optional] An initialisation object for specifying default instance properties.
 		*/
 		public function Sound3D(sound:Sound, reference:Object3D, driver : ISound3DDriver = null, init:Object=null)
