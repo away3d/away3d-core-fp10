@@ -88,7 +88,12 @@ package away3d.geom
 			for each(var command:DrawingCommand in _path.drawingCommands)
 			{
 				if(command.type != DrawingCommand.MOVE)
+				{
+					if(command.type == DrawingCommand.LINE)
+						BezierUtils.createControlPointForLine(command);
+					
 					_curves.push(command);
+				}
 			}
 			
 			// Get arc length info for all curves.

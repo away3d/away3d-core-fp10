@@ -3,8 +3,6 @@ package away3d.core.utils
 	import away3d.core.base.DrawingCommand;
 	import away3d.core.base.Vertex;
 	import away3d.core.math.Number3D;
-	
-	import flash.display.Graphics;
 
 	public class BezierUtils
 	{
@@ -64,6 +62,18 @@ package away3d.core.utils
 			var pZ:Number = invTSqr*curve.pStart.z + 2*invT*t*curve.pControl.z + tSqr*curve.pEnd.z;
 			
 			return new Vertex(pX, pY, pZ);
+		}
+		
+		static public function createControlPointForLine(line:DrawingCommand):void
+		{
+			if(line.pControl)
+				return;
+				
+			var pX:Number = (line.pStart.x + line.pEnd.x)/2;
+			var pY:Number = (line.pStart.y + line.pEnd.y)/2;
+			var pZ:Number = (line.pStart.z + line.pEnd.z)/2;
+			
+			line.pControl = new Vertex(pX, pY, pZ);
 		}
 		
 		static public function getDerivativeAt(t:Number, curve:DrawingCommand):Number3D
