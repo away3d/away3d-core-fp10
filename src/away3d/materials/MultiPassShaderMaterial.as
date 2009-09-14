@@ -41,6 +41,12 @@ package away3d.materials
 			
 		}
 		
+		override public function set normalMap(value:BitmapData):void
+		{
+			super.normalMap = value;
+			_directionalLightShader.data.normalMap.input = value;
+		}
+		
 		/**
 		 * @inheritDoc
 		 */

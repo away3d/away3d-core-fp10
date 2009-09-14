@@ -66,9 +66,26 @@ package away3d.materials
 			_pointLightShader.data.positionMap.input = _positionMap;
 		}
 		
+		/**
+		 * A map generated specifically for the target model which keeps the object-space coordinates for every texel 
+		 */
+		public function get positionMap() : BitmapData
+		{
+			return _positionMap;
+		}
+		
+		/**
+		 * An object-space normal map
+		 */
 		public function get normalMap() : BitmapData
 		{
 			return _normalMap;
+		}
+		
+		public function set normalMap(value : BitmapData) : void
+		{
+			_normalMap = value;
+			_pointLightShader.data.normalMap.input = _normalMap;
 		}
 		
 		private function createPositionMap() : void

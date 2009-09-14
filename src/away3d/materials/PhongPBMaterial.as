@@ -31,6 +31,8 @@ package away3d.materials
 		
 		private var _specular : Number;
 		
+		private var _specularMap : BitmapData;
+		
 		/**
 		 * Creates a new PhongPBMaterial object.
 		 * 
@@ -44,17 +46,54 @@ package away3d.materials
 		{
 			var shader : Shader;
 			
+			_specularMap = specularMap;
+			
 			if (specularMap) {
 				shader = new Shader(new SpecularKernel());
 				shader.data.specularMap.input = specularMap;
 			}
-			else shader = new Shader(new NormalKernel());
+			else
+				shader = new Shader(new NormalKernel());
 			shader.precisionHint = ShaderPrecision.FAST;
 			
 			super(bitmap, normalMap, shader, targetModel, init);
 			
 			gloss = ini.getNumber("gloss", 10);
 			specular = ini.getNumber("specular", 1);
+		}
+		
+		public function get specularMap() : BitmapData
+		{
+			return _specularMap;
+		}
+		
+		public function set specularMap(value : BitmapData) : void
+		{
+			var shader : Shader;
+			if (_specularMap) {
+				if (value)
+					_pointLightShader.data.specularMap.input = value;
+				else {
+					shader = new Shader(new NormalKernel());
+					shader.data.phongComponents.value[1] = gloss;
+					shader.data.normalMap.input = _normalMap;
+					shader.data.positionMap.input = _positionMap;
+					shader.data.positionTransformation.value = _pointLightShader.data.positionTransformation.value;
+					shader.precisionHint = ShaderPrecision.FAST;
+					_pointLightShader = shader;
+				}
+			}
+			else if (value) {
+				shader = new Shader(new SpecularKernel());
+				shader.data.phongComponents.value[1] = gloss;
+				shader.data.specularMap.input = value;
+				shader.data.normalMap.input = _normalMap;
+				shader.data.positionMap.input = _positionMap;
+				shader.data.positionTransformation.value = _pointLightShader.data.positionTransformation.value;
+				shader.precisionHint = ShaderPrecision.FAST;
+				_pointLightShader = shader;
+			}
+			_specularMap = value;
 		}
 		
 		/**

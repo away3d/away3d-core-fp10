@@ -41,6 +41,8 @@ package away3d.materials
 		
 		private var _specular : Number;
 		
+		private var _specularMap : BitmapData;
+		
 		/**
 		 * Creates a SpecularMultiPassMaterial.
 		 * 
@@ -77,6 +79,58 @@ package away3d.materials
 			
 			_shaderBlendMode = BlendMode.SCREEN;
 			_useAmbient = false;
+		}
+		
+		/**
+		 * An optional specular map BitmapData, which modulates the specular reflections
+		 */
+		public function get specularMap() : BitmapData
+		{
+			return _specularMap;
+		}
+		 
+		public function set specularMap(value : BitmapData) : void
+		{
+			var shaderPt : Shader;
+			var shaderDir : Shader;
+			
+			if (_specularMap) {
+				if (value) {
+					_pointLightShader.data.specularMap.input = value;
+					_directionalLightShader.data.specularMap.input = value;
+				}
+				else {
+					shaderPt = new Shader(new NormalKernel());
+					shaderDir = new Shader(new NormalKernelDir());
+					shaderPt.data.phongComponents.value[1] = gloss;
+					shaderDir.data.phongComponents.value[1] = gloss;
+					shaderPt.data.normalMap.input = _normalMap;
+					shaderDir.data.normalMap.input = _normalMap;
+					shaderPt.data.positionMap.input = _normalMap;
+					shaderDir.data.positionMap.input = _normalMap;
+					shaderPt.precisionHint = ShaderPrecision.FAST;
+					shaderDir.precisionHint = ShaderPrecision.FAST;
+					_pointLightShader = shaderPt;
+					_directionalLightShader = shaderDir;
+				}
+			}
+			else if (value) {
+				shaderPt = new Shader(new SpecularKernel());
+				shaderDir = new Shader(new SpecularKernelDir());
+				shaderPt.data.phongComponents.value[1] = gloss;
+				shaderDir.data.phongComponents.value[1] = gloss;
+				shaderPt.data.specularMap.input = value;
+				shaderDir.data.specularMap.input = value;
+				shaderPt.data.normalMap.input = _normalMap;
+				shaderDir.data.normalMap.input = _normalMap;
+				shaderPt.data.positionMap.input = _normalMap;
+				shaderDir.data.positionMap.input = _normalMap;
+				shaderPt.precisionHint = ShaderPrecision.FAST;
+				shaderDir.precisionHint = ShaderPrecision.FAST;
+				_pointLightShader = shaderPt;
+				_directionalLightShader = shaderDir;
+			}
+			_specularMap = value;
 		}
 		
 		/**
