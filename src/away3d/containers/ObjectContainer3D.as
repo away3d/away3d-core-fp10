@@ -171,9 +171,9 @@
             if (child == null)
                 throw new Error("ObjectContainer3D.addChild(null)");
             
-            child.parent = this;
-            
             updatePolyCount(child);
+            
+            child.parent = this;
         }
         
         /**
@@ -220,8 +220,8 @@
                 throw new Error("ObjectContainer3D.removeChild(null)");
             if (child.parent != this)
                 return;
-            child.parent = null;
             updatePolyCount(child, false);
+            child.parent = null;
         }
         
 		/**
