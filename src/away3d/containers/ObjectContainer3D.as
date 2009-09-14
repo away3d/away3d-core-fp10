@@ -172,6 +172,40 @@
                 throw new Error("ObjectContainer3D.addChild(null)");
             
             child.parent = this;
+            
+            updatePolyCount(child);
+        }
+        
+        /**
+         * Returns the number of elements in the container,
+         * including elements in child nodes.
+         * Elements can be faces, segments or billboards.
+         * @return int
+         */        
+        public function get polyCount():int
+        {
+        	return _polyCount;
+        }
+        
+        private var _polyCount:int;
+        arcane function incrementPolyCount(delta:int):void
+        {
+        	_polyCount += delta;
+        	
+        	if(this.parent)
+        		parent.incrementPolyCount(delta);
+        }
+        private function updatePolyCount(child:Object3D, add:Boolean = true):void
+        {
+        	var k:int = add ? 1 : -1;
+        	var deltaPoly:int;
+        	
+        	if(child is Mesh)
+        		deltaPoly = k*Mesh(child).elements.length;
+        	else if(child is ObjectContainer3D)
+        		deltaPoly = k*ObjectContainer3D(child).polyCount;
+        	
+        	incrementPolyCount(deltaPoly);
         }
         
 		/**
@@ -187,6 +221,7 @@
             if (child.parent != this)
                 return;
             child.parent = null;
+            updatePolyCount(child, false);
         }
         
 		/**
