@@ -16,7 +16,7 @@ package away3d.core.draw
 		private var dx:Number;
 		private var dy:Number;
 
-		public var vectorInstructionType:String = VectorInstructionType.LINE;
+		public var vectorInstructionType:String = DrawingCommand.LINE;
 		
     	/**
     	 * The view x position of the vertex in the view.
