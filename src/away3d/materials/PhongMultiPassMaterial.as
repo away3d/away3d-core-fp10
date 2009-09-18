@@ -56,6 +56,7 @@ package away3d.materials
 			var shaderPt : Shader;
 			var shaderDir : Shader;
 			
+			_specularMap = specularMap;
 			if (specularMap) {
 				shaderPt = new Shader(new SpecularKernel());
 				shaderPt.data.specularMap.input = specularMap;

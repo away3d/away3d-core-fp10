@@ -35,7 +35,7 @@ package away3d.materials
 		 * @param targetModel The target mesh for which this shader is applied
 		 * @param init An initialisation object
 		 */
-		public function DiffuseMultiPassMaterial(bitmap:BitmapData, normalMap:BitmapData, targetModel:Mesh, specularMap : BitmapData = null, init:Object=null)
+		public function DiffuseMultiPassMaterial(bitmap:BitmapData, normalMap:BitmapData, targetModel:Mesh, init:Object=null)
 		{
  			super(bitmap, normalMap, new Shader(new NormalKernel()), new Shader(new NormalKernelDir()), targetModel, init);
 		}

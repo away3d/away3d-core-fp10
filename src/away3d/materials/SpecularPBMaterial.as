@@ -44,6 +44,9 @@ package away3d.materials
 		public function SpecularPBMaterial(bitmap:BitmapData, normalMap:BitmapData, targetModel:Mesh, specularMap : BitmapData = null, init:Object=null)
 		{
 			var shader : Shader;
+			
+			_specularMap = specularMap;
+			
 			if (specularMap) {
 				shader = new Shader(new SpecularKernel());
 				shader.data.specularMap.input = specularMap;
