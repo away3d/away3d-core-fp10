@@ -78,11 +78,10 @@
         }
         
 		
-		/**
-		 * Duplicates the 3d number's properties to another <code>Number3D</code> object
-		 * 
-		 * @return	The new 3d number instance with duplicated properties applied
-		 */
+        /**
+         * Duplicates a <code>Number3D</code>'s properties to this <code>Number3D</code>.
+         * @param v Number3D The <code>Number3D</code> whose properties will be cloned.
+         */		
         public function clone(v:Number3D):void
         {
             x = v.x;
