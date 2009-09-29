@@ -7,25 +7,34 @@ package away3d.materials
 	
 	import flash.display.BitmapData;
 	import flash.display.Shader;
+	import flash.utils.ByteArray;
 	
 	/**
 	 * BitmapData material which creates reflections based on a cube map.
+	 * The reflection strength changes based on the refraction of the material and its environment,
+	 * as well as the angle of view. This can be used to create water-like reflections.
 	 */
-	public class CubicEnvMapPBMaterial extends SinglePassShaderMaterial
+	public class FresnelPBMaterial extends SinglePassShaderMaterial
 	{
-		[Embed(source="../pbks/CubicEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../pbks/FresnelShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
 		
-		[Embed(source="../pbks/CubicEnvReflMapShader.pbj", mimeType="application/octet-stream")]
+		[Embed(source="../pbks/FresnelReflMapShader.pbj", mimeType="application/octet-stream")]
 		private var ReflMapKernel : Class;
 		
 		private var _faces : Array;
 		private var _envMapAlpha : Number = 1;
 		
+		private var _outerRefraction : Number = 1.0008;
+		private var _innerRefraction : Number = 1.330;
+		private var _fresnelMap : ByteArray;
+		
+		private var _refractionStrength : Number = 0;
+		
 		private var _reflectivityMap : BitmapData;
 		
 		/**
-		 * Creates a new CubicEnvMapPBMaterial object.
+		 * Creates a new FresnelPBMaterial object.
 		 * 
 		 * @param bitmap The texture to be used for the diffuse shading
 		 * @param normalMap An object-space normal map
@@ -33,13 +42,17 @@ package away3d.materials
 		 * @param targetModel The target mesh for which this shader is applied
 		 * @param init An initialisation object
 		 */
-		public function CubicEnvMapPBMaterial(bitmap:BitmapData, normalMap:BitmapData, faces : Array, targetModel:Mesh, init:Object=null)
+		public function FresnelPBMaterial(bitmap:BitmapData, normalMap:BitmapData, faces : Array, targetModel:Mesh, init:Object=null)
 		{
 			super(bitmap, normalMap, new Shader(new Kernel()), targetModel, init);
 			_useWorldCoords = true;
 			_envMapAlpha = ini.getNumber("envMapAlpha", 1);
-			
+			_outerRefraction = ini.getNumber("outerRefraction", 1.0008);
+			_innerRefraction = ini.getNumber("innerRefraction", 1.330);
+			_refractionStrength = ini.getNumber("refractionStrength", 1);
 			_faces = faces;
+			
+			initFresnelMap();
 			
 			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
 			_pointLightShader.data.left.input = faces[CubeFaces.LEFT];
@@ -49,6 +62,7 @@ package away3d.materials
 			_pointLightShader.data.front.input = faces[CubeFaces.FRONT];
 			_pointLightShader.data.back.input = faces[CubeFaces.BACK];
 			_pointLightShader.data.cubeDim.value = [ faces[CubeFaces.LEFT].width*.5 ];
+			_pointLightShader.data.refractionStrength.value = [ _refractionStrength ];
 		}
 		
 		/**
@@ -88,9 +102,60 @@ package away3d.materials
 				shader.data.positionTransformation.value = _pointLightShader.data.positionTransformation.value;
 				shader.data.positionMap.input = _positionMap;
 				shader.data.normalMap.input = _normalMap;
+				shader.data.fresnelMap.input = _fresnelMap;
+				shader.data.fresnelMap.width = 256;
+				shader.data.fresnelMap.height = 1;
 				_pointLightShader = shader;
 			} 
 			_reflectivityMap = value;
+		}
+		
+		/**
+		 * The maximum amount of refraction to be performed on the diffuse texture, used to simulate water
+		 */
+		public function get refractionStrength() : Number
+		{
+			return _refractionStrength;
+		}
+		
+		public function set refractionStrength(value : Number) : void
+		{
+			_refractionStrength = value;
+			_pointLightShader.data.refractionStrength.value = [ _refractionStrength ];
+		}
+		
+		private function initFresnelMap() : void
+		{
+			var i : int = 256;
+			var dot : Number;
+			var angle : Number;
+			var refrAngle : Number;
+			var fres : Number;
+			var t1 : Number;
+			var t2 : Number;
+			
+			_fresnelMap = new ByteArray();
+			
+			while (i--) {
+				angle = Math.acos(i/256);
+				
+				// snel's law: n1*sin(a1) = n2*sin(a2)
+				refrAngle = Math.asin(Math.sin(angle)*_outerRefraction/_innerRefraction);
+				
+				t1 = Math.sin(angle-refrAngle)/Math.sin(angle+refrAngle);
+				t2 = Math.tan(angle-refrAngle)/Math.tan(angle+refrAngle);
+				
+				fres = t1*t1+t2*t2;
+				if (fres > 1.0) fres = 1.0;
+				else if (fres < 0.0) fres = 0.0;
+				_fresnelMap.writeFloat(fres);
+				_fresnelMap.writeFloat(fres);
+				_fresnelMap.writeFloat(fres);
+			}
+			
+			_pointLightShader.data.fresnelMap.input = _fresnelMap;
+			_pointLightShader.data.fresnelMap.width = 256;
+			_pointLightShader.data.fresnelMap.height = 1;
 		}
 		
 		/**

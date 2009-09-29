@@ -15,8 +15,13 @@ package away3d.materials
 		[Embed(source="../pbks/SphericEnvNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
 		
+		[Embed(source="../pbks/SphericEnvReflMapShader.pbj", mimeType="application/octet-stream")]
+		private var ReflMapKernel : Class;
+		
 		protected var _envMap : BitmapData;
 		private var _envMapAlpha : Number = 1;
+		
+		private var _reflectivityMap : BitmapData;
 		
 		/**
 		 * Creates a new SphericEnvMapPBMaterial object.
@@ -37,6 +42,42 @@ package away3d.materials
 			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
 			_pointLightShader.data.envMap.input = envMap;
 			_pointLightShader.data.envMapDim.value = [ envMap.width*.5 ];
+		}
+		
+		/**
+		 * A texture map that indicates the reflection amount for each texel
+		 */
+		public function get reflectivityMap() : BitmapData
+		{
+			return _reflectivityMap;
+		}
+		
+		public function set reflectivityMap(value : BitmapData) : void
+		{
+			var copyNeeded : Boolean;
+			var shader : Shader;
+			
+			if (!_reflectivityMap && value) {
+				shader = new Shader(new ReflMapKernel());
+				copyNeeded = true;
+			}
+			else if (_reflectivityMap && !value) {
+				shader = new Shader(new Kernel());
+				copyNeeded = true;
+			}
+			
+			if (value) shader.data.reflectivityMap.input = value;
+			
+			if (copyNeeded) {
+				shader.data.alpha.value = [ _envMapAlpha ];
+				shader.data.envMap.input = _pointLightShader.data.envMap.input;
+				shader.data.normalTransformation.value = _pointLightShader.data.normalTransformation.value;
+				shader.data.positionTransformation.value = _pointLightShader.data.positionTransformation.value;
+				shader.data.positionMap.input = _positionMap;
+				shader.data.normalMap.input = _normalMap;
+				_pointLightShader = shader;
+			} 
+			_reflectivityMap = value;
 		}
 		
 		/**

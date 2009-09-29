@@ -1,0 +1,74 @@
+<languageVersion: 1.0;>
+kernel SphericEnvMapShader
+<
+	namespace: "com.away3d";
+	vendor: "Away3d";
+	version: 1;
+	description: "Applies a spherical environment map with support for normal maps.";
+>
+{
+	input image4 diffuse;
+	input image4 reflectivityMap;
+	input image3 envMap;
+	input image3 normalMap;
+	input image3 positionMap;
+	output pixel4 dst;
+	
+	parameter float alpha
+	<
+		minValue: float(0.0);
+		maxValue: float(1.0);
+		defaultValue: float(0.5);
+		description: "The alpha of the environment map";
+	>;
+	
+	parameter float envMapDim
+	<
+		minValue: float(0.0);
+		maxValue: float(1024.0);
+		defaultValue: float(160.0);
+		description: "Half the size of the cube map's edges";
+	>;
+
+	parameter float3x3 normalTransformation
+	<
+		minValue: float3x3(-8000.0);
+		maxValue: float3x3(8000.0);
+		defaultValue: float3x3(0.0);
+		description: "The transformation matrix that transforms the displayObject to stage coordinates";
+	>;
+	
+	parameter float4x4 positionTransformation
+	<
+		minValue: float4x4(-8000.0);
+		maxValue: float4x4(8000.0);
+		defaultValue: float4x4(0.0);
+	>;
+	
+	parameter float3 viewPos
+	<
+		minValue: float3(0.0);
+		maxValue: float3(100000.0);
+		defaultValue: float3(0.0);
+		description: "The position of the camera";
+	>;
+	
+	void evaluatePixel()
+	{
+		float3 coord3d = sampleNearest(positionMap, outCoord());
+		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
+		float3 view = normalize(viewPos-coord3d);
+		view.y = -view.y;
+		float3 normalSample = 2.0*(sampleNearest(normalMap, outCoord())-float3(0.5));
+		float3 n = normalize(normalTransformation*normalSample);
+		
+		float3 refl = view - 2.0*dot(n, view)*n;
+		refl.y = -refl.y;
+		refl.z = refl.z-1.0;
+		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
+		
+		dst = sampleNearest(diffuse, outCoord());
+		float reflStrength = sampleNearest(reflectivityMap, outCoord()).x*alpha;
+		dst.xyz = dst.xyz*(1.0-reflStrength)+reflection*reflStrength*dst.a;
+	}
+}
