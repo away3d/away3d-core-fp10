@@ -280,6 +280,8 @@ package away3d.cameras
     	 */
         public function screen(object:Object3D, vertex:Vertex = null):ScreenVertex
         {
+        	update();
+        	
             if (vertex == null)
                 _vertices = object.center;
             else
