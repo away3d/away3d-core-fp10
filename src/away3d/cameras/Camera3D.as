@@ -336,7 +336,7 @@ package away3d.cameras
         		_fovDirty = false;
         		_fov = lens.getFOV();
         	}
-        	trace(_fov)
+        	
         	if (_zoomDirty) {
         		_zoomDirty = false;
         		_zoom = lens.getZoom();
