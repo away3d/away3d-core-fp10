@@ -50,30 +50,30 @@ package away3d.cameras.lenses
 			_plane.transform(viewTransform);
 			
 			_plane = _frustum.planes[Frustum.LEFT];
-			_plane.a = -_clipHeight*_focusOverZoom;
+			_plane.a = _clipHeight*_focusOverZoom;
 			_plane.b = 0;
-			_plane.c = _clipHeight*_clipLeft/_zoom2;
+			_plane.c = -_clipHeight*_clipLeft/_zoom2;
 			_plane.d = 0;
 			_plane.transform(viewTransform);
 			
 			_plane = _frustum.planes[Frustum.RIGHT];
-			_plane.a = _clipHeight*_focusOverZoom;
+			_plane.a = -_clipHeight*_focusOverZoom;
 			_plane.b = 0;
-			_plane.c = -_clipHeight*_clipRight/_zoom2;
+			_plane.c = _clipHeight*_clipRight/_zoom2;
 			_plane.d = 0;
 			_plane.transform(viewTransform);
 			
 			_plane = _frustum.planes[Frustum.TOP];
 			_plane.a = 0;
-			_plane.b = -_clipWidth*_focusOverZoom;
-			_plane.c = _clipWidth*_clipTop/_zoom2;
+			_plane.b = _clipWidth*_focusOverZoom;
+			_plane.c = -_clipWidth*_clipTop/_zoom2;
 			_plane.d = 0;
 			_plane.transform(viewTransform);
 			
 			_plane = _frustum.planes[Frustum.BOTTOM];
 			_plane.a = 0;
-			_plane.b = _clipWidth*_focusOverZoom;
-			_plane.c = -_clipWidth*_clipBottom/_zoom2;
+			_plane.b = -_clipWidth*_focusOverZoom;
+			_plane.c = _clipWidth*_clipBottom/_zoom2;
 			_plane.d = 0;
 			_plane.transform(viewTransform);
 			
@@ -87,7 +87,8 @@ package away3d.cameras.lenses
 		
 		public function getZoom():Number
 		{
-			return ((_clipTop - _clipBottom)/Math.tan(_camera.fov*toRADIANS) - _clipTop*_clipBottom)/_camera.focus;
+			var b:Number = _clipHeight/Math.tan(_camera.fov*toRADIANS);
+			return (b + Math.sqrt(Math.pow(b, 2) - 4*_clipTop*_clipBottom/_camera.zoom))/(2*_camera.focus);
 		}
         
 		public function getPerspective(screenZ:Number):Number

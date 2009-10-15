@@ -111,8 +111,15 @@ package away3d.cameras
 		
 		public function set focus(value:Number):void
 		{
+			if (_focus == value)
+				return;
+			
 			_focus = value;			
 			DofCache.focus = _focus;
+			
+			_zoomDirty = false;
+			_fovDirty = true;
+			
 			notifyCameraUpdate();
 		}
 		
@@ -308,7 +315,7 @@ package away3d.cameras
         	
         	_clipping  = _view.screenClipping;
         	
-        	if (_clipTop != _clipping.maxY || _clipBottom != _clipping.minY || _clipLeft != _clipping.minX || _clipRight != _clipping.maxX) {
+        	if (_clipTop != _clipping.minY || _clipBottom != _clipping.maxY || _clipLeft != _clipping.minX || _clipRight != _clipping.maxX) {
         		
         		if (!_fovDirty && !_zoomDirty) {
 	        		if (fixedZoom)
@@ -317,8 +324,8 @@ package away3d.cameras
 		        		_zoomDirty = true;
 		        }
 		        
-	        	_clipTop = _clipping.maxY;
-	        	_clipBottom = _clipping.minY;
+	        	_clipTop = _clipping.minY;
+	        	_clipBottom = _clipping.maxY;
 	        	_clipLeft = _clipping.minX;
 	        	_clipRight = _clipping.maxX;
         	}
@@ -329,7 +336,7 @@ package away3d.cameras
         		_fovDirty = false;
         		_fov = lens.getFOV();
         	}
-        	
+        	trace(_fov)
         	if (_zoomDirty) {
         		_zoomDirty = false;
         		_zoom = lens.getZoom();

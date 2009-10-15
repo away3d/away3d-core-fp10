@@ -749,7 +749,7 @@ package away3d.core.render
 							break;
 					}
 	            }
-	        } else {
+	        } else if (endIndex - startIndex > 2) {
 	        	_index0 = screenIndices[startIndex]*3;
 	        	_index1 = screenIndices[startIndex+1]*3;
 	        	_index2 = screenIndices[startIndex+2]*3; 
@@ -758,6 +758,12 @@ package away3d.core.render
 	            graphics.lineTo(screenVertices[_index1], screenVertices[_index1+1]);
 		        graphics.lineTo(screenVertices[_index2], screenVertices[_index2+1]);
 		        graphics.lineTo(v0x, v0y);
+	        } else {
+	        	_index0 = screenIndices[startIndex]*3;
+	        	_index1 = screenIndices[startIndex+1]*3;
+	        	
+	        	graphics.moveTo(screenVertices[_index0], screenVertices[_index0+1]);
+	            graphics.lineTo(screenVertices[_index1], screenVertices[_index1+1]);
 	        }
         }
         

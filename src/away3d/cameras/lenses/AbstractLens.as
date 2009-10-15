@@ -69,8 +69,8 @@ package away3d.cameras.lenses
 			_cameraVarsStore = val.cameraVarsStore;
 			_camera = val.camera;
 			_clipping = val.screenClipping;
-			_clipTop = _clipping.maxY;
-        	_clipBottom = _clipping.minY;
+			_clipTop = _clipping.minY;
+        	_clipBottom = _clipping.maxY;
         	_clipLeft = _clipping.minX;
         	_clipRight = _clipping.maxX;
         	_clipHeight = _clipBottom - _clipTop;
