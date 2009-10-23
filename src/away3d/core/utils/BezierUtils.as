@@ -1,5 +1,7 @@
 package away3d.core.utils
 {
+	import __AS3__.vec.Vector;
+	
 	import away3d.core.base.DrawingCommand;
 	import away3d.core.base.Vertex;
 	import away3d.core.math.Number3D;
@@ -85,20 +87,22 @@ package away3d.core.utils
 			return new Number3D(pX, pY, pZ);
 		}
 		
-		static public function getArcLengthArray(curve:DrawingCommand, delta:Number):Array
+		static public function getArcLengthArray(curve:DrawingCommand, delta:Number):Vector.<Number>
 		{
 			// Get the points on the curve for the specifyed delta.
-			var curvePoints:Array = [];
+			var curvePoints:Vector.<Vertex> = new Vector.<Vertex>();
 			for(var t:Number = 0; t <= 1; t += delta)
 				curvePoints.push(BezierUtils.getCoordinatesAt(t, curve));
 			
 			// Incrementally calculate lengths and put them into an array.
 			var acumLength:Number = 0;
-			var lengths:Array = [0];
-			for(var i:uint; i<curvePoints.length - 1; i++)
+			var lengths:Vector.<Number> = new Vector.<Number>();
+			lengths.push(0);
+			var loop:uint = curvePoints.length - 1;
+			for(var i:uint; i<loop; ++i)
 			{
-				var pStart:Vertex = curvePoints[i];
-				var pEnd:Vertex = curvePoints[i+1];
+				var pStart:Vertex = curvePoints[uint(i)];
+				var pEnd:Vertex = curvePoints[uint(i+1)];
 				var dX:Number = pEnd.x - pStart.x;
 				var dY:Number = pEnd.y - pStart.y;
 				var dZ:Number = pEnd.z - pStart.z;

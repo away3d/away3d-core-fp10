@@ -1,5 +1,7 @@
 package away3d.geom
 {
+	import __AS3__.vec.Vector;
+	
 	import away3d.core.base.DrawingCommand;
 	import away3d.core.base.Element;
 	import away3d.core.base.Face;
@@ -7,18 +9,37 @@ package away3d.geom
 	import away3d.core.base.Vertex;
 	import away3d.core.math.Number3D;
 	import away3d.core.utils.BezierUtils;
+	
+	import flash.utils.Dictionary;
 
 	public class AlignToPath
 	{
 		private var _originalMesh:Mesh;
 		private var _activeMesh:Mesh;
 		private var _path:Element;
-		private var _curves:Array = [];
-		private var _lengths:Array = [];
-		private var _lengthArrays:Array = [];
+		private var _curves:Vector.<DrawingCommand>;
+		private var _lengths:Vector.<Number>;
+		private var _lengthArrays:Vector.<Vector.<Number>>;
 		private var _totalLength:Number = 0;
-		private var _cachedVertices:Array;
+		private var _cachedVertices:Vector.<Vector.<Number3D>>;
+		private var _cacheRef:Dictionary;
 		private var _arcLengthPrecision:Number = 0.01;
+		
+		/**
+		 * Constructor. 
+		 * @param mesh Mesh A mesh containing the elements to be aligned.
+		 * @param path Element A Segment or a Face containing the path's vector data for the alignment.
+		 * NOTE: The inputed mesh will be cached, so updates to the mesh will need a new instance
+		 * of the aligner.
+		 */		
+		public function AlignToPath(mesh:Mesh, path:Element)
+		{
+			duplicateMesh(mesh);
+			updatePath(path);
+			
+			_cachedVertices = new Vector.<Vector.<Number3D>>();
+			_cacheRef = new Dictionary();
+		}
 		
 		/**
 		 * Returns the last calculated length of the path.
@@ -40,13 +61,10 @@ package away3d.geom
 		
 		/**
 		 * Determines the quality of the alignment.
-		 * 
 		 * The value is used to arc length parameterize the path. Without this technique
 		 * the alignment would produce undesired scaling and squashing of the text.
-		 * 
 		 * The closer to zero, the better the quality of the alignment is, the larger the value
 		 * the faster the performance of the aligment is.
-		 * 
 		 * @param value Number
 		 */		
 		public function set arcLengthPrecision(value:Number):void
@@ -55,20 +73,6 @@ package away3d.geom
 			
 			if(_path)
 				updatePath(_path);
-		}
-		
-		/**
-		 * Constructor. 
-		 * @param mesh Mesh A mesh containing the elements to be aligned.
-		 * @param path Element A Segment or a Face containing the path's vector data for the alignment.
-		 * 
-		 * NOTE: The inputed mesh will be cached, so updates to the mesh will need a new instance
-		 * of the aligner.
-		 */		
-		public function AlignToPath(mesh:Mesh, path:Element)
-		{
-			duplicateMesh(mesh);
-			updatePath(path);
 		}
 		
 		/**
@@ -85,26 +89,31 @@ package away3d.geom
 			_path = path;
 			
 			_totalLength = 0;
-			_lengthArrays = [];
-			_lengths = [];
-			_curves = [];
+			_lengthArrays = new Vector.<Vector.<Number>>();
+			_lengths = new Vector.<Number>();
+			_curves = new Vector.<DrawingCommand>();
 			
 			// Identify the curves in the segment.
-			for each(var command:DrawingCommand in _path.drawingCommands)
+			var i:uint;
+			var loop:uint = _path.drawingCommands.length;
+			for(i = 0; i<loop; ++i)
 			{
+				var command:DrawingCommand = _path.drawingCommands[uint(i)];
 				if(command.type != DrawingCommand.MOVE)
 				{
 					if(command.type == DrawingCommand.LINE)
 						BezierUtils.createControlPointForLine(command);
-					
 					_curves.push(command);
 				}
 			}
 			
 			// Get arc length info for all curves.
-			for each(command in _curves)
+			loop = _curves.length;
+			for(i = 0; i<loop; ++i)
 			{
-				var commandLengthsArray:Array = BezierUtils.getArcLengthArray(command, _arcLengthPrecision);
+				command = _curves[uint(i)];
+				
+				var commandLengthsArray:Vector.<Number> = BezierUtils.getArcLengthArray(command, _arcLengthPrecision);
 				_lengthArrays.push(commandLengthsArray);
 				
 				var commandTotalLength:Number = commandLengthsArray[commandLengthsArray.length-1];
@@ -129,9 +138,10 @@ package away3d.geom
 			// in order to determine which is the closest curve.
 			var minimunDistance:Number = Number.MAX_VALUE;
 			var minimunDistanceIndex:uint;
-			for(var i:uint; i<_curves.length; i++)
+			var loop:uint = _curves.length;
+			for(var i:uint; i<loop; ++i)
 			{
-				var command:DrawingCommand = _curves[i];
+				var command:DrawingCommand = _curves[uint(i)];
 				var control:Vertex = command.pControl;
 				
 				var dX:Number = control.x - point.x;
@@ -150,18 +160,43 @@ package away3d.geom
 			// Finds the cumulative arc-length of the path
 			// until the closest curve is reached.
 			var offset:Number = 0;
-			for(i = 0; i<minimunDistanceIndex; i++)
+			for(i = 0; i<minimunDistanceIndex; ++i)
 				offset += _lengths[i];
+				
+			offset -= _lengths[minimunDistanceIndex];
 			
-			// TO-DO: For more precision, not only the closest curve
-			// should be found, but actually the point in such curve that
-			// yields the closest point. For now, this serves as
-			// a good aproximation.
+			// TO-DO: Use arc-length parameterization to obtain
+			// the closest value within the curve.
+			minimunDistance = Number.MAX_VALUE;
+			var distancesArr:Vector.<Number> = BezierUtils.getArcLengthArray(_curves[minimunDistanceIndex], 0.1);
+			var pCurvehit:Vertex;
+			var minimunDistanceIndex1:uint;
+			for(i = 0; i<10; ++i)
+			{
+				var pCurve:Vertex = BezierUtils.getCoordinatesAt(i/10, _curves[minimunDistanceIndex]);
+				
+				dX = pCurve.x - point.x;
+				dY = pCurve.y - point.y;
+				dZ = pCurve.z - point.z;
+				
+				dis = Math.sqrt(dX*dX + dY*dY + dZ*dZ);
+				
+				if(dis < minimunDistance)
+				{
+					minimunDistance = dis;
+					minimunDistanceIndex1 = i;
+					pCurvehit = pCurve;
+				}
+			}
+			
+			for(i = 0; i<minimunDistanceIndex1; ++i)
+				offset += distancesArr[uint(i)];
 			
 			// Identifies the point in the curve.
-			var closestPoint:Vertex = _curves[minimunDistanceIndex].pStart;
+			//var closestPoint:Vertex = _curves[minimunDistanceIndex].pStart;
 			
-			return {point:closestPoint, offset:offset};
+			// TO-DO: Avoid returning an object.
+			return {point:pCurvehit, offset:offset};
 		}
 		
 		/**
@@ -176,7 +211,7 @@ package away3d.geom
 		 */		
 		public function buildCache(divisions:Number, yOffset:Number, restrain:Boolean = false, fast:Boolean = false):void
 		{
-			_cachedVertices = [];
+			_cachedVertices = new Vector.<Vector.<Number3D>>();
 			
 			for(var i:Number = 0; i < _totalLength; i += _totalLength/divisions)
 			{
@@ -193,6 +228,70 @@ package away3d.geom
 		}
 		
 		/**
+		 * Caches the warped vertex positions of the mesh at a given x offset.
+		 * To recall positions cached in this way use applyCachedAt(). 
+		 * @param xOffset The x offset to cache. See apply().
+		 * @param yOffset See apply().
+		 * @param restrain See apply().
+		 * @param fast See apply().
+		 */		
+		public function buildCacheAt(xOffset:Number = 0, yOffset:Number = 0, restrain:Boolean = false, fast:Boolean = false):void
+		{
+			apply(xOffset, yOffset, restrain, fast);
+				
+			var snapshot:Vector.<Number3D> = new Vector.<Number3D>();
+			var i:uint, j:uint;
+			var loop:uint = _activeMesh.faces.length;
+			for(i = 0; i<loop; ++i)
+			{
+				var face:Face = _activeMesh.faces[uint(i)];
+				
+				var subLoop:uint = face.vertices.length;
+				var vertices:Array = face.vertices;
+				for(j = 0; j<subLoop; ++j)
+				{
+					var vertex:Vertex = vertices[uint(j)];
+					snapshot.push(new Number3D(vertex.x, vertex.y, vertex.z));
+				}
+			}
+			_cachedVertices.push(snapshot);
+			
+			_cacheRef[xOffset] = snapshot;
+		}
+		
+		/**
+		 * See buildCacheAt();
+		 * @param xOffset The x offset to restore.
+		 */		
+		public function applyCachedAt(xOffset:Number = 0):void
+		{
+			var snapshot:Vector.<Number3D> = _cacheRef[xOffset];
+			
+			var i:uint, a:uint, b:uint;
+			var loop:uint = _activeMesh.faces.length;
+			var arr:Array = _activeMesh.faces;
+			for(a = 0; a<loop; ++a)
+			{
+				var face:Face = arr[uint(a)];
+				var subLoop:uint = face.vertices.length;
+				var subArr:Array = face.vertices;
+				for(b = 0; b<subLoop; ++b)
+				{
+					var vertex:Vertex = face.vertices[uint(b)];
+					
+					if(!snapshot[uint(i)])
+						continue;
+					
+					vertex.x = snapshot[uint(i)].x;
+					vertex.y = snapshot[uint(i)].y;
+					vertex.z = snapshot[uint(i)].z;
+					
+					i++;
+				}
+			}
+		}
+		
+		/**
 		 * Performs the alignment from precalculations.
 		 * buildCache() must be called first. See buildCache().
 		 * @param index uint Specifyes the index in the cached alignments to use,
@@ -200,7 +299,8 @@ package away3d.geom
 		 */		
 		public function applyCached(index:uint):void
 		{
-			var snapshot:Array = _cachedVertices[index];
+			var snapshot:Vector.<Number3D> = _cachedVertices[index];
+			
 			if(!snapshot)
 				return;
 			
@@ -238,15 +338,18 @@ package away3d.geom
 			var n:uint;
 			
 			// Warp the textfield's points onto the curve.
-			for(m = 0; m<_originalMesh.faces.length; m++)
+			var loop:uint, subLoop:uint, subSubLoop:uint, subSubSubLoop:uint;
+			loop = _originalMesh.faces.length;
+			for(m = 0; m<loop; ++m)
 			{
-				var origFace:Face = _originalMesh.faces[m];
-				var transFace:Face = _activeMesh.faces[m];
+				var origFace:Face = _originalMesh.faces[uint(m)];
+				var transFace:Face = _activeMesh.faces[uint(m)];
 				
-				for(n = 0; n<origFace.vertices.length; n++)
+				subLoop = origFace.vertices.length;
+				for(n = 0; n<subLoop; ++n)
 				{
-					var origVertex:Vertex = origFace.vertices[n];
-					var transVertex:Vertex = transFace.vertices[n];
+					var origVertex:Vertex = origFace.vertices[uint(n)];
+					var transVertex:Vertex = transFace.vertices[uint(n)];
 					
 					// Get the x position marker for the vertex.
 					var X:Number = origVertex.x + xOffset;
@@ -264,44 +367,46 @@ package away3d.geom
 					
 					// Evaluate into which curve the X marker falls.
 					var acumLength:Number = 0;
-					for(i = 0; i<_lengths.length; i++)
+					subSubLoop = _lengths.length;
+					for(i = 0; i<subSubLoop; ++i)
 					{
-						acumLength += _lengths[i];
+						acumLength += _lengths[uint(i)];
 						
 						if(acumLength > X)
 							break; // The loop breaks and i represents the index of the curve that contains the marker.
 					}
 					
 					// Remove the last length from acumLength to obtain the local t in the landing curve.
-					acumLength -= _lengths[i];
-					var u:Number = (X - acumLength)/_lengths[i];
+					acumLength -= _lengths[uint(i)];
+					var u:Number = (X - acumLength)/_lengths[uint(i)];
 					
 					if(!fast)
 					{
 						// Arc-length parameterization.
 						//-----------------------------------------------------------------
 						// Find a t that yields uniform arc length.
-						for(j = 0; j<_lengthArrays[i].length-2; j++)
+						subSubSubLoop = _lengthArrays[uint(i)].length-2;
+						for(j = 0; j<subSubSubLoop; ++j)
 						{
-							var currentLength:Number = _lengthArrays[i][j];
-							if(currentLength/_lengths[i] > u)
+							var currentLength:Number = _lengthArrays[uint(i)][uint(j)];
+							if(currentLength/_lengths[uint(i)] > u)
 								break;
 						}
 						
 						var t:Number = 0;
-						if(_lengthArrays[i][j]/_lengths[i] == u)
-						    t = j/(_lengthArrays[i].length - 1);
+						if(_lengthArrays[uint(i)][uint(j)]/_lengths[uint(i)] == u)
+						    t = j/(_lengthArrays[uint(i)].length - 1);
 						else  // need to interpolate between two points
 						{
-						    var lengthBefore:Number = _lengthArrays[i][j];
-						    var lengthAfter:Number = _lengthArrays[i][j+1];
+						    var lengthBefore:Number = _lengthArrays[uint(i)][uint(j)];
+						    var lengthAfter:Number = _lengthArrays[uint(i)][uint(j+1)];
 						    var segmentLength:Number = lengthAfter - lengthBefore;
 						
 						    // determine where we are between the 'before' and 'after' points.
-						    var segmentFraction:Number = (u*_lengths[i] - lengthBefore)/segmentLength;
+						    var segmentFraction:Number = (u*_lengths[uint(i)] - lengthBefore)/segmentLength;
 						                          
 						    // add that fractional amount to t 
-						    t = (j + segmentFraction)/(_lengthArrays[i].length - 1);
+						    t = (j + segmentFraction)/(_lengthArrays[uint(i)].length - 1);
 						}
 						//-----------------------------------------------------------------
 					}
@@ -309,10 +414,10 @@ package away3d.geom
 						t = u;
 					
 					// Get the coordinates of the curve at t.
-					var s:Vertex = BezierUtils.getCoordinatesAt(t, _curves[i]);
+					var s:Vertex = BezierUtils.getCoordinatesAt(t, _curves[uint(i)]);
 					
 					// Get the normal at t.
-					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _curves[i]);
+					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _curves[uint(i)]);
 					
 					var tX:Number = restrain ? -Math.abs(tangent.y) : -tangent.y;
 					var tY:Number = restrain ? Math.abs(tangent.x) : tangent.x;
