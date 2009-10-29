@@ -2,8 +2,10 @@ package away3d.primitives
 {
 	import away3d.arcane;
 	import away3d.core.base.*;
+	import away3d.materials.ColorMaterial;
 	
-	import wumedia.parsers.swf.DefineFont;
+	import flash.geom.Rectangle;
+	
 	import wumedia.vector.VectorText;
 	
 	use namespace arcane;
@@ -134,6 +136,32 @@ package away3d.primitives
     		
 			_align = val;
 			_primitiveDirty = true;
+		}
+    	
+    	/**
+    	 * Adds a hit box wrapping the text that captures mouse events near the text.
+    	 * @param paddingWidth Number Adds specified amount of pixels on the hitbox to the left and right of the text. 
+    	 * @param paddingHeight Number Adds specified amount of pixels on the hitbox to the top and bottom of the text. 
+    	 * @param debug Boolean If using the default color material, makes the hit box visible for debugging.
+    	 * @param colorMaterial ColorMaterial Allows to use a custom material for the hit box. The main idea is to avoid having multiple materials if a lot
+    	 * of TextField3D instances are used.
+    	 * @return Face A reference to the face representing the hit box.
+    	 */    	
+    	public function addHitBox(paddingWidth:Number = 0, paddingHeight:Number = 0, debug:Boolean = false, colorMaterial:ColorMaterial = null):Face
+		{
+			var bounds:Rectangle = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+			bounds.inflate(paddingWidth, paddingHeight);
+			
+			var hit:Face = new Face();
+			hit.moveTo(bounds.left, bounds.top, 0);
+			hit.lineTo(bounds.right, bounds.top, 0); 
+			hit.lineTo(bounds.right, bounds.bottom, 0); 
+			hit.lineTo(bounds.left, bounds.bottom, 0); 
+			hit.lineTo(bounds.left, bounds.top, 0); 
+			hit.material = colorMaterial ? colorMaterial : new ColorMaterial(0x3399CC, {alpha: debug ? .2 : .001}); 
+			addFace(hit);
+			
+			return hit;
 		}
     	
 		/**
