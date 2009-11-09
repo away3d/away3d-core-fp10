@@ -33,7 +33,8 @@ package away3d.loaders
 				var data:ByteArray = kmzFile.getInput(entry);
 				if(entry.name.indexOf(".dae")>-1 && entry.name.indexOf("models/")>-1) {
 					collada = new XML(data.toString());
-					container = Collada.parse(collada, ini);
+					//TODO: swap this to parseGeometry()
+					_container = Collada.parse(collada, ini);
 					if (container is Loader3D) {
 						(container as Loader3D).parser.container.materialLibrary.loadRequired = false;
 						(container as Loader3D).addOnSuccess(onParseGeometry);
@@ -55,14 +56,14 @@ package away3d.loaders
         
         private function onParseGeometry(event:Loader3DEvent):void
         {
-        	container = event.loader.handle;
+        	_container = event.loader.handle;
         	parseImages();
         }
         
         private function parseImages():void
         {
-        	materialLibrary = container.materialLibrary;
-			materialLibrary.loadRequired = false;
+        	_materialLibrary = _container.materialLibrary;
+			_materialLibrary.loadRequired = false;
 			
 			for(var i:int = 0; i < kmzFile.entries.length; ++i) {
 				var entry:ZipEntry = kmzFile.entries[i];
@@ -82,7 +83,7 @@ package away3d.loaders
 			//pass material instance to correct materialData
 			var _materialData:MaterialData;
 			var _face:Face;
-			for each (_materialData in materialLibrary) {
+			for each (_materialData in _materialLibrary) {
 				if (_materialData.textureFileName == loader.name) {
 					_materialData.textureBitmap = Bitmap(loader.content).bitmapData;
 					_materialData.material = new BitmapMaterial(_materialData.textureBitmap);
@@ -91,11 +92,6 @@ package away3d.loaders
 				}
 			}
 		}
-        
-        /**
-        * Reference container for all materials used in the kmz scene.
-        */
-    	public var materialLibrary:MaterialLibrary;
     	
     	/**
     	 * Container data object used for storing the parsed kmz data structure.
@@ -129,7 +125,7 @@ package away3d.loaders
 		 */
         public static function parse(data:*, init:Object = null):ObjectContainer3D
         {
-            return Loader3D.parseGeometry(data, Kmz, init).handle as ObjectContainer3D;
+            return Loader3D.parse(data, Kmz, init).handle as ObjectContainer3D;
         }
     	
     	/**
@@ -141,7 +137,7 @@ package away3d.loaders
     	 */
         public static function load(url:String, init:Object = null):Loader3D
         {
-            return Loader3D.loadGeometry(url, Kmz, init);
+            return Loader3D.load(url, Kmz, init);
         }
     }
 }

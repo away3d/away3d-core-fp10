@@ -1,10 +1,15 @@
 package away3d.loaders
 {
+	import away3d.animators.skin.*;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
+	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	import away3d.events.*;
+	import away3d.loaders.data.*;
+	import away3d.loaders.utils.*;
+	import away3d.materials.*;
 	
 	import flash.display.*;
 	import flash.events.*;
@@ -38,6 +43,8 @@ package away3d.loaders
     */
 	public class AbstractParser extends EventDispatcher
 	{
+		/** @private */
+    	arcane var _container:Object3D;
 		/** @private */
     	arcane var binary:Boolean;
 		/** @private */
@@ -95,31 +102,193 @@ package away3d.loaders
         {
         	notifySuccess();
         }
-        
+		
         private var _broadcaster:Sprite = new Sprite();
         private var _parseStart:int;
         private var _parseTime:int;
+        private var _materials:Object;
+        private var _faceMaterial:ITriangleMaterial;
+    	private var _face:Face;
+        private var _moveVector:Number3D = new Number3D();
         
         private function update(event:Event):void
         {
         	parseNext();
         }
         
+		/** @private */
+		protected var _materialLibrary:MaterialLibrary;
+		
+		/** @private */
+        protected var _geometryLibrary:GeometryLibrary;
+        
+        protected var _symbolLibrary:Dictionary = new Dictionary(true);
+        /** @private */
+        protected function getFileType():String
+        {
+        	return "Abstract";
+        }
+          
+        protected function buildMaterials():void
+		{
+			for each (var _materialData:MaterialData in _materialLibrary)
+			{
+				Debug.trace(" + Build Material : "+_materialData.name);
+				
+				//overridden by the material property
+				if (material)
+					_materialData.material = material;
+				
+				//overridden by materials property
+				if (_materialData.material)
+					continue;
+				
+				Debug.trace(" + Material Type : "+_materialData.materialType);
+				
+				switch (_materialData.materialType)
+				{
+					case MaterialData.TEXTURE_MATERIAL:
+						_materialLibrary.textureLoadRequired = true;
+						break;
+					case MaterialData.SHADING_MATERIAL:
+						_materialData.material = new ShadingColorMaterial(null, {ambient:_materialData.ambientColor, diffuse:_materialData.diffuseColor, specular:_materialData.specularColor, shininess:_materialData.shininess});
+						break;
+					case MaterialData.COLOR_MATERIAL:
+						_materialData.material = new ColorMaterial(_materialData.diffuseColor);
+						break;
+					case MaterialData.WIREFRAME_MATERIAL:
+						_materialData.material = new WireColorMaterial();
+						break;
+				}
+			}
+		}
+		
+        protected function buildMesh(_meshData:MeshData, parent:ObjectContainer3D):Mesh
+		{
+			Debug.trace(" + Build Mesh : "+_meshData.name);
+			
+			var mesh:Mesh = new Mesh({name:_meshData.name});
+			mesh.transform = _meshData.transform;
+			mesh.bothsides = _meshData.geometry.bothsides;
+			
+			var _geometryData:GeometryData = _meshData.geometry;
+			var geometry:Geometry = _geometryData.geometry;
+			
+			if (!geometry) {
+				geometry = _geometryData.geometry = new Geometry();
+				
+				mesh.geometry = geometry;
+				
+				//set materialdata for each face
+				var _faceData:FaceData;
+				for each (var _meshMaterialData:MeshMaterialData in _geometryData.materials) {
+					for each (var _faceListIndex:int in _meshMaterialData.faceList) {
+						_faceData = _geometryData.faces[_faceListIndex] as FaceData;
+						_faceData.materialData = _symbolLibrary[_meshMaterialData.symbol];
+					}
+				}
+				
+				
+				if (_geometryData.skinVertices.length) {
+					var rootBone:Bone = (_container as ObjectContainer3D).getBoneByName(_meshData.skeleton);
+					
+					geometry.skinVertices = _geometryData.skinVertices;
+					geometry.skinControllers = _geometryData.skinControllers;
+					//mesh.bone = container.getChildByName(_meshData.bone) as Bone;
+					
+		   			geometry.rootBone = rootBone;
+		   			
+		   			for each (var _skinController:SkinController in geometry.skinControllers)
+		                _skinController.inverseTransform = parent.inverseSceneTransform;
+				}
+				
+				//create faces from face and mesh data
+				for each(_faceData in _geometryData.faces) {
+					if (_faceData.materialData)
+						_faceMaterial = _faceData.materialData.material as ITriangleMaterial;
+					else
+						_faceMaterial = null;
+					
+					_face = new Face(_geometryData.vertices[_faceData.v0],
+												_geometryData.vertices[_faceData.v1],
+												_geometryData.vertices[_faceData.v2],
+												_faceMaterial,
+												_geometryData.uvs[_faceData.uv0],
+												_geometryData.uvs[_faceData.uv1],
+												_geometryData.uvs[_faceData.uv2]);
+					geometry.addFace(_face);
+					
+					if (_faceData.materialData)
+						_faceData.materialData.elements.push(_face);
+				}
+			} else {
+				mesh.geometry = geometry;
+			}
+			
+			if (centerMeshes) {
+				mesh.movePivot(_moveVector.x = (_geometryData.maxX + _geometryData.minX)/2, _moveVector.y = (_geometryData.maxY + _geometryData.minY)/2, _moveVector.z = (_geometryData.maxZ + _geometryData.minZ)/2);
+				_moveVector.transform(_moveVector, _meshData.transform);
+				mesh.moveTo(_moveVector.x, _moveVector.y, _moveVector.z);
+			}
+			
+			mesh.type = getFileType();
+			
+			if (parent)
+				parent.addChild(mesh);
+			else
+				_container = mesh;
+			
+			return mesh;
+		}
+		
         /**
          * Instance of the Init object used to hold and parse default property values
          * specified by the initialiser object in the parser constructor.
          */
 		protected var ini:Init;
 		
-        /**
-        * 3d container object used for storing the parsed 3d object.
-        */
-		public var container:Object3D;
-		
 		/**
 		 * Defines a timeout period for file parsing (in milliseconds).
 		 */
 		public var parseTimeout:int;
+		
+    	/**
+    	 * Overrides all materials in the model.
+    	 */
+        public var material:ITriangleMaterial;
+        
+    	/**
+    	 * Controls the automatic centering of geometry data in the model, improving culling and the accuracy of bounding dimension values. Defaults to false.
+    	 */
+        public var centerMeshes:Boolean;
+        
+    	/**
+    	 * Overides materials in the model using name:value pairs.
+    	 */
+        public function get materials():Object
+        {
+        	return _materials;
+        }
+		
+		public function set materials(val:Object):void
+		{
+			_materials = val;
+			
+			//organise the materials
+			var _materialData:MaterialData;
+            for (var name:String in _materials) {
+                _materialData = _materialLibrary.addMaterial(name);
+                _materialData.material = Cast.material(_materials[name]);
+
+                //determine material type
+                if (_materialData.material is BitmapMaterial)
+                	_materialData.materialType = MaterialData.TEXTURE_MATERIAL;
+                else if (_materialData.material is ShadingColorMaterial)
+                	_materialData.materialType = MaterialData.SHADING_MATERIAL;
+                else if (_materialData.material is WireframeMaterial)
+                	_materialData.materialType = MaterialData.WIREFRAME_MATERIAL;
+   			}
+		}
 		
     	/**
     	 * Returns the total number of data chunks parsed
@@ -136,6 +305,30 @@ package away3d.loaders
 		{
 			return _totalChunks;
 		}
+				
+        /**
+        * Retuns a materialLibrary object used for storing the parsed material objects.
+        */
+		public function get materialLibrary():MaterialLibrary
+		{
+			return _materialLibrary;
+		}
+		
+        /**
+        * Retuns a geometryLibrary object used for storing the parsed geometry data.
+        */
+		public function get geometryLibrary():GeometryLibrary
+		{
+			return _geometryLibrary;
+		}
+		
+        /**
+        * Retuns a 3d container object used for storing the parsed 3d object.
+        */
+		public function get container():Object3D
+		{
+			return _container;
+		}
 		
 		/**
 		 * Creates a new <code>AbstractParser</code> object.
@@ -146,7 +339,14 @@ package away3d.loaders
         {
         	ini = Init.parse(init);
         	
+        	//setup default libs
+        	_materialLibrary = new MaterialLibrary();
+			_geometryLibrary = new GeometryLibrary();
+        	
         	parseTimeout = ini.getNumber("parseTimeout", 40000);
+        	material = ini.getMaterial("material") as ITriangleMaterial;
+        	materials = ini.getObject("materials") || {};
+        	centerMeshes = ini.getBoolean("centerMeshes", false);
         }
         
 		/**
@@ -156,7 +356,7 @@ package away3d.loaders
 		 * 
          * @return				The parsed 3d object.
          */
-        public function parse(data:*):Object3D
+        public function parseGeometry(data:*):Object3D
         {
         	_broadcaster.addEventListener(Event.ENTER_FRAME, update);
         	

@@ -152,7 +152,7 @@ package away3d.loaders
 			
             scaling = ini.getNumber("scaling", 100);
 			
-            mesh = (container = new Mesh(ini)) as Mesh;
+            mesh = (_container = new Mesh(ini)) as Mesh;
             
             binary = false;
         }
@@ -168,7 +168,7 @@ package away3d.loaders
 		 */
         public static function parse(data:*, init:Object = null):Mesh
         {
-            return Loader3D.parseGeometry(data, Ase, init).handle as Mesh;
+            return Loader3D.parse(data, Ase, init).handle as Mesh;
         }
     	
     	/**
@@ -181,7 +181,7 @@ package away3d.loaders
     	 */
         public static function load(url:String, init:Object = null):Loader3D
         {
-            return Loader3D.loadGeometry(url, Ase, init);
+            return Loader3D.load(url, Ase, init);
         }
     }
 }

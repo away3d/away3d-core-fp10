@@ -121,7 +121,7 @@ package away3d.loaders
 			perspectiveOffset = ini.getNumber("perspectiveOffset", 0);
 			perspectiveFocus = ini.getNumber("perspectiveFocus", 1000);
 			
-			container = new ObjectContainer3D();
+			_container = new ObjectContainer3D();
 			
 			binary = true;
 		}
@@ -136,7 +136,7 @@ package away3d.loaders
 		 */
 		public static function parse(data:*, init:Object = null):ObjectContainer3D
         {
-        	return Loader3D.parseGeometry(data, Swf, init).handle as ObjectContainer3D;
+        	return Loader3D.parse(data, Swf, init).handle as ObjectContainer3D;
         }
 		
     	/**
@@ -149,7 +149,7 @@ package away3d.loaders
     	 */
         public static function load(url:String, init:Object = null):Loader3D
         {
-			return Loader3D.loadGeometry(url, Swf, init);
+			return Loader3D.load(url, Swf, init);
         }
 	}
 }
