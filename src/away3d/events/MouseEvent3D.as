@@ -100,7 +100,7 @@ package away3d.events
 		/**
 		 * The material of the 3d element inside which the event took place.
 		 */
-        public var material:IUVMaterial;
+        public var material:IMaterial;
         	
 		/**
 		 * The uv coordinate inside the draw primitive where the event took place.

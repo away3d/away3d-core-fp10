@@ -125,7 +125,7 @@ package away3d.containers
         private var screenZ:Number = Infinity;
         private var element:Object;
         private var drawpri:DrawPrimitive;
-        private var material:IUVMaterial;
+        private var material:IMaterial;
         private var object:Object3D;
         private var uv:UV;
         private var sceneX:Number;
@@ -199,8 +199,10 @@ package away3d.containers
                                 return;
                             uv = testuv;
                         }
-                        material = testmaterial;
+                        material = tri.material;
                     } else {
+                    	if (pri is DrawSegment)
+                    		material = (pri as DrawSegment).material;
                         uv = null;
                     }
                     screenZ = z;
@@ -401,7 +403,7 @@ package away3d.containers
         /**
          * Current material under the mouse.
          */
-        public var mouseMaterial:IUVMaterial;
+        public var mouseMaterial:IMaterial;
         
         /**
          * Defines whether the view always redraws on a render, or just redraws what 3d objects change. Defaults to false.
