@@ -299,102 +299,110 @@ package away3d.core.clip
         	
 			_stage = container.stage;
 			
-        	if (_stage.scaleMode == StageScaleMode.NO_SCALE) {
-        		_stageWidth = _stage.stageWidth;
-        		_stageHeight = _stage.stageHeight;
-        	} else if (_stage.scaleMode == StageScaleMode.EXACT_FIT) {
-        		_stageWidth = _loaderWidth;
-        		_stageHeight = _loaderHeight;
-        	} else if (_stage.scaleMode == StageScaleMode.SHOW_ALL) {
-        		if (_stage.stageWidth/_loaderWidth < _stage.stageHeight/_loaderHeight) {
-        			_stageWidth = _loaderWidth;
-        			_stageHeight = _stage.stageHeight*_stageWidth/_stage.stageWidth;
-        		} else {
-        			_stageHeight = _loaderHeight;
-        			_stageWidth = _stage.stageWidth*_stageHeight/_stage.stageHeight;
-        		}
-        	} else if (_stage.scaleMode == StageScaleMode.NO_BORDER) {
-        		if (_stage.stageWidth/_loaderWidth > _stage.stageHeight/_loaderHeight) {
-        			_stageWidth = _loaderWidth;
-        			_stageHeight = _stage.stageHeight*_stageWidth/_stage.stageWidth;
-        		} else {
-        			_stageHeight = _loaderHeight;
-        			_stageWidth = _stage.stageWidth*_stageHeight/_stage.stageHeight;
-        		}
-        	}
-        	
-        	if(_stage.align == StageAlign.TOP_LEFT) {
-        		
-            	_localPointTL.x = 0;
-            	_localPointTL.y = 0;
-                
-                _localPointBR.x = _stageWidth;
-            	_localPointBR.y = _stageHeight;
-                
-	        } else if(_stage.align == StageAlign.TOP_RIGHT) {
+        	if (_stage) {
+	        	if (_stage.scaleMode == StageScaleMode.NO_SCALE) {
+	        		_stageWidth = _stage.stageWidth;
+	        		_stageHeight = _stage.stageHeight;
+	        	} else if (_stage.scaleMode == StageScaleMode.EXACT_FIT) {
+	        		_stageWidth = _loaderWidth;
+	        		_stageHeight = _loaderHeight;
+	        	} else if (_stage.scaleMode == StageScaleMode.SHOW_ALL) {
+	        		if (_stage.stageWidth/_loaderWidth < _stage.stageHeight/_loaderHeight) {
+	        			_stageWidth = _loaderWidth;
+	        			_stageHeight = _stage.stageHeight*_stageWidth/_stage.stageWidth;
+	        		} else {
+	        			_stageHeight = _loaderHeight;
+	        			_stageWidth = _stage.stageWidth*_stageHeight/_stage.stageHeight;
+	        		}
+	        	} else if (_stage.scaleMode == StageScaleMode.NO_BORDER) {
+	        		if (_stage.stageWidth/_loaderWidth > _stage.stageHeight/_loaderHeight) {
+	        			_stageWidth = _loaderWidth;
+	        			_stageHeight = _stage.stageHeight*_stageWidth/_stage.stageWidth;
+	        		} else {
+	        			_stageHeight = _loaderHeight;
+	        			_stageWidth = _stage.stageWidth*_stageHeight/_stage.stageHeight;
+	        		}
+	        	}
 	        	
-	        	_localPointTL.x = _loaderWidth - _stageWidth;
+	        	if(_stage.align == StageAlign.TOP_LEFT) {
+	        		
+	            	_localPointTL.x = 0;
+	            	_localPointTL.y = 0;
+	                
+	                _localPointBR.x = _stageWidth;
+	            	_localPointBR.y = _stageHeight;
+	                
+		        } else if(_stage.align == StageAlign.TOP_RIGHT) {
+		        	
+		        	_localPointTL.x = _loaderWidth - _stageWidth;
+	            	_localPointTL.y = 0;
+	            	
+	            	_localPointBR.x = _loaderWidth;
+	            	_localPointBR.y = _stageHeight;
+	                
+		        } else if(_stage.align==StageAlign.BOTTOM_LEFT) {
+		        	
+		        	_localPointTL.x = 0;
+	            	_localPointTL.y = _loaderHeight - _stageHeight;
+	            	
+	            	_localPointBR.x = _stageWidth;
+	            	_localPointBR.y = _loaderHeight;
+	            	
+		        } else if(_stage.align==StageAlign.BOTTOM_RIGHT) {
+		        	
+		        	_localPointTL.x = _loaderWidth - _stageWidth;
+		        	_localPointTL.y = _loaderHeight - _stageHeight;
+		        	
+		        	_localPointBR.x = _loaderWidth;
+		        	_localPointBR.y = _loaderHeight;
+		        	
+		        } else if(_stage.align == StageAlign.TOP) {
+		        	
+		        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
+	            	_localPointTL.y = 0;
+	            	
+	            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
+	            	_localPointBR.y = _stageHeight;
+	            	
+		        } else if(_stage.align==StageAlign.BOTTOM) {
+	            	
+		        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
+	            	_localPointTL.y = _loaderHeight - _stageHeight;
+	            	
+	            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
+	            	_localPointBR.y = _loaderHeight;
+	            	
+		        } else if(_stage.align==StageAlign.LEFT) {
+		        	
+		        	_localPointTL.x = 0;
+	            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
+	            	
+	            	_localPointBR.x = _stageWidth;
+	            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
+	            	
+		        } else if(_stage.align==StageAlign.RIGHT) {
+	            	
+		        	_localPointTL.x = _loaderWidth - _stageWidth;
+	            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
+	            	
+	            	_localPointBR.x = _loaderWidth;
+	            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
+	            	
+		        } else {
+	            	
+		        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
+	            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
+	            	
+	            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
+	            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
+	        	}
+	  		} else {
+	  			_localPointTL.x = 0;
             	_localPointTL.y = 0;
             	
             	_localPointBR.x = _loaderWidth;
-            	_localPointBR.y = _stageHeight;
-                
-	        } else if(_stage.align==StageAlign.BOTTOM_LEFT) {
-	        	
-	        	_localPointTL.x = 0;
-            	_localPointTL.y = _loaderHeight - _stageHeight;
-            	
-            	_localPointBR.x = _stageWidth;
             	_localPointBR.y = _loaderHeight;
-            	
-	        } else if(_stage.align==StageAlign.BOTTOM_RIGHT) {
-	        	
-	        	_localPointTL.x = _loaderWidth - _stageWidth;
-	        	_localPointTL.y = _loaderHeight - _stageHeight;
-	        	
-	        	_localPointBR.x = _loaderWidth;
-	        	_localPointBR.y = _loaderHeight;
-	        	
-	        } else if(_stage.align == StageAlign.TOP) {
-	        	
-	        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
-            	_localPointTL.y = 0;
-            	
-            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
-            	_localPointBR.y = _stageHeight;
-            	
-	        } else if(_stage.align==StageAlign.BOTTOM) {
-            	
-	        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
-            	_localPointTL.y = _loaderHeight - _stageHeight;
-            	
-            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
-            	_localPointBR.y = _loaderHeight;
-            	
-	        } else if(_stage.align==StageAlign.LEFT) {
-	        	
-	        	_localPointTL.x = 0;
-            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
-            	
-            	_localPointBR.x = _stageWidth;
-            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
-            	
-	        } else if(_stage.align==StageAlign.RIGHT) {
-            	
-	        	_localPointTL.x = _loaderWidth - _stageWidth;
-            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
-            	
-            	_localPointBR.x = _loaderWidth;
-            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
-            	
-	        } else {
-            	
-	        	_localPointTL.x = _loaderWidth/2 - _stageWidth/2;
-            	_localPointTL.y = _loaderHeight/2 - _stageHeight/2;
-            	
-            	_localPointBR.x = _loaderWidth/2 + _stageWidth/2;
-            	_localPointBR.y = _loaderHeight/2 + _stageHeight/2;
-        	}
+	  		}
         	
         	_globalPointTL = container.globalToLocal(_localPointTL);
         	_globalPointBR = container.globalToLocal(_localPointBR);
@@ -404,22 +412,22 @@ package away3d.core.clip
             _maX = _globalPointBR.x;
             _maY = _globalPointBR.y;
             
-            if (_minX > _miX)
+            if ((!_stage && _minX != -Infinity) || _minX > _miX)
             	_clippingClone.minX = _minX;
             else
             	_clippingClone.minX = _miX;
             
-            if (_maxX < _maX)
+            if ((!_stage && _maxX != Infinity) || _maxX < _maX)
             	_clippingClone.maxX = _maxX;
             else
             	_clippingClone.maxX = _maX;
             
-            if (_minY > _miY)
+            if ((!_stage && _minY != -Infinity) || _minY > _miY)
             	_clippingClone.minY = _minY;
             else
             	_clippingClone.minY = _miY;
             
-            if (_maxY < _maY)
+            if ((!_stage && _maxY != Infinity) || _maxY < _maY)
             	_clippingClone.maxY = _maxY;
             else
             	_clippingClone.maxY = _maY;

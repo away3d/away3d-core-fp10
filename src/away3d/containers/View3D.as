@@ -99,6 +99,8 @@ package away3d.containers
 		private var _y:Number;
 		private var _stageWidth:Number;
 		private var _stageHeight:Number;
+		private var _newStageWidth:Number;
+		private var _newStageHeight:Number;
 		private var _drawPrimitiveStore:DrawPrimitiveStore = new DrawPrimitiveStore();
 		private var _cameraVarsStore:CameraVarsStore = new CameraVarsStore();
         private var _scene:Scene3D;
@@ -788,8 +790,10 @@ package away3d.containers
         	if (!session || !_mouseIsOverView)
         		return;
         	
-            _hitPointX = stage.mouseX;
-            _hitPointY = stage.mouseY;
+            var screenPoint:Point = new Point(x, y);
+        	var stagePoint:Point = localToGlobal(screenPoint);
+            _hitPointX = stagePoint.x;
+            _hitPointY = stagePoint.y;
             
         	if (this.session is BitmapRenderSession) {
         		_container = this.session.getContainer(this);
@@ -867,8 +871,14 @@ package away3d.containers
         		}
         	} catch (error:Error) {
         		_loaderDirty = true;
-        		_loaderWidth = stage.stageWidth;
-        		_loaderHeight = stage.stageHeight;
+        		
+        		if (stage) {
+	        		_loaderWidth = stage.stageWidth;
+	        		_loaderHeight = stage.stageHeight;
+	        	} else {
+	        		_loaderWidth = 550;
+	        		_loaderHeight = 400;
+	        	}
         	}
         	
 			//check for global view movement
@@ -876,11 +886,19 @@ package away3d.containers
         	_viewZero.y = 0;
         	_viewZero = localToGlobal(_viewZero);
         	
-			if (_x != _viewZero.x || _y != _viewZero.y || stage.scaleMode != StageScaleMode.NO_SCALE && (_stageWidth != stage.stageWidth || _stageHeight != stage.stageHeight)) {
+        	if (stage) {
+        		_newStageWidth = stage.stageWidth;
+        		_newStageHeight = stage.stageHeight;
+        	} else {
+        		_newStageWidth = 550;
+        		_newStageHeight = 400;
+        	}
+        	
+			if (_x != _viewZero.x || _y != _viewZero.y || _stageWidth != _newStageWidth || _stageHeight != _newStageHeight) {
         		_x = _viewZero.x;
         		_y = _viewZero.y;
-        		_stageWidth = stage.stageWidth;
-        		_stageHeight = stage.stageHeight;
+        		_stageWidth = _newStageWidth;
+        		_stageHeight = _newStageHeight;
         		_screenClippingDirty = true;
    			}
 		}
