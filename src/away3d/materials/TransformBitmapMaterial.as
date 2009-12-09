@@ -133,7 +133,70 @@ package away3d.materials
     		
             return _uvtData;
         }
-		
+        
+		private function projectMapping(tri:DrawTriangle):Matrix
+        {
+        	faceVO = tri.faceVO;
+        	
+        	if (globalProjection) {
+	    		v0.transform(faceVO.v0.position, tri.source.sceneTransform);
+	    		v1.transform(faceVO.v1.position, tri.source.sceneTransform);
+	    		v2.transform(faceVO.v2.position, tri.source.sceneTransform);
+        	} else {
+	    		v0 = faceVO.v0.position;
+	    		v1 = faceVO.v1.position;
+	    		v2 = faceVO.v2.position;
+        	}
+        	
+        	v0x = v0.x;
+        	v0y = v0.y;
+        	v0z = v0.z;
+        	v1x = v1.x;
+        	v1y = v1.y;
+        	v1z = v1.z;
+        	v2x = v2.x;
+        	v2y = v2.y;
+        	v2z = v2.z;
+    		
+    		_u0 = v0x*_N.x + v0y*_N.y + v0z*_N.z;
+    		_u1 = v1x*_N.x + v1y*_N.y + v1z*_N.z;
+    		_u2 = v2x*_N.x + v2y*_N.y + v2z*_N.z;
+    		_v0 = v0x*_M.x + v0y*_M.y + v0z*_M.z;
+    		_v1 = v1x*_M.x + v1y*_M.y + v1z*_M.z;
+    		_v2 = v2x*_M.x + v2y*_M.y + v2z*_M.z;
+      
+            // Fix perpendicular projections
+            if ((_u0 == _u1 && _v0 == _v1) || (_u0 == _u2 && _v0 == _v2))
+            {
+            	if (_u0 > 0.05)
+                	_u0 -= 0.05;
+                else
+                	_u0 += 0.05;
+                	
+                if (_v0 > 0.07)           
+                	_v0 -= 0.07;
+                else
+                	_v0 += 0.07;
+            }
+    
+            if (_u2 == _u1 && _v2 == _v1)
+            {
+            	if (_u2 > 0.04)
+                	_u2 -= 0.04;
+                else
+                	_u2 += 0.04;
+                	
+                if (_v2 > 0.06)           
+                	_v2 -= 0.06;
+                else
+                	_v2 += 0.06;
+            }
+            
+            t = new Matrix(_u1 - _u0, _v1 - _v0, _u2 - _u0, _v2 - _v0, _u0, _v0);
+            t.invert();
+            return t;
+        }
+        
 		private function getContainerPoints(rect:Rectangle):Array
 		{
 			return [rect.topLeft, new Point(rect.top, rect.right), rect.bottomRight, new Point(rect.bottom, rect.left)];
@@ -726,7 +789,7 @@ package away3d.materials
 					
 					//calulate mapping
 					_invtexturemapping = _faceMaterialVO.invtexturemapping;
-					//_mapping.concat(projectUV(tri));
+					_mapping.concat(projectMapping(tri));
 					_mapping.concat(_invtexturemapping);
 					
 					normalR.clone(tri.faceVO.face.normal);
@@ -755,7 +818,7 @@ package away3d.materials
 				} else {
 					
 					//check to see if the bitmap (non repeating) lies inside the containerRect area
-					if (repeat && !findSeparatingAxis(getContainerPoints(containerRect), getMappingPoints(_mapping))) {
+					if (repeat || !findSeparatingAxis(getContainerPoints(containerRect), getMappingPoints(_mapping))) {
 						_faceMaterialVO.cleared = false;
 						_faceMaterialVO.updated = true;
 						

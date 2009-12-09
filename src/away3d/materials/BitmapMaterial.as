@@ -24,7 +24,7 @@
     	/** @private */
         arcane var _id:int;
     	/** @private */
-    	arcane var _texturemapping:Matrix;
+    	arcane var _texturemapping:Matrix;    	/** @private */    	arcane var _view:View3D;
     	/** @private */
     	arcane var _uvtData:Vector.<Number> = new Vector.<Number>(9, true);
     	/** @private */
@@ -121,8 +121,7 @@
 			}
 		}
 		
-		private var index:int;
-		private var _view:View3D;		private var _screenVertices:Array;		private var _screenCommands:Array;		private var _screenIndices:Array;
+		private var index:int;		private var _screenVertices:Array;		private var _screenCommands:Array;		private var _screenIndices:Array;
 		private var _near:Number;
 		private var _smooth:Boolean;
 		private var _debug:Boolean;
@@ -494,14 +493,14 @@
 		 */
         public function renderTriangle(tri:DrawTriangle):void
         {
-        	//_mapping = getMapping(tri);
-			_session = tri.source.session;
-			_screenCommands = tri.screenCommands;			_screenVertices = tri.screenVertices;			_screenIndices = tri.screenIndices;
-        	_view = tri.view;
-        	_near = _view.screenClipping.minZ;        	
+        	//_mapping = getMapping(tri);			_session = tri.source.session;
+			_screenCommands = tri.screenCommands;
+			_screenVertices = tri.screenVertices;			_screenIndices = tri.screenIndices;        	_view = tri.view;
+        	_near = _view.screenClipping.minZ;
+			_uvtData = getUVData(tri);        	
         	//if (!_graphics && _session.newLayer)        	//	_graphics = _session.newLayer.graphics;
         	
-			_session.renderTriangleBitmapF10(_renderBitmap, getUVData(tri), _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
+			_session.renderTriangleBitmapF10(_renderBitmap, _uvtData, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
 			//_session.renderTriangleBitmap(_renderBitmap, _mapping, tri.v0, tri.v1, tri.v2, smooth, repeat, _graphics);
             if (debug)
                 _session.renderTriangleLine(0, 0x0000FF, 1, _screenVertices, _screenCommands, _screenIndices, tri.startIndex, tri.endIndex);
