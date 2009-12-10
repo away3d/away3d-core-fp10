@@ -26,7 +26,7 @@
     	/** @private */
     	arcane var _texturemapping:Matrix;    	/** @private */    	arcane var _view:View3D;
     	/** @private */
-    	arcane var _uvtData:Vector.<Number> = new Vector.<Number>(9, true);
+    	arcane var _uvtData:Vector.<Number>
     	/** @private */
     	arcane var _focus:Number;
         /** @private */
@@ -121,7 +121,7 @@
 			}
 		}
 		
-		private var index:int;		private var _screenVertices:Array;		private var _screenCommands:Array;		private var _screenIndices:Array;
+		private var index:int;		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);		private var _screenVertices:Array;		private var _screenCommands:Array;		private var _screenIndices:Array;
 		private var _near:Number;
 		private var _smooth:Boolean;
 		private var _debug:Boolean;
@@ -223,7 +223,7 @@
 		
 		protected function getUVData(tri:DrawTriangle):Vector.<Number>
 		{			_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source, tri.view);
-						if (_view.camera.lens is ZoomFocusLens)        		_focus = tri.view.camera.focus;        	else        		_focus = 0;						if (tri.generated) {				_uvtData[2] = 1/(_focus + tri.v0z);				_uvtData[5] = 1/(_focus + tri.v1z);				_uvtData[8] = 1/(_focus + tri.v2z);				_uvtData[0] = tri.uv0.u;	    		_uvtData[1] = 1 - tri.uv0.v;	    		_uvtData[3] = tri.uv1.u;	    		_uvtData[4] = 1 - tri.uv1.v;	    		_uvtData[6] = tri.uv2.u;	    		_uvtData[7] = 1 - tri.uv2.v;	    			    		return _uvtData;			}						_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);						if (!_faceMaterialVO.invalidated)				return _faceMaterialVO.uvtData;						_faceMaterialVO.invalidated = false;        	        	_faceMaterialVO.uvtData[0] = tri.uv0.u;    		_faceMaterialVO.uvtData[1] = 1 - tri.uv0.v;    		_faceMaterialVO.uvtData[3] = tri.uv1.u;    		_faceMaterialVO.uvtData[4] = 1 - tri.uv1.v;    		_faceMaterialVO.uvtData[6] = tri.uv2.u;    		_faceMaterialVO.uvtData[7] = 1 - tri.uv2.v;        	
+						if (_view.camera.lens is ZoomFocusLens)        		_focus = tri.view.camera.focus;        	else        		_focus = 0;						if (tri.generated) {				_uvt[2] = 1/(_focus + tri.v0z);				_uvt[5] = 1/(_focus + tri.v1z);				_uvt[8] = 1/(_focus + tri.v2z);				_uvt[0] = tri.uv0.u;	    		_uvt[1] = 1 - tri.uv0.v;	    		_uvt[3] = tri.uv1.u;	    		_uvt[4] = 1 - tri.uv1.v;	    		_uvt[6] = tri.uv2.u;	    		_uvt[7] = 1 - tri.uv2.v;	    			    		return _uvt;			}						_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);						if (!_faceMaterialVO.invalidated)				return _faceMaterialVO.uvtData;						_faceMaterialVO.invalidated = false;        	        	_faceMaterialVO.uvtData[0] = tri.uv0.u;    		_faceMaterialVO.uvtData[1] = 1 - tri.uv0.v;    		_faceMaterialVO.uvtData[3] = tri.uv1.u;    		_faceMaterialVO.uvtData[4] = 1 - tri.uv1.v;    		_faceMaterialVO.uvtData[6] = tri.uv2.u;    		_faceMaterialVO.uvtData[7] = 1 - tri.uv2.v;        	
 			return _faceMaterialVO.uvtData;
 		}
 		
