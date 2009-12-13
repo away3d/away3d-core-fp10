@@ -514,7 +514,7 @@
 			//draw the bitmap once
 			renderSource(tri.source, containerRect, new Matrix());
 			
-			//get the correct faceMaterialVO			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);
+			//get the correct faceMaterialVO			_faceMaterialVO = getFaceMaterialVO(tri.faceVO.face.faceVO);
 			
 			//pass on resize value
 			if (parentFaceMaterialVO.resized) {
@@ -538,7 +538,7 @@
 				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
 				
 				//draw into faceBitmap
-				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, tri.faceVO.bitmapRect, _zeroPoint, null, null, true);
+				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, tri.faceVO.face.bitmapRect, _zeroPoint, null, null, true);
 			}
 			
 			return _faceMaterialVO;

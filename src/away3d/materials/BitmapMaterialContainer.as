@@ -23,6 +23,7 @@ package away3d.materials
 	 */
 	public class BitmapMaterialContainer extends BitmapMaterial implements ITriangleMaterial, ILayerMaterial
 	{
+		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);
 		private var _width:Number;
 		private var _height:Number;
 		private var _fMaterialVO:FaceMaterialVO;
@@ -34,10 +35,66 @@ package away3d.materials
 		private var _faceWidth:int;
 		private var _faceHeight:int;
 		private var _faceVO:FaceVO;
+        private var _bRect:Rectangle;
+        private var _u0:Number;
+        private var _u1:Number;
+        private var _u2:Number;
+        private var _v0:Number;
+        private var _v1:Number;
+        private var _v2:Number;
+        private var _invtexmapping:Matrix = new Matrix();
         
         private function onMaterialUpdate(event:MaterialEvent):void
         {
         	_materialDirty = true;
+        }
+        
+        private function transformUV(faceVO:FaceVO):Matrix
+        {
+            
+            if (faceVO.uv0 == null || faceVO.uv1 == null || faceVO.uv2 == null)
+                return null;
+
+            _u0 = _width * faceVO.uv0._u;
+            _u1 = _width * faceVO.uv1._u;
+            _u2 = _width * faceVO.uv2._u;
+            _v0 = _height * (1 - faceVO.uv0._v);
+            _v1 = _height * (1 - faceVO.uv1._v);
+            _v2 = _height * (1 - faceVO.uv2._v);
+      
+            // Fix perpendicular projections
+            if ((_u0 == _u1 && _v0 == _v1) || (_u0 == _u2 && _v0 == _v2)) {
+            	if (_u0 > 0.05)
+                	_u0 -= 0.05;
+                else
+                	_u0 += 0.05;
+                	
+                if (_v0 > 0.07)           
+                	_v0 -= 0.07;
+                else
+                	_v0 += 0.07;
+            }
+    
+            if (_u2 == _u1 && _v2 == _v1) {
+            	if (_u2 > 0.04)
+                	_u2 -= 0.04;
+                else
+                	_u2 += 0.04;
+                	
+                if (_v2 > 0.06)           
+                	_v2 -= 0.06;
+                else
+                	_v2 += 0.06;
+            }
+            
+        	_invtexmapping.a = _u1 - _u0;
+        	_invtexmapping.b = _v1 - _v0;
+        	_invtexmapping.c = _u2 - _u0;
+        	_invtexmapping.d = _v2 - _v0;
+            _invtexmapping.tx = _u0 - faceVO.face.bitmapRect.x;
+            _invtexmapping.ty = _v0 - faceVO.face.bitmapRect.y;
+            
+            return _invtexmapping;
         }
         
 		/**
@@ -62,19 +119,16 @@ package away3d.materials
 		 */
 		protected override function getUVData(tri:DrawTriangle):Vector.<Number>
 		{
-			_faceVO = tri.faceVO;
-			_faceMaterialVO = getFaceMaterialVO(_faceVO, tri.source, tri.view);
+			_faceVO = tri.faceVO.face.faceVO;
 			
 			if (_view.camera.lens is ZoomFocusLens)
         		_focus = tri.view.camera.focus;
         	else
         		_focus = 0;
-    		
-    		_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);
-			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);
-			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);
 			
-    		if (tri.generated || _faceMaterialVO.invalidated || _faceMaterialVO.updated) {
+			_faceMaterialVO = getFaceMaterialVO(_faceVO, tri.source, tri.view);
+			
+    		if (_faceMaterialVO.invalidated || _faceMaterialVO.updated) {
 	    		_faceMaterialVO.updated = true;
 	    		_faceMaterialVO.cleared = false;
 	    		
@@ -83,16 +137,16 @@ package away3d.materials
 	        		_faceMaterialVO.invalidated = false;
 	        		
 	        		//update face bitmapRect
-	        		_faceVO.bitmapRect = new Rectangle(_faceX = int(_width*_faceVO.minU), _faceY = int(_height*(1 - _faceVO.maxV)), _faceWidth = int(_width*(_faceVO.maxU-_faceVO.minU)+2), _faceHeight = int(_height*(_faceVO.maxV-_faceVO.minV)+2));
+	        		_faceVO.face.bitmapRect = new Rectangle(_faceX = int(_width*_faceVO.minU), _faceY = int(_height*(1 - _faceVO.maxV)), _faceWidth = int(_width*(_faceVO.maxU-_faceVO.minU)+2), _faceHeight = int(_height*(_faceVO.maxV-_faceVO.minV)+2));
 	        		
 	        		//update texturemapping
-	        		_faceMaterialVO.uvtData[0] = (tri.uv0.u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[1] = ((1 - tri.uv0.v)*_height - _faceY)/_faceHeight;
-					_faceMaterialVO.uvtData[3] = (tri.uv1.u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[4] = ((1 - tri.uv1.v)*_height - _faceY)/_faceHeight;
-		    		_faceMaterialVO.uvtData[6] = (tri.uv2.u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[7] = ((1 - tri.uv2.v)*_height - _faceY)/_faceHeight;
-	        		_faceMaterialVO.invtexturemapping = tri.transformUV(this).clone();
+	        		_faceMaterialVO.uvtData[0] = (_faceVO.uv0.u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[1] = ((1 - _faceVO.uv0.v)*_height - _faceY)/_faceHeight;
+					_faceMaterialVO.uvtData[3] = (_faceVO.uv1.u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[4] = ((1 - _faceVO.uv1.v)*_height - _faceY)/_faceHeight;
+		    		_faceMaterialVO.uvtData[6] = (_faceVO.uv2.u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[7] = ((1 - _faceVO.uv2.v)*_height - _faceY)/_faceHeight;
+	        		_faceMaterialVO.invtexturemapping = transformUV(_faceVO).clone();
 	        		_faceMaterialVO.texturemapping = _faceMaterialVO.invtexturemapping.clone();
 	        		_faceMaterialVO.texturemapping.invert();
 	        		
@@ -106,33 +160,39 @@ package away3d.materials
 	    		for each (var _material:ILayerMaterial in materials)
 	        		_fMaterialVO = _material.renderBitmapLayer(tri, _bitmapRect, _fMaterialVO);
         		
-        		_renderBitmap = _cacheDictionary[_faceVO] = _fMaterialVO.bitmap;
+        		_cacheDictionary[_faceVO] = _fMaterialVO.bitmap;
 	        	
 	        	_fMaterialVO.updated = false;
-	        	
-				return _faceMaterialVO.uvtData;
 			}
-			
+        	
         	_renderBitmap = _cacheDictionary[_faceVO];
         	
-        	//check to see if tri texturemapping need updating
-        	if (_faceMaterialVO.invalidated) {
-        		_faceMaterialVO.invalidated = false;
-        		
-        		_faceX = _faceVO.bitmapRect.x;
-        		_faceY = _faceVO.bitmapRect.y;
-        		_faceWidth = _faceVO.bitmapRect.width;
-        		_faceHeight = _faceVO.bitmapRect.height;
+        	//check to see if tri is generated
+        	if (tri.generated) {
+        		_bRect = _faceVO.face.bitmapRect;
+        		_faceX = _bRect.x;
+        		_faceY = _bRect.y;
+        		_faceWidth = _bRect.width;
+        		_faceHeight = _bRect.height;
         		
         		//update texturemapping
-        		_faceMaterialVO.uvtData[0] = (tri.uv0.u*_width - _faceX)/_faceWidth;
-	    		_faceMaterialVO.uvtData[1] = ((1 - tri.uv0.v)*_height - _faceY)/_faceHeight;
-				_faceMaterialVO.uvtData[3] = (tri.uv1.u*_width - _faceX)/_faceWidth;
-	    		_faceMaterialVO.uvtData[4] = ((1 - tri.uv1.v)*_height - _faceY)/_faceHeight;
-	    		_faceMaterialVO.uvtData[6] = (tri.uv2.u*_width - _faceX)/_faceWidth;
-	    		_faceMaterialVO.uvtData[7] = ((1 - tri.uv2.v)*_height - _faceY)/_faceHeight;
-	        }
-	        
+        		_uvt[2] = 1/(_focus + tri.v0z);
+				_uvt[5] = 1/(_focus + tri.v1z);
+				_uvt[8] = 1/(_focus + tri.v2z);
+        		_uvt[0] = (tri.uv0.u*_width - _faceX)/_faceWidth;
+	    		_uvt[1] = ((1 - tri.uv0.v)*_height - _faceY)/_faceHeight;
+				_uvt[3] = (tri.uv1.u*_width - _faceX)/_faceWidth;
+	    		_uvt[4] = ((1 - tri.uv1.v)*_height - _faceY)/_faceHeight;
+	    		_uvt[6] = (tri.uv2.u*_width - _faceX)/_faceWidth;
+	    		_uvt[7] = ((1 - tri.uv2.v)*_height - _faceY)/_faceHeight;
+	    		
+	    		return _uvt;
+        	}
+        	
+	        _faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);
+			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);
+			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);
+			
     		return _faceMaterialVO.uvtData;
         }
 		
@@ -233,8 +293,8 @@ package away3d.materials
 			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);
 			
 			//get width and height values
-			_faceWidth = tri.faceVO.bitmapRect.width;
-    		_faceHeight = tri.faceVO.bitmapRect.height;
+			_faceWidth = tri.faceVO.face.bitmapRect.width;
+    		_faceHeight = tri.faceVO.face.bitmapRect.height;
 
 			//check to see if bitmapContainer exists
 			if (!(_containerVO = _containerDictionary[tri]))

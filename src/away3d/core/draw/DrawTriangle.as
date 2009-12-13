@@ -307,8 +307,8 @@ package away3d.core.draw
         	_invtexmapping.d = _v2 - _v0;
         	
             if (material is BitmapMaterialContainer) {
-            	_invtexmapping.tx = _u0 - faceVO.bitmapRect.x;
-            	_invtexmapping.ty = _v0 - faceVO.bitmapRect.y;
+            	_invtexmapping.tx = _u0 - faceVO.face.bitmapRect.x;
+            	_invtexmapping.ty = _v0 - faceVO.face.bitmapRect.y;
             } else {
             	_invtexmapping.tx = _u0;
             	_invtexmapping.ty = _v0;

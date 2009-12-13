@@ -1,10 +1,7 @@
 package away3d.core.utils
 {
-	import __AS3__.vec.Vector;
-	
-	import away3d.core.base.DrawingCommand;
-	import away3d.core.base.Vertex;
-	import away3d.core.math.Number3D;
+	import away3d.core.base.*;
+	import away3d.core.math.*;
 
 	public class BezierUtils
 	{

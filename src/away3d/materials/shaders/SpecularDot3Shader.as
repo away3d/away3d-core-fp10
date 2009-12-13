@@ -141,7 +141,7 @@
 					_faceMaterialVO.updated = true;
 					
 					//resolve normal map
-					_normalBitmap.applyFilter(_bitmap, _faceVO.bitmapRect, _zeroPoint, directional.normalMatrixSpecularTransform[_source][_view]);
+					_normalBitmap.applyFilter(_bitmap, _faceVO.face.bitmapRect, _zeroPoint, directional.normalMatrixSpecularTransform[_source][_view]);
 		            
 					//draw into faceBitmap
 					_faceMaterialVO.bitmap.draw(_normalBitmap, null, directional.diffuseColorTransform, blendMode);

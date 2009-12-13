@@ -934,7 +934,7 @@ package away3d.materials
 				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
 				
 				//draw into faceBitmap
-				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, tri.faceVO.bitmapRect, _zeroPoint, null, null, true);
+				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, tri.faceVO.face.bitmapRect, _zeroPoint, null, null, true);
 			}
 			
 			return _faceMaterialVO;

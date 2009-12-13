@@ -232,7 +232,7 @@ package away3d.materials.shaders
 				parentFaceMaterialVO.updated = false;
 				
 				//retrieve the bitmapRect
-				_bitmapRect = _faceVO.bitmapRect;
+				_bitmapRect = _faceVO.face.bitmapRect;
 				
 				//reset booleans
 				if (_faceMaterialVO.invalidated)
