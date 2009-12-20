@@ -41,55 +41,7 @@
 		private var _channelArrayLength:int;
 		private var _defaultAnimationClip:AnimationData;
 		private var _haveClips:Boolean = false;
-		private var _containers:Dictionary = new Dictionary(true);
 		private var _materials:Object;
-		
-		private function buildContainers(containerData:ContainerData, parent:ObjectContainer3D):void
-		{
-			for each (var _objectData:ObjectData in containerData.children) {
-				if (_objectData is MeshData) {
-					var mesh:Mesh = buildMesh(_objectData as MeshData, parent);
-					_containers[_objectData.name] = mesh;
-				} else if (_objectData is BoneData) {
-					var _boneData:BoneData = _objectData as BoneData;
-					var bone:Bone = new Bone({name:_boneData.name});
-					_boneData.container = bone as ObjectContainer3D;
-					
-					_containers[bone.name] = bone;
-					
-					//ColladaMaya 3.05B
-					bone.boneId = _boneData.id;
-					
-					bone.transform = _boneData.transform;
-					
-					bone.joint.transform = _boneData.jointTransform;
-					
-					buildContainers(_boneData, bone.joint);
-					
-					parent.addChild(bone);
-					
-				} else if (_objectData is ContainerData) {
-					var _containerData:ContainerData = _objectData as ContainerData;
-					var objectContainer:ObjectContainer3D = _containerData.container = new ObjectContainer3D({name:_containerData.name});
-					
-					_containers[objectContainer.name] = objectContainer;
-					
-					objectContainer.transform = _objectData.transform;
-					
-					buildContainers(_containerData, objectContainer);
-					
-					if (centerMeshes && objectContainer.children.length) {
-						//center children in container for better bounding radius calulations
-						objectContainer.movePivot(_moveVector.x = (objectContainer.maxX + objectContainer.minX)/2, _moveVector.y = (objectContainer.maxY + objectContainer.minY)/2, _moveVector.z = (objectContainer.maxZ + objectContainer.minZ)/2);
-						_moveVector.transform(_moveVector, _objectData.transform);
-						objectContainer.moveTo(_moveVector.x, _moveVector.y, _moveVector.z);
-					}
-					
-					parent.addChild(objectContainer);
-					
-				}
-			}
-		}
 		
 		private function buildAnimations():void
 		{
@@ -373,11 +325,6 @@
     	 * Controls the use of shading materials when color textures are encountered. Defaults to false.
     	 */
         public var shading:Boolean;
-        
-    	/**
-    	 * Container data object used for storing the parsed collada data structure.
-    	 */
-        public var containerData:ContainerData;
 		
 		/**
 		 * Creates a new <code>Collada</code> object.
@@ -475,7 +422,7 @@
 				buildMaterials();
 				
 				//build the containers
-				buildContainers(containerData, _container as ObjectContainer3D);
+				buildContainers(_containerData, _container as ObjectContainer3D);
 				
 				//build animations
 				buildAnimations();
@@ -500,10 +447,10 @@
         	
 			Debug.trace(" ! ------------- Begin Parse Scene -------------");
 			
-			containerData = new ContainerData();
+			_containerData = new ContainerData();
 			
             for each (var node:XML in scene["node"])
-				parseNode(node, containerData);
+				parseNode(node, _containerData);
 			
 			Debug.trace(" ! ------------- End Parse Scene -------------");
 			_geometryArray = geometryLibrary.getGeometryArray();

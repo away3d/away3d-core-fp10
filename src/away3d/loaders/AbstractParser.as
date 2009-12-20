@@ -116,6 +116,12 @@ package away3d.loaders
         	parseNext();
         }
         
+        /** @private */
+        protected var _containers:Dictionary = new Dictionary(true);
+        
+		/** @private */
+        protected var _containerData:ContainerData;
+        
 		/** @private */
 		protected var _materialLibrary:MaterialLibrary;
 		
@@ -159,6 +165,56 @@ package away3d.loaders
 					case MaterialData.WIREFRAME_MATERIAL:
 						_materialData.material = new WireColorMaterial();
 						break;
+				}
+			}
+		}
+		
+		protected function buildContainers(containerData:ContainerData, parent:ObjectContainer3D):void
+		{
+			for each (var _objectData:ObjectData in containerData.children) {
+				if (_objectData is MeshData) {
+					var mesh:Mesh = buildMesh(_objectData as MeshData, parent);
+					_containers[_objectData.name] = mesh;
+				} else if (_objectData is BoneData) {
+					var _boneData:BoneData = _objectData as BoneData;
+					var bone:Bone = new Bone({name:_boneData.name});
+					_boneData.container = bone as ObjectContainer3D;
+					
+					_containers[bone.name] = bone;
+					
+					//ColladaMaya 3.05B
+					bone.boneId = _boneData.id;
+					
+					bone.transform = _boneData.transform;
+					
+					bone.joint.transform = _boneData.jointTransform;
+					
+					buildContainers(_boneData, bone.joint);
+					
+					parent.addChild(bone);
+					
+				} else if (_objectData is ContainerData) {
+					
+					Debug.trace(" + Build Container : "+_objectData.name);
+			
+					var _containerData:ContainerData = _objectData as ContainerData;
+					var objectContainer:ObjectContainer3D = _containerData.container = new ObjectContainer3D({name:_containerData.name});
+					
+					_containers[objectContainer.name] = objectContainer;
+					
+					objectContainer.transform = _objectData.transform;
+					
+					buildContainers(_containerData, objectContainer);
+					
+					if (centerMeshes && objectContainer.children.length) {
+						//center children in container for better bounding radius calulations
+						objectContainer.movePivot(_moveVector.x = (objectContainer.maxX + objectContainer.minX)/2, _moveVector.y = (objectContainer.maxY + objectContainer.minY)/2, _moveVector.z = (objectContainer.maxZ + objectContainer.minZ)/2);
+						_moveVector.transform(_moveVector, _objectData.transform);
+						objectContainer.moveTo(_moveVector.x, _moveVector.y, _moveVector.z);
+					}
+					
+					parent.addChild(objectContainer);
+					
 				}
 			}
 		}
