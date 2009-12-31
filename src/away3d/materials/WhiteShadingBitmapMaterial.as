@@ -43,32 +43,6 @@ package away3d.materials {
                 v = 0xFF;
             return Math.exp(Math.round(Math.log(v)*step)/step);
         }
-        
-        /**
-        * Calculates the mapping matrix required to draw the triangle texture to screen.
-        * 
-        * @param	tri		The data object holding all information about the triangle to be drawn.
-        * @return			The required matrix object.
-        */
-		protected function getMapping(tri:DrawTriangle):Matrix
-		{
-			if (tri.generated) {
-				_texturemapping = tri.transformUV(this).clone();
-				_texturemapping.invert();
-				
-				return _texturemapping;
-			}
-			
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source, tri.view);
-			
-			if (!_faceMaterialVO.invalidated)
-				return _faceMaterialVO.texturemapping;
-			
-			_texturemapping = tri.transformUV(this).clone();
-			_texturemapping.invert();
-			
-			return _faceMaterialVO.texturemapping = _texturemapping;
-		}
 		
 		protected function getUVData(tri:DrawTriangle):Vector.<Number>
 		{
@@ -117,18 +91,17 @@ package away3d.materials {
         {
             br = (kar + kag + kab + kdr + kdg + kdb + ksr + ksg + ksb)/3;
 			
-            //mapping = getMapping(tri);
             _view = tri.view;
             
             if ((br < 1) && (blackrender || ((step < 16) && (!_bitmap.transparent))))
             {
-            	session.renderTriangleBitmapF10(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
+            	session.renderTriangleBitmap(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
                 session.renderTriangleColor(0x000000, 1 - br, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
             }
             else
             if ((br > 1) && (whiterender))
             {
-            	session.renderTriangleBitmapF10(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
+            	session.renderTriangleBitmap(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
                 session.renderTriangleColor(0xFFFFFF, (br - 1)*whitek, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
             }
             else
@@ -145,7 +118,7 @@ package away3d.materials {
                 	bitmap.applyFilter(_bitmap, bitmap.rect, bitmapPoint, colorTransform);
                     cache[brightness] = bitmap;
                 }
-                session.renderTriangleBitmapF10(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
+                session.renderTriangleBitmap(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
             }
         }
         

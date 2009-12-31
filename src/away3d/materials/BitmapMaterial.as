@@ -195,31 +195,6 @@
 	        
 	        invalidateFaces();
         }
-        
-        /**
-        * Calculates the mapping matrix required to draw the triangle texture to screen.
-        * 
-        * @param	tri		The data object holding all information about the triangle to be drawn.
-        * @return			The required matrix object.
-        */
-		protected function getMapping(tri:DrawTriangle):Matrix
-		{
-			if (tri.generated) {
-				_texturemapping = tri.transformUV(this).clone();
-				_texturemapping.invert();
-				
-				return _texturemapping;
-			}
-			
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);			
-			if (!_faceMaterialVO.invalidated)
-				return _faceMaterialVO.texturemapping;
-						_faceMaterialVO.invalidated = false;			
-			_texturemapping = tri.transformUV(this).clone();
-			_texturemapping.invert();
-			
-			return _faceMaterialVO.texturemapping = _texturemapping;
-		}
 		
 		protected function getUVData(tri:DrawTriangle):Vector.<Number>
 		{			_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source, tri.view);
@@ -492,16 +467,13 @@
 		 * @inheritDoc
 		 */
         public function renderTriangle(tri:DrawTriangle):void
-        {
-        	//_mapping = getMapping(tri);			_session = tri.source.session;
+        {			_session = tri.source.session;
 			_screenCommands = tri.screenCommands;
 			_screenVertices = tri.screenVertices;			_screenIndices = tri.screenIndices;        	_view = tri.view;
         	_near = _view.screenClipping.minZ;
-			_uvtData = getUVData(tri);        	
-        	//if (!_graphics && _session.newLayer)        	//	_graphics = _session.newLayer.graphics;
+			_uvtData = getUVData(tri);
         	
-			_session.renderTriangleBitmapF10(_renderBitmap, _uvtData, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
-			//_session.renderTriangleBitmap(_renderBitmap, _mapping, tri.v0, tri.v1, tri.v2, smooth, repeat, _graphics);
+			_session.renderTriangleBitmap(_renderBitmap, _uvtData, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
             if (debug)
                 _session.renderTriangleLine(0, 0x0000FF, 1, _screenVertices, _screenCommands, _screenIndices, tri.startIndex, tri.endIndex);
 							if(showNormals){								_nn.rotate(tri.faceVO.face.normal, tri.view.cameraVarsStore.viewTransformDictionary[tri.source]);				 				_sv0x = (tri.v0x + tri.v1x + tri.v2x) / 3;				_sv0y = (tri.v0y + tri.v1y + tri.v2y) / 3;				 				_sv1x = (_sv0x - (30*_nn.x));				_sv1y = (_sv0y - (30*_nn.y));				 				_session.renderLine(_sv0x, _sv0y, _sv1x, _sv1y, 0, 0xFF00FF, 1);			}        }        		/**		 * @inheritDoc		 */        public function renderBillboard(bill:DrawBillboard):void        {            bill.source.session.renderBillboardBitmap(_renderBitmap, bill, smooth);        }

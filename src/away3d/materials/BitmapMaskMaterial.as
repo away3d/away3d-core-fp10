@@ -1,19 +1,19 @@
-package away3d.materials
-{
-	import away3d.arcane;
-	import away3d.containers.*;
-	import away3d.core.base.*;
-	import away3d.core.clip.*;
-	import away3d.core.draw.*;
-	import away3d.core.math.*;
-	import away3d.core.render.*;
-	import away3d.core.utils.*;
-	import away3d.events.*;
-	
-	import flash.display.*;
-	import flash.events.*;
-	import flash.geom.*;
-	import flash.utils.*;
+﻿package away3d.materials{
+    import away3d.arcane;
+    import away3d.cameras.lenses.*;
+    import away3d.containers.*;
+    import away3d.core.base.*;
+    import away3d.core.clip.*;
+    import away3d.core.draw.*;
+    import away3d.core.math.*;
+    import away3d.core.render.*;
+    import away3d.core.utils.*;
+    import away3d.events.*;
+    
+    import flash.display.*;
+    import flash.events.*;
+    import flash.geom.*;
+    import flash.utils.*;
     
 	use namespace arcane;
 	
@@ -24,8 +24,6 @@ package away3d.materials
     {
     	/** @private */
         arcane var _id:int;
-    	/** @private */
-    	arcane var _texturemapping:Matrix;
         /** @private */
     	arcane var _bitmap:BitmapData;
         /** @private */
@@ -83,6 +81,7 @@ package away3d.materials
                 
             dispatchEvent(_materialupdated);
         }
+        
         /** @private */
 		arcane function renderSource(source:Object3D, containerRect:Rectangle, mapping:Matrix):void
 		{
@@ -118,312 +117,24 @@ package away3d.materials
 			}
 		}
 		
-		private var _view:View3D;
-		private var _screenVertices:Array;
+		private var index:int;		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);		private var _screenVertices:Array;
 		private var _screenCommands:Array;
 		private var _screenIndices:Array;
-		private var _near:Number;
 		private var _smooth:Boolean;
 		private var _debug:Boolean;
 		private var _repeat:Boolean;
         private var _precision:Number;
     	private var _shape:Shape;
     	private var _materialupdated:MaterialEvent;
-        private var focus:Number;
         private var map:Matrix = new Matrix();
         private var x:Number;
 		private var y:Number;
-        private var faz:Number;
-        private var fbz:Number;
-        private var fcz:Number;
-        private var mabz:Number;
-        private var mbcz:Number;
-        private var mcaz:Number;
-        private var mabx:Number;
-        private var maby:Number;
-        private var mbcx:Number;
-        private var mbcy:Number;
-        private var mcax:Number;
-        private var mcay:Number;
-        private var dabx:Number;
-        private var daby:Number;
-        private var dbcx:Number;
-        private var dbcy:Number;
-        private var dcax:Number;
-        private var dcay:Number;    
-        private var dsab:Number;
-        private var dsbc:Number;
-        private var dsca:Number;
-        private var dmax:Number;
-        private var ai:Number;
-        private var ax:Number;
-        private var ay:Number;
-        private var az:Number;
-        private var bi:Number;
-        private var bx:Number;
-        private var by:Number;
-        private var bz:Number;
-        private var ci:Number;
-        private var cx:Number;
-        private var cy:Number;
-        private var cz:Number;
 		private var _showNormals:Boolean;
 		private var _nn:Number3D = new Number3D();
 		private var _sv0x:Number;
 		private var _sv0y:Number;
 		private var _sv1x:Number;
 		private var _sv1y:Number;
-        
-        private function renderRec(startIndex:Number, endIndex:Number, index:Number):void
-        {
-            ai = _screenIndices[startIndex]*3;
-            ax = _screenVertices[ai];
-            ay = _screenVertices[ai+1];
-            az = _screenVertices[ai+2];
-            bi = _screenIndices[startIndex+1]*3;
-            bx = _screenVertices[bi];
-            by = _screenVertices[bi+1];
-            bz = _screenVertices[bi+2];
-            ci = _screenIndices[startIndex+2]*3;
-            cx = _screenVertices[ci];
-            cy = _screenVertices[ci+1];
-            cz = _screenVertices[ci+2];
-            
-            if (!(_view.screenClipping is FrustumClipping) && !_view.screenClipping.rect(Math.min(ax, Math.min(bx, cx)), Math.min(ay, Math.min(by, cy)), Math.max(ax, Math.max(bx, cx)), Math.max(ay, Math.max(by, cy))))
-                return;
-
-            if ((_view.screenClipping is RectangleClipping) && (az < _near || bz < _near || cz < _near))
-                return;
-            
-            if (index >= 100 || (focus == Infinity) || (Math.max(Math.max(ax, bx), cx) - Math.min(Math.min(ax, bx), cx) < 10) || (Math.max(Math.max(ay, by), cy) - Math.min(Math.min(ay, by), cy) < 10))
-            {
-                _session.renderTriangleBitmap(_renderBitmap, map, _screenVertices, _screenIndices, startIndex, endIndex, smooth, repeat, _graphics);
-                if (debug)
-                    _session.renderTriangleLine(1, 0x00FF00, 1, _screenVertices, _screenCommands, _screenIndices, startIndex, endIndex);
-                return;
-            }
-			
-            faz = focus + az;
-            fbz = focus + bz;
-            fcz = focus + cz;
-			
-            mabz = 2 / (faz + fbz);
-            mbcz = 2 / (fbz + fcz);
-            mcaz = 2 / (fcz + faz);
-			
-            dabx = ax + bx - (mabx = (ax*faz + bx*fbz)*mabz);
-            daby = ay + by - (maby = (ay*faz + by*fbz)*mabz);
-            dbcx = bx + cx - (mbcx = (bx*fbz + cx*fcz)*mbcz);
-            dbcy = by + cy - (mbcy = (by*fbz + cy*fcz)*mbcz);
-            dcax = cx + ax - (mcax = (cx*fcz + ax*faz)*mcaz);
-            dcay = cy + ay - (mcay = (cy*fcz + ay*faz)*mcaz);
-            
-            dsab = (dabx*dabx + daby*daby);
-            dsbc = (dbcx*dbcx + dbcy*dbcy);
-            dsca = (dcax*dcax + dcay*dcay);
-			
-            if ((dsab <= precision) && (dsca <= precision) && (dsbc <= precision))
-            {
-                _session.renderTriangleBitmap(_renderBitmap, map, _screenVertices, _screenIndices, startIndex, endIndex, smooth, repeat, _graphics);
-                if (debug)
-                    _session.renderTriangleLine(1, 0x00FF00, 1, _screenVertices, _screenCommands, _screenIndices, startIndex, endIndex);
-                return;
-            }
-			
-            var map_a:Number = map.a;
-            var map_b:Number = map.b;
-            var map_c:Number = map.c;
-            var map_d:Number = map.d;
-            var map_tx:Number = map.tx;
-            var map_ty:Number = map.ty;
-            
-            var sv1:int;
-            var sv2:int;
-            var sv3:int;
-            
-            index++;
-            
-            sv3 = _screenVertices.length/3;
-            _screenVertices[_screenVertices.length] = mbcx/2;
-            _screenVertices[_screenVertices.length] = mbcy/2;
-            _screenVertices[_screenVertices.length] = (bz+cz)/2;
-            
-            if ((dsab > precision) && (dsca > precision) && (dsbc > precision))
-            {
-            	index += 2;
-            	
-            	sv1 = _screenVertices.length/3;
-            	_screenVertices[_screenVertices.length] = mabx/2;
-                _screenVertices[_screenVertices.length] = maby/2;
-                _screenVertices[_screenVertices.length] = (az+bz)/2;
-                
-                sv2 = _screenVertices.length/3;
-                _screenVertices[_screenVertices.length] = mcax/2;
-                _screenVertices[_screenVertices.length] = mcay/2;
-                _screenVertices[_screenVertices.length] = (cz+az)/2;
-                
-	            _screenIndices[startIndex = _screenIndices.length] = ai;
-                _screenIndices[_screenIndices.length] = sv1;
-                _screenIndices[_screenIndices.length] = sv2;
-                
-            	endIndex = _screenIndices.length;
-                
-                map.a = map_a*=2;
-                map.b = map_b*=2;
-                map.c = map_c*=2;
-                map.d = map_d*=2;
-                map.tx = map_tx*=2;
-                map.ty = map_ty*=2;
-                renderRec(startIndex, endIndex, index);
-            	
-            	_screenIndices[startIndex = _screenIndices.length] = sv1;
-                _screenIndices[_screenIndices.length] = bi;
-                _screenIndices[_screenIndices.length] = sv3;
-                
-            	endIndex = _screenIndices.length;
-            	
-                map.a = map_a;
-                map.b = map_b;
-                map.c = map_c;
-                map.d = map_d;
-                map.tx = map_tx-1;
-                map.ty = map_ty;
-                renderRec(startIndex, endIndex, index);
-            	
-            	_screenIndices[startIndex = _screenIndices.length] = sv2;
-                _screenIndices[_screenIndices.length] = sv3;
-                _screenIndices[_screenIndices.length] = ci;
-                
-            	endIndex = _screenIndices.length;
-            	
-                map.a = map_a;
-                map.b = map_b;
-                map.c = map_c;
-                map.d = map_d;
-                map.tx = map_tx;
-                map.ty = map_ty-1;
-                renderRec(startIndex, endIndex, index);
-            	
-            	_screenIndices[startIndex = _screenIndices.length] = sv3;
-                _screenIndices[_screenIndices.length] = sv2;
-                _screenIndices[_screenIndices.length] = sv1;
-                
-            	endIndex = _screenIndices.length;
-            	
-                map.a = -map_a;
-                map.b = -map_b;
-                map.c = -map_c;
-                map.d = -map_d;
-                map.tx = 1-map_tx;
-                map.ty = 1-map_ty;
-                renderRec(startIndex, endIndex, index);
-                
-                return;
-            }
-			
-            dmax = Math.max(dsab, Math.max(dsca, dsbc));
-            if (dsab == dmax)
-            {
-            	index++;
-            	
-            	sv1 = _screenVertices.length/3;
-            	_screenVertices[_screenVertices.length] = mabx/2;
-                _screenVertices[_screenVertices.length] = maby/2;
-                _screenVertices[_screenVertices.length] = (az+bz)/2;
-                
-	            _screenIndices[startIndex = _screenIndices.length] = ai;
-                _screenIndices[_screenIndices.length] = sv1;
-                _screenIndices[_screenIndices.length] = ci;
-                
-            	endIndex = _screenIndices.length;
-            	
-                map.a = map_a*=2;
-                map.c = map_c*=2;
-                map.tx = map_tx*=2;
-                renderRec(startIndex, endIndex, index);
-                
-	            _screenIndices[startIndex = _screenIndices.length] = sv1;
-                _screenIndices[_screenIndices.length] = bi;
-                _screenIndices[_screenIndices.length] = ci;
-                
-            	endIndex = _screenIndices.length;
-            	
-                map.a = map_a + map_b;
-                map.b = map_b;
-                map.c = map_c + map_d;
-                map.d = map_d;
-                map.tx = map_tx + map_ty - 1;
-                map.ty = map_ty;
-                renderRec(startIndex, endIndex, index);
-                
-                return;
-            }
-			
-            if (dsca == dmax)
-            {
-            	index++;
-            	
-                sv2 = _screenVertices.length/3;
-                _screenVertices[_screenVertices.length] = mcax/2;
-                _screenVertices[_screenVertices.length] = mcay/2;
-                _screenVertices[_screenVertices.length] = (cz+az)/2;
-                
-	            _screenIndices[startIndex = _screenIndices.length] = ai;
-                _screenIndices[_screenIndices.length] = bi;
-                _screenIndices[_screenIndices.length] = sv2;
-                
-            	endIndex = _screenIndices.length;
-            	
-                map.b = map_b*=2;
-                map.d = map_d*=2;
-                map.ty = map_ty*=2;
-                renderRec(startIndex, endIndex, index);
-                
-	            _screenIndices[startIndex = _screenIndices.length] = sv2;
-                _screenIndices[_screenIndices.length] = bi;
-                _screenIndices[_screenIndices.length] = ci;
-                
-            	endIndex = _screenIndices.length;
-            	
-                map.a = map_a;
-                map.b = map_b + map_a;
-                map.c = map_c;
-                map.d = map_d + map_c;
-                map.tx = map_tx;
-                map.ty = map_ty + map_tx - 1;
-                renderRec(startIndex, endIndex, index);
-                
-                return;
-            }
-            
-            _screenIndices[startIndex = _screenIndices.length] = ai;
-            _screenIndices[_screenIndices.length] = bi;
-            _screenIndices[_screenIndices.length] = sv3;
-            
-        	endIndex = _screenIndices.length;
-        	
-            map.a = map_a - map_b;
-            map.b = map_b*2;
-            map.c = map_c - map_d;
-            map.d = map_d*2;
-            map.tx = map_tx - map_ty;
-            map.ty = map_ty*2;
-            renderRec(startIndex, endIndex, index);
-            
-            _screenIndices[startIndex = _screenIndices.length] = ai;
-            _screenIndices[_screenIndices.length] = sv3;
-            _screenIndices[_screenIndices.length] = ci;
-            
-        	endIndex = _screenIndices.length;
-        	
-            map.a = map_a*2;
-            map.b = map_b - map_a;
-            map.c = map_c*2;
-            map.d = map_d - map_c;
-            map.tx = map_tx*2;
-            map.ty = map_ty - map_tx;
-            renderRec(startIndex, endIndex, index);
-        }
         
         /**
         * Instance of the Init object used to hold and parse default property values
@@ -446,8 +157,9 @@ package away3d.materials
         	
             if (_alpha == 1 && _color == 0xFFFFFF) {
                 _renderBitmap = _bitmap;
-                _colorTransform = null;
-                return;
+                if (!_colorTransform || (!_colorTransform.redOffset && !_colorTransform.greenOffset && !_colorTransform.blueOffset)) {
+                	_colorTransform = null;
+                	return;            	}
             } else if (!_colorTransform)
             	_colorTransform = new ColorTransform();
 			
@@ -482,39 +194,11 @@ package away3d.materials
 	           }
 	            _renderBitmap.colorTransform(_renderBitmap.rect, _colorTransform);
 	        } else {
-	        	_renderBitmap = _bitmap.clone();
+	        	_renderBitmap = _bitmap;
 	        }
 	        
 	        invalidateFaces();
         }
-        
-        /**
-        * Calculates the mapping matrix required to draw the triangle texture to screen.
-        * 
-        * @param	tri		The data object holding all information about the triangle to be drawn.
-        * @return			The required matrix object.
-        */
-		protected function getMapping(tri:DrawTriangle):Matrix
-		{
-			if (tri.generated) {
-				_texturemapping = tri.transformUV(this).clone();
-				_texturemapping.invert();
-				
-				return _texturemapping;
-			}
-			
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);
-			
-			if (!_faceMaterialVO.invalidated)
-				return _faceMaterialVO.texturemapping;
-			
-			_faceMaterialVO.invalidated = false;
-			
-			_texturemapping = tri.transformUV(this).clone();
-			_texturemapping.invert();
-			
-			return _faceMaterialVO.texturemapping = _texturemapping;
-		}
 		
     	/**
     	 * Determines if texture bitmap is smoothed (bilinearly filtered) when drawn to screen.
@@ -573,7 +257,7 @@ package away3d.materials
         
         
         /**
-        * Corrects distortion caused by the affine transformation (non-perpective) of textures.
+        * Corrects distortion caused by the affine transformation (non-perspective) of textures.
         * The number refers to the pixel correction value - ie. a value of 2 means a distorion correction to within 2 pixels of the correct perspective distortion.
         * 0 performs no precision.
         */
@@ -695,10 +379,12 @@ package away3d.materials
         }
         
         /**
+        * Defines a colortransform for the texture bitmap.        */        public function get colorTransform():ColorTransform        {            return _colorTransform;        }                public function set colorTransform(value:ColorTransform):void        {            _colorTransform = value;						if (_colorTransform) {				_red = _colorTransform.redMultiplier;				_green = _colorTransform.greenMultiplier;				_blue = _colorTransform.blueMultiplier;				_alpha = _colorTransform.alphaMultiplier;								_color = (_red*255 << 16) + (_green*255 << 8) + _blue*255;			}			            _colorTransformDirty = true;        }
+        /**
         * Defines a blendMode value for the texture bitmap.
         * Applies to materials rendered as children of <code>BitmapMaskMaterialContainer</code> or  <code>CompositeMaterial</code>.
         * 
-        * @see away3d.materials.BitmapMaskMaterialContainer
+        * @see away3d.materials.BitmapMaterialContainer
         * @see away3d.materials.CompositeMaterial
         */
         public function get blendMode():String
@@ -715,8 +401,7 @@ package away3d.materials
         	_blendModeDirty = true;
         }
 		
-		 /**
-        * Displays the normals per face in pink lines.
+		/**        * Displays the normals per face in pink lines.
         */
         public function get showNormals():Boolean
         {
@@ -732,16 +417,14 @@ package away3d.materials
         	
         	_materialDirty = true;
         }
-                
-		/**
+        		/**
 		 * @inheritDoc
 		 */
         public function get visible():Boolean
         {
             return _alpha > 0;
         }
-        
-		/**
+                		/**
 		 * @inheritDoc
 		 */
         public function get id():int
@@ -771,6 +454,7 @@ package away3d.materials
             _blendMode = ini.getString("blendMode", BlendMode.NORMAL);
             alpha = ini.getNumber("alpha", _alpha, {min:0, max:1});
             color = ini.getColor("color", _color);
+            colorTransform = ini.getObject("colorTransform", ColorTransform) as ColorTransform;
             showNormals = ini.getBoolean("showNormals", false);
             _offsetX = ini.getNumber("offsetX", 0);
             _offsetY = ini.getNumber("offsetY", 0);
@@ -813,8 +497,7 @@ package away3d.materials
         {
         	notifyMaterialUpdate();
         	
-        	for each (var _faceMaterialVO:FaceMaterialVO in _faceDictionary)
-        		if (!_faceMaterialVO.cleared)
+        	for each (_faceMaterialVO in _faceDictionary)        		if (!_faceMaterialVO.cleared)
         			_faceMaterialVO.clear();
         }
         
@@ -825,8 +508,7 @@ package away3d.materials
         {
         	_materialDirty = true;
         	
-        	for each (var _faceMaterialVO:FaceMaterialVO in _faceDictionary)
-        		_faceMaterialVO.invalidated = true;
+        	for each (_faceMaterialVO in _faceDictionary)        		_faceMaterialVO.invalidated = true;
         }
         
 		/**
@@ -857,27 +539,13 @@ package away3d.materials
 		 */
         public function renderTriangle(tri:DrawTriangle):void
         {
-        	_mapping = getMapping(tri);
 			_session = tri.source.session;
 			_screenCommands = tri.screenCommands;
-        	_view = tri.view;
+			_screenVertices = tri.screenVertices;			_screenIndices = tri.screenIndices;
         	
-			if (precision) {
-            	focus = tri.view.camera.focus;
-            	
-            	map.a = _mapping.a;
-	            map.b = _mapping.b;
-	            map.c = _mapping.c;
-	            map.d = _mapping.d;
-	            map.tx = _mapping.tx;
-	            map.ty = _mapping.ty;
-	            renderRec(tri.startIndex, tri.endIndex, 0);
-			} else {
-				_session.renderTriangleBitmapMask(_renderBitmap, _offsetX, _offsetY, _scaling, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
-			}
-			
+			_session.renderTriangleBitmapMask(_renderBitmap, _offsetX, _offsetY, _scaling, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
             if (debug)
-                _session.renderTriangleLine(0, 0x0000FF, 1, _screenVertices, tri.screenCommands, _screenIndices, tri.startIndex, tri.endIndex);
+                _session.renderTriangleLine(0, 0x0000FF, 1, _screenVertices, _screenCommands, _screenIndices, tri.startIndex, tri.endIndex);
 				
 			if(showNormals){
 				
@@ -910,7 +578,7 @@ package away3d.materials
 			renderSource(tri.source, containerRect, new Matrix());
 			
 			//get the correct faceMaterialVO
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);
+			_faceMaterialVO = getFaceMaterialVO(tri.faceVO.face.faceVO);
 			
 			//pass on resize value
 			if (parentFaceMaterialVO.resized) {

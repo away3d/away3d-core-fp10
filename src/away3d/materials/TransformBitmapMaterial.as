@@ -285,58 +285,6 @@ package away3d.materials
 			return false;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		protected override function getMapping(tri:DrawTriangle):Matrix
-		{
-			if (tri.generated) {
-		        //use projectUV if projection vector detected
-	    		if (projectionVector) {
-	    			//_texturemapping = projectUV(tri);
-	    		} else {
-	    			_texturemapping = tri.transformUV(this).clone();
-	        		_texturemapping.invert();
-	    		}
-    		
-	        	//apply transform matrix if one exists
-        		if (_transform) {
-        			_mapping = _transform.clone();
-	        		_mapping.concat(_texturemapping);
-	        	} else {
-	        		_mapping = _texturemapping;
-	        	}
-	        	
-	        	return _mapping;
-			}
-			
-        	_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source);
-        	
-        	//check to see if rendering can be skipped
-        	if (!_faceMaterialVO.invalidated)
-        		return _faceMaterialVO.texturemapping;
-    	
-    		_faceMaterialVO.invalidated = false;
-    		
-    		//use projectUV if projection vector detected
-    		if (projectionVector) {
-    			//_texturemapping = projectUV(tri);
-    		} else {
-    			_texturemapping = tri.transformUV(this).clone();
-        		_texturemapping.invert();
-    		}
-    		
-    		//apply transform matrix if one exists
-    		if (_transform) {
-    			_faceMaterialVO.texturemapping = _transform.clone();
-        		_faceMaterialVO.texturemapping.concat(_texturemapping);
-        		
-        		return _faceMaterialVO.texturemapping;
-        	}
-        	
-        	return _faceMaterialVO.texturemapping = _texturemapping;
-		}
-		
 		protected override function getUVData(tri:DrawTriangle):Vector.<Number>
 		{
 			if (tri.view.camera.lens is ZoomFocusLens)

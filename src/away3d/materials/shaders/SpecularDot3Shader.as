@@ -4,11 +4,10 @@
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.draw.*;
+	import away3d.core.light.*;
 	import away3d.core.math.*;
-	import away3d.core.render.*;
 	import away3d.core.utils.*;
 	import away3d.materials.*;
-	import away3d.core.light.DirectionalLight;
 	
 	import flash.display.*;
 	import flash.geom.*;
@@ -21,7 +20,7 @@
 	 * 
 	 * @see away3d.lights.DirectionalLight3D
 	 */
-    public class SpecularDot3Shader extends AbstractShader implements IUVMaterial
+    public class SpecularDot3Shader extends AbstractShader
     {
         private var _zeroPoint:Point = new Point(0, 0);
         private var _bitmap:BitmapData;
@@ -38,32 +37,20 @@
 		private var _normal0z:Number;
 		private var _normal1z:Number;
 		private var _normal2z:Number;
-		private var _texturemapping:Matrix;
 		
-        /**
-        * Calculates the mapping matrix required to draw the triangle texture to screen.
-        * 
-        * @param	tri		The data object holding all information about the triangle to be drawn.
-        * @return			The required matrix object.
-        */
-		private function getMapping(tri:DrawTriangle):Matrix
+		protected override function calcUVT(tri:DrawTriangle, uvt:Vector.<Number>):Vector.<Number>
 		{
-			if (tri.generated) {
-				_texturemapping = tri.transformUV(this).clone();
-				_texturemapping.invert();
-				
-				return _texturemapping;
-			}
-			
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source, tri.view);
-			
-			if (!_faceMaterialVO.invalidated)
-				return _faceMaterialVO.texturemapping;
-			
-			_texturemapping = tri.transformUV(this).clone();
-			_texturemapping.invert();
-			
-			return _faceMaterialVO.texturemapping = _texturemapping;
+			uvt[2] = 1/(_focus + tri.v0z);
+			uvt[5] = 1/(_focus + tri.v1z);
+			uvt[8] = 1/(_focus + tri.v2z);
+			uvt[0] = tri.uv0.u;
+    		uvt[1] = 1 - tri.uv0.v;
+    		uvt[3] = tri.uv1.u;
+    		uvt[4] = 1 - tri.uv1.v;
+    		uvt[6] = tri.uv2.u;
+    		uvt[7] = 1 - tri.uv2.v;
+    		
+    		return uvt;
 		}
 		
 		/**
@@ -74,18 +61,11 @@
         	notifyMaterialUpdate();
         	
         	for each (var faceMaterialVO:FaceMaterialVO in _faceDictionary)
-        		if (source == faceMaterialVO.source)
+        		if (source == faceMaterialVO.source && view == faceMaterialVO.view) {
 	        		if (!faceMaterialVO.cleared)
 	        			faceMaterialVO.clear();
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function invalidateFaces(source:Object3D = null, view:View3D = null):void
-        {
-        	for each (var faceMaterialVO:FaceMaterialVO in _faceDictionary)
-        		faceMaterialVO.invalidated = true;
+	        		faceMaterialVO.invalidated = true;
+        		}
         }
         
 		/**
@@ -269,9 +249,7 @@
         		_shape.blendMode = blendMode;
         		_graphics = _shape.graphics;
         		
-        		_mapping = getMapping(tri);
-        		
-				_source.session.renderTriangleBitmap(_bitmap, _mapping, tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, false, _graphics);
+				_source.session.renderTriangleBitmap(_bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, false, _graphics);
         	}
 			
 			if (debug)

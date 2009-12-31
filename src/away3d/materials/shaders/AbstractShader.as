@@ -1,7 +1,8 @@
 package away3d.materials.shaders
 {
-	import away3d.containers.*;
 	import away3d.arcane;
+	import away3d.cameras.lenses.*;
+	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.draw.*;
 	import away3d.core.light.*;
@@ -89,7 +90,13 @@ package away3d.materials.shaders
         /** @private */
 		arcane var _normal2:Number3D = new Number3D();
         /** @private */
-		arcane var _mapping:Matrix = new Matrix();
+		arcane var _map:Matrix = new Matrix();
+		/** @private */
+		arcane var _uvt:Vector.<Number>;
+		/** @private */
+		arcane var _focus:Number;
+		/** @private */
+		arcane var _mapping:Matrix;
 		/** @private */
         arcane function notifyMaterialUpdate():void
         {
@@ -134,6 +141,85 @@ package away3d.materials.shaders
         	throw new Error("Not implemented");
         }
         
+        protected function calcMapping(tri:DrawTriangle, map:Matrix):Matrix
+        {
+        	tri; map;
+        	
+        	map.a = 1;
+			map.b = 0;
+			map.c = 0;
+			map.d = 1;
+			map.tx = 0;
+			map.ty = 0;
+            map.invert();
+            
+            return map;
+        }
+        
+        protected function calcUVT(tri:DrawTriangle, uvt:Vector.<Number>):Vector.<Number>
+        {
+        	tri; uvt;
+        	
+			uvt[0] = 0;
+    		uvt[1] = 1;
+    		uvt[3] = 0;
+    		uvt[4] = 0;
+    		uvt[6] = 1;
+    		uvt[7] = 0;
+    		
+    		return uvt;
+        }
+        
+        /**
+        * Calculates the mapping matrix required to draw the triangle texture to screen.
+        * 
+        * @param	tri		The data object holding all information about the triangle to be drawn.
+        * @return			The required matrix object.
+        */
+		protected function getMapping(tri:DrawTriangle):Matrix
+		{
+			if (tri.generated)
+				return calcMapping(tri, _map);
+			
+			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);
+			
+			if (!_faceMaterialVO.invalidated)
+				return _faceMaterialVO.texturemapping;
+			
+			_faceMaterialVO.invalidated = false;
+			
+			return calcMapping(tri, _faceMaterialVO.texturemapping);
+		}
+		
+		protected function getUVData(tri:DrawTriangle):Vector.<Number>
+		{
+			_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source, tri.view);
+			
+			if (_view.camera.lens is ZoomFocusLens)
+        		_focus = tri.view.camera.focus;
+        	else
+        		_focus = 0;
+			
+			if (tri.generated) {
+				_uvt[2] = 1/(_focus + tri.v0z);
+				_uvt[5] = 1/(_focus + tri.v1z);
+				_uvt[8] = 1/(_focus + tri.v2z);
+				
+	    		return calcUVT(tri, _uvt);
+			}
+			
+			_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);
+			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);
+			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);
+			
+			if (!_faceMaterialVO.invalidated)
+				return _faceMaterialVO.uvtData;
+			
+			_faceMaterialVO.invalidated = false;
+        	
+			return calcUVT(tri, _faceMaterialVO.uvtData);
+		}
+		
     	/**
     	 * Determines if the shader bitmap is smoothed (bilinearly filtered) when drawn to screen
     	 */
@@ -259,7 +345,7 @@ package away3d.materials.shaders
         	if ((_faceMaterialVO = _faceDictionary[faceVO]))
         		return _faceMaterialVO;
         	
-        	return _faceDictionary[faceVO] = new FaceMaterialVO();
+        	return _faceDictionary[faceVO] = new FaceMaterialVO(source, view);
         }
         
 		/**
