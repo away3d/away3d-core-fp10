@@ -258,65 +258,6 @@ package away3d.core.draw
             material.renderTriangle(this);
         }
         
-        /**
-        * Calculates from the uv coordinates the mapping matrix required to draw the triangle primitive.
-        */
-        public final function transformUV(material:IUVMaterial):Matrix
-        {
-            materialWidth = material.width,
-            materialHeight = material.height;
-            
-            if (uv0 == null || uv1 == null || uv2 == null)
-                return null;
-
-            _u0 = materialWidth * uv0._u;
-            _u1 = materialWidth * uv1._u;
-            _u2 = materialWidth * uv2._u;
-            _v0 = materialHeight * (1 - uv0._v);
-            _v1 = materialHeight * (1 - uv1._v);
-            _v2 = materialHeight * (1 - uv2._v);
-      
-            // Fix perpendicular projections
-            if ((_u0 == _u1 && _v0 == _v1) || (_u0 == _u2 && _v0 == _v2)) {
-            	if (_u0 > 0.05)
-                	_u0 -= 0.05;
-                else
-                	_u0 += 0.05;
-                	
-                if (_v0 > 0.07)           
-                	_v0 -= 0.07;
-                else
-                	_v0 += 0.07;
-            }
-    
-            if (_u2 == _u1 && _v2 == _v1) {
-            	if (_u2 > 0.04)
-                	_u2 -= 0.04;
-                else
-                	_u2 += 0.04;
-                	
-                if (_v2 > 0.06)           
-                	_v2 -= 0.06;
-                else
-                	_v2 += 0.06;
-            }
-            
-        	_invtexmapping.a = _u1 - _u0;
-        	_invtexmapping.b = _v1 - _v0;
-        	_invtexmapping.c = _u2 - _u0;
-        	_invtexmapping.d = _v2 - _v0;
-        	
-            if (material is BitmapMaterialContainer) {
-            	_invtexmapping.tx = _u0 - faceVO.face.bitmapRect.x;
-            	_invtexmapping.ty = _v0 - faceVO.face.bitmapRect.y;
-            } else {
-            	_invtexmapping.tx = _u0;
-            	_invtexmapping.ty = _v0;
-            }
-            
-            return _invtexmapping;
-        }
-        
 		/**
 		 * @inheritDoc
 		 */

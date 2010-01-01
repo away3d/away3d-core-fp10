@@ -1,9 +1,7 @@
 ﻿package away3d.materials{
     import away3d.arcane;
-    import away3d.cameras.lenses.*;
     import away3d.containers.*;
     import away3d.core.base.*;
-    import away3d.core.clip.*;
     import away3d.core.draw.*;
     import away3d.core.math.*;
     import away3d.core.render.*;
@@ -116,8 +114,7 @@
 				}
 			}
 		}
-		
-		private var index:int;		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);		private var _screenVertices:Array;
+				private var _screenVertices:Array;
 		private var _screenCommands:Array;
 		private var _screenIndices:Array;
 		private var _smooth:Boolean;
@@ -126,7 +123,6 @@
         private var _precision:Number;
     	private var _shape:Shape;
     	private var _materialupdated:MaterialEvent;
-        private var map:Matrix = new Matrix();
         private var x:Number;
 		private var y:Number;
 		private var _showNormals:Boolean;

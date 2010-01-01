@@ -26,7 +26,7 @@ package away3d.materials
     	 * @see away3d.materials.CompositeMaterial#color
     	 * @see away3d.materials.CompositeMaterial#alpha
     	 */
-		protected override function setColorTransform():void
+		protected override function updateColorTransform():void
 		{
 			_colorTransformDirty = false;
 			
@@ -37,7 +37,7 @@ package away3d.materials
 			} else {
 				_phongShader.color = 0xFFFFFF;
 				_phongShader.alpha = 1;
-				super.setColorTransform();
+				super.updateColorTransform();
 			}
 		}
 		

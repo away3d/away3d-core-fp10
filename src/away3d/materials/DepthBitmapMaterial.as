@@ -1,17 +1,15 @@
 package away3d.materials
 {
-	import away3d.core.utils.*;
 	import away3d.materials.shaders.*;
 	
 	import flash.display.*;
-	import flash.geom.ColorTransform;
 	
 	/**
 	 * Bitmap material with depth shading.
 	 */
 	public class DepthBitmapMaterial extends CompositeMaterial
 	{
-		private var _bitmapMaterial:BitmapMaterial;
+		private var _textureMaterial:BitmapMaterial;
 		private var _depthShader:DepthShader;
 		
 		private var _minZ:Number;
@@ -69,7 +67,7 @@ package away3d.materials
         	
         	_minColor = val;
         	
-        	_bitmapMaterial.color = _minColor;
+        	_textureMaterial.color = _minColor;
         }
 				
 		/**
@@ -89,13 +87,13 @@ package away3d.materials
         	
             _depthShader.color = val;
         }
-        
+		
         /**
-        * Returns the bitmapData object being used as the material texture.
+        * Returns the bitmap material being used as the material texture.
         */
-		public function get bitmap():BitmapData
+		public function get textureMaterial():BitmapMaterial
 		{
-			return _bitmapMaterial.bitmap;
+			return _textureMaterial;
 		}
 		
 		/**
@@ -119,12 +117,12 @@ package away3d.materials
 			_maxColor = ini.getNumber("maxColor", 0x000000);
 			
 			//create new materials
-			_bitmapMaterial = new BitmapMaterial(bitmap, ini);
-			_bitmapMaterial.color = _minColor;
+			_textureMaterial = new BitmapMaterial(bitmap, ini);
+			_textureMaterial.color = _minColor;
 			_depthShader = new DepthShader({minZ:_minZ, maxZ:_maxZ, color:_maxColor});
 			
 			//add to materials array
-			addMaterial(_bitmapMaterial);
+			addMaterial(_textureMaterial);
 			addMaterial(_depthShader);
 			
 		}

@@ -197,7 +197,8 @@ package away3d.containers
                         if (tri.material is IUVMaterial) {
                             var testmaterial:IUVMaterial = (tri.material as IUVMaterial);
                             //return if material pixel is transparent
-                            if (!(tri.material is BitmapMaterialContainer) && !(testmaterial.getPixel32(testuv.u, testuv.v) >> 24))
+                            //TODO: sort out eventuality for composite materials
+                            if (!(testmaterial.getPixel32(testuv.u, testuv.v) >> 24))
                                 return;
                             uv = testuv;
                         }

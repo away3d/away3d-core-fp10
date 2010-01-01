@@ -1,6 +1,5 @@
 ﻿package away3d.materials
 {
-	import away3d.core.utils.*;
 	import away3d.materials.shaders.*;
 	
 	import flash.display.*;
@@ -12,7 +11,7 @@
 	{
 		private var _shininess:Number;
 		private var _specular:Number;
-		private var _bitmapMaterial:BitmapMaterial;
+		private var _textureMaterial:BitmapMaterial;
 		private var _phongShader:CompositeMaterial;
 		private var _ambientShader:AmbientShader;
 		private var _diffuseDot3Shader:DiffuseDot3Shader;
@@ -63,11 +62,11 @@
 		}
         
         /**
-        * Returns the bitmapData object being used as the material texture.
+        * Returns the bitmap material being used as the material texture.
         */
-		public function get bitmap():BitmapData
+		public function get textureMaterial():BitmapMaterial
 		{
-			return _bitmapMaterial.bitmap;
+			return _textureMaterial;
 		}
 		
 		/**
@@ -119,14 +118,14 @@
 			}
 			
 			//create new materials
-			_bitmapMaterial = new BitmapMaterial(bitmap, ini);
+			_textureMaterial = new BitmapMaterial(bitmap, ini);
 			_phongShader = new CompositeMaterial({blendMode:BlendMode.MULTIPLY});
 			_phongShader.addMaterial(_ambientShader = new AmbientShader({blendMode:BlendMode.ADD}));
 			_phongShader.addMaterial(_diffuseDot3Shader = new DiffuseDot3Shader(renderNormalMap, {blendMode:BlendMode.ADD}));
 			_specularDot3Shader = new SpecularDot3Shader(renderNormalMap, {shininess:_shininess, specular:_specular, blendMode:BlendMode.ADD});
 			
 			//add to materials array
-			addMaterial(_bitmapMaterial);
+			addMaterial(_textureMaterial);
 			addMaterial(_phongShader);
 			
 			if (_specular)

@@ -3,7 +3,6 @@
     import away3d.cameras.lenses.*;
     import away3d.containers.*;
     import away3d.core.base.*;
-    import away3d.core.clip.*;
     import away3d.core.draw.*;
     import away3d.core.math.*;
     import away3d.core.render.*;
@@ -26,7 +25,7 @@
     	/** @private */
     	arcane var _texturemapping:Matrix;    	/** @private */    	arcane var _view:View3D;
     	/** @private */
-    	arcane var _uvtData:Vector.<Number>
+    	arcane var _uvtData:Vector.<Number>;
     	/** @private */
     	arcane var _focus:Number;
         /** @private */
@@ -120,8 +119,7 @@
 				}
 			}
 		}
-		
-		private var index:int;		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);		private var _screenVertices:Array;		private var _screenCommands:Array;		private var _screenIndices:Array;
+				private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);		private var _screenVertices:Array;		private var _screenCommands:Array;		private var _screenIndices:Array;
 		private var _near:Number;
 		private var _smooth:Boolean;
 		private var _debug:Boolean;
@@ -129,7 +127,6 @@
         private var _precision:Number;
     	private var _shape:Shape;
     	private var _materialupdated:MaterialEvent;
-        private var map:Matrix = new Matrix();
         private var x:Number;
 		private var y:Number;		private var _showNormals:Boolean;		private var _nn:Number3D = new Number3D();		private var _sv0x:Number;		private var _sv0y:Number;		private var _sv1x:Number;		private var _sv1y:Number;        
         /**
