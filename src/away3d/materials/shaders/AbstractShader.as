@@ -92,7 +92,7 @@ package away3d.materials.shaders
         /** @private */
 		arcane var _map:Matrix = new Matrix();
 		/** @private */
-		arcane var _uvt:Vector.<Number>;
+		arcane var _uvt:Vector.<Number> = new Vector.<Number>(9, true);
 		/** @private */
 		arcane var _focus:Number;
 		/** @private */
