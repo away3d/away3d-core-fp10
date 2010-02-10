@@ -1041,7 +1041,11 @@
 	
 				var image:XML = collada["library_images"].image.(@id == imageId)[0];
 	
-				filename = image["init_from"];
+				//3dsMax 11 - Feeling ColladaMax v3.05B.
+				if(!image)
+					filename = collada["library_images"].image.init_from.text();
+				else
+					filename = image["init_from"];
 	
 				if (filename.substr(0, 2) == "./")
 				{
