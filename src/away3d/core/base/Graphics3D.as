@@ -1,9 +1,8 @@
 package away3d.core.base
 {
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.WireColorMaterial;
+    import away3d.materials.ColorMaterial;
 
-	public class Graphics3D
+    public class Graphics3D
 	{
 		private var _geometry:Geometry;
 		private var _currentFace:Face;
