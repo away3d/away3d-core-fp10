@@ -37,6 +37,7 @@
 		private var _normal0z:Number;
 		private var _normal1z:Number;
 		private var _normal2z:Number;
+		private var _bitmapDirty:Boolean;
 		
 		protected override function calcUVT(tri:DrawTriangle, uvt:Vector.<Number>):Vector.<Number>
 		{
@@ -56,16 +57,27 @@
 		/**
 		 * @inheritDoc
 		 */
-        public function clearFaces(source:Object3D = null, view:View3D = null):void
+        public function updateFaces(source:Object3D = null, view:View3D = null):void
         {
         	notifyMaterialUpdate();
         	
         	for each (var faceMaterialVO:FaceMaterialVO in _faceDictionary)
-        		if (source == faceMaterialVO.source && view == faceMaterialVO.view) {
+        		if (source == faceMaterialVO.source && view == faceMaterialVO.view)
 	        		if (!faceMaterialVO.cleared)
 	        			faceMaterialVO.clear();
-	        		faceMaterialVO.invalidated = true;
-        		}
+        }
+        
+		/**
+		 * @inheritDoc
+		 */
+        public function invalidateFaces(source:Object3D = null, view:View3D = null):void
+        {
+        	source; view;
+        	
+        	_bitmapDirty = false;
+        	
+        	for each (var faceMaterialVO:FaceMaterialVO in _faceDictionary)
+        		faceMaterialVO.invalidated = true;
         }
         
 		/**
@@ -159,6 +171,13 @@
         	return _bitmap;
         }
         
+        public function set bitmap(val:BitmapData):void
+        {
+        	_bitmap = val;
+        	
+        	_bitmapDirty = true;
+        }
+        
 		/**
 		 * The exponential dropoff value used for specular highlights.
 		 */
@@ -219,6 +238,9 @@
 		 */
 		public override function updateMaterial(source:Object3D, view:View3D):void
         {
+        	if (_bitmapDirty)
+        		invalidateFaces();
+        	
         	var _source_lightarray_directionals:Array = source.lightarray.directionals;
 			var directional:DirectionalLight;
         	for each (directional in _source_lightarray_directionals) {
@@ -228,7 +250,7 @@
         		if (!directional.specularTransform[source][view] || view.scene.updatedObjects[source] || view.updated) {
         			directional.setSpecularTransform(source, view);
         			directional.setNormalMatrixSpecularTransform(source, view, _specular, _shininess);
-        			clearFaces(source, view);
+        			updateFaces(source, view);
         		}
         	}
         }

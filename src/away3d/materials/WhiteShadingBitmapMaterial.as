@@ -211,7 +211,7 @@ package away3d.materials {
 		/**
 		 * @inheritDoc
 		 */
-        public override function clearFaces(source:Object3D = null, view:View3D = null):void
+        public override function updateFaces(source:Object3D = null, view:View3D = null):void
         {
         	notifyMaterialUpdate();
         	

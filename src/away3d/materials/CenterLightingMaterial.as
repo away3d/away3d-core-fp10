@@ -214,10 +214,10 @@
         	}
         	
         	if (_materialDirty)
-        		clearFaces(source, view);
+        		updateFaces(source, view);
         }
         
-        public function clearFaces(source:Object3D = null, view:View3D = null):void
+        public function updateFaces(source:Object3D = null, view:View3D = null):void
         {
 			source = source;
 			view = view;

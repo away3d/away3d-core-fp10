@@ -39,14 +39,14 @@ package away3d.materials
 		function getFaceMaterialVO(faceVO:FaceVO, source:Object3D = null, view:View3D = null):FaceMaterialVO;
 		
 		/**
-        * Clears facematerial value objects when bitmap requires updating
+        * Flags facematerial value objects when bitmap requires updating
         * 
         * @param	source		[optional]	The parent 3d object of the face.
         * @param	view		[optional]	The view rendering the draw triangle.
         * 
         * @see away3d.core.utils.FaceMaterialVO
         */
-        function clearFaces(source:Object3D = null, view:View3D = null):void
+        function updateFaces(source:Object3D = null, view:View3D = null):void
 		
 		/**
         * Invalidates facematerial value objects when texturemapping requires updating

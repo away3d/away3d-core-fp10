@@ -666,7 +666,7 @@ package away3d.materials
         		updateTransform();
         	
         	if (_materialDirty || _blendModeDirty)
-        		clearFaces();
+        		updateFaces();
         	
         	_projectionDirty = false;
         	_blendModeDirty = false;

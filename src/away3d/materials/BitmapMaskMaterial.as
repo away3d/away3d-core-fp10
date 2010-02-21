@@ -471,7 +471,7 @@
         		updateRenderBitmap();
         	
         	if (_materialDirty || _blendModeDirty)
-        		clearFaces(source, view);
+        		updateFaces(source, view);
         	
         	_blendModeDirty = false;
         }
@@ -489,7 +489,7 @@
 		/**
 		 * @inheritDoc
 		 */
-        public function clearFaces(source:Object3D = null, view:View3D = null):void
+        public function updateFaces(source:Object3D = null, view:View3D = null):void
         {
         	notifyMaterialUpdate();
         	

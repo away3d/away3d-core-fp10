@@ -294,7 +294,7 @@ package away3d.materials
         		updateRenderBitmap();
         	
         	if (_materialDirty || _blendModeDirty)
-        		clearFaces();
+        		updateFaces();
         	
         	_blendModeDirty = false;
         }
