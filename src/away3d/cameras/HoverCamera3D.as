@@ -1,15 +1,15 @@
 package away3d.cameras
 {
-    import away3d.core.base.*;
-    import away3d.core.utils.*;
+	import away3d.core.base.*;
+	import away3d.core.utils.*;
 	
-    /**
-    * Extended camera used to hover round a specified target object.
-    * 
-    * @see	away3d.containers.View3D
-    */
-    public class HoverCamera3D extends TargetCamera3D
-    {
+	/**
+	 * Extended camera used to hover round a specified target object.
+	 * 
+	 * @see	away3d.containers.View3D
+	 */
+	public class HoverCamera3D extends TargetCamera3D
+	{
 		private var _currentPanAngle:Number = 0;
 		private var _currentTiltAngle:Number = 90;
 		
@@ -64,17 +64,17 @@ package away3d.cameras
 		 * Defines whether the value of the pan angle wraps when over 360 degrees or under 0 degrees. Defaults to false.
 		 */
 		public var wrapPanAngle:Boolean = false;
-    	
-	    /**
-	    * Creates a new <code>HoverCamera3D</code> object.
-	    * 
-	    * @param	init	[optional]	An initialisation object for specifying default instance properties.
-	    */
-        public function HoverCamera3D(init:Object = null)
-        {
-            super(init);
-
-            yfactor = ini.getNumber("yfactor", yfactor);
+		
+		/**
+		 * Creates a new <code>HoverCamera3D</code> object.
+		 * 
+		 * @param	init	[optional]	An initialisation object for specifying default instance properties.
+		 */
+		public function HoverCamera3D(init:Object = null)
+		{
+			super(init);
+			
+			yfactor = ini.getNumber("yfactor", yfactor);
 			distance = ini.getNumber("distance", distance);
 			wrapPanAngle = ini.getBoolean("wrapPanAngle", false);
 			panAngle = ini.getNumber("panAngle", panAngle);
@@ -83,22 +83,22 @@ package away3d.cameras
 			maxTiltAngle = ini.getNumber("maxTiltAngle", maxTiltAngle);
 			steps = ini.getNumber("steps", steps);
 			
-            hover();
-        }
-        
-        /**
-        * Updates the current tilt angle and pan angle values.
-        * 
-        * Values are calculated using the defined <code>tiltAngle</code>, <code>panAngle</code> and <code>steps</code> variables.
-        * 
-        * @return		True if the camera position was updated, otherwise false.
-        * 
-        * @see	#tiltAngle
-        * @see	#panAngle
-        * @see	#steps
-        */
-        public function hover(jumpTo:Boolean = false):Boolean
-        {
+			hover();
+		}
+		
+		/**
+		 * Updates the current tilt angle and pan angle values.
+		 * 
+		 * Values are calculated using the defined <code>tiltAngle</code>, <code>panAngle</code> and <code>steps</code> variables.
+		 * 
+		 * @return		True if the camera position was updated, otherwise false.
+		 * 
+		 * @see	#tiltAngle
+		 * @see	#panAngle
+		 * @see	#steps
+		 */
+		public function hover(jumpTo:Boolean = false):Boolean
+		{
 			if (tiltAngle != _currentTiltAngle || panAngle != _currentPanAngle) {
 				
 				tiltAngle = Math.max(minTiltAngle, Math.min(maxTiltAngle, tiltAngle));
@@ -132,8 +132,8 @@ package away3d.cameras
 			}
 			
 			var gx:Number = target.x + distance*Math.sin(_currentPanAngle*toRADIANS)*Math.cos(_currentTiltAngle*toRADIANS);
-			var gz:Number = target.y + distance*Math.cos(_currentPanAngle*toRADIANS)*Math.cos(_currentTiltAngle*toRADIANS);
-			var gy:Number = target.z + distance*Math.sin(_currentTiltAngle*toRADIANS)*yfactor;
+			var gz:Number = target.z + distance*Math.cos(_currentPanAngle*toRADIANS)*Math.cos(_currentTiltAngle*toRADIANS);
+			var gy:Number = target.y + distance*Math.sin(_currentTiltAngle*toRADIANS)*yfactor;
 			
 			if ((x == gx) && (y == gy) && (z == gz))
 				return false;
@@ -143,6 +143,6 @@ package away3d.cameras
 			z = gz;
 			
 			return true;
-        }
-    }
+		}
+	}
 }

@@ -68,9 +68,9 @@ package away3d.cameras
 		public var fixedZoom:Boolean;
 		
 		/**
-		 * Used in <code>DofSprite2D</code>.
+		 * Used in <code>DofSprite3D</code>.
 		 * 
-		 * @see	away3d.sprites.DofSprite2D
+		 * @see	away3d.sprites.DofSprite3D
 		 */
 		public function get aperture():Number
 		{
@@ -84,9 +84,9 @@ package away3d.cameras
 		}
         
 		/**
-		 * Used in <code>DofSprite2D</code>.
+		 * Used in <code>DofSprite3D</code>.
 		 * 
-		 * @see	away3d.sprites.DofSprite2D
+		 * @see	away3d.sprites.DofSprite3D
 		 */
 		public function get dof():Boolean
 		{
@@ -184,16 +184,16 @@ package away3d.cameras
 		}
 		
 		/**
-		 * Used in <code>DofSprite2D</code>.
+		 * Used in <code>DofSprite3D</code>.
 		 * 
-		 * @see	away3d.sprites.DofSprite2D
+		 * @see	away3d.sprites.DofSprite3D
 		 */
         public var maxblur:Number = 150;
         
         /**
-		 * Used in <code>DofSprite2D</code>.
+		 * Used in <code>DofSprite3D</code>.
 		 * 
-		 * @see	away3d.sprites.DofSprite2D
+		 * @see	away3d.sprites.DofSprite3D
 		 */
         public var doflevels:Number = 16;
         
@@ -252,9 +252,9 @@ package away3d.cameras
         }
         
         /**
-		 * Used in <code>DofSprite2D</code>.
+		 * Used in <code>DofSprite3D</code>.
 		 * 
-		 * @see	away3d.sprites.DofSprite2D
+		 * @see	away3d.sprites.DofSprite3D
 		 */
         public function enableDof():void
         {
@@ -266,9 +266,9 @@ package away3d.cameras
         }
                 
         /**
-		 * Used in <code>DofSprite2D</code>
+		 * Used in <code>DofSprite3D</code>
 		 * 
-		 * @see	away3d.sprites.DofSprite2D
+		 * @see	away3d.sprites.DofSprite3D
 		 */
         public function disableDof():void
         {
