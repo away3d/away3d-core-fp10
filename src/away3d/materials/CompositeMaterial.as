@@ -154,7 +154,6 @@ package away3d.materials
 	        		_faceMaterialVO.invtexturemapping = transformUV(_faceVO).clone();
 	        		_faceMaterialVO.texturemapping = _faceMaterialVO.invtexturemapping.clone();
 	        		_faceMaterialVO.texturemapping.invert();
-	        		
 	        		//resize bitmapData for container
 	        		_faceMaterialVO.resize(_faceWidth, _faceHeight, transparent);
 	        	}
@@ -378,6 +377,9 @@ package away3d.materials
 				parentFaceMaterialVO.resized = false;
 				_containerVO.resize(_faceWidth, _faceHeight, transparent);
 			}
+			
+			//pass on invtexturemapping value
+			_faceMaterialVO.invtexturemapping = _containerVO.invtexturemapping = parentFaceMaterialVO.invtexturemapping;
 			
 			//call renderFace on each material
     		for each (var _material:ILayerMaterial in materials)

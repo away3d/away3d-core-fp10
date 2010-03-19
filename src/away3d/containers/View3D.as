@@ -360,7 +360,7 @@ package away3d.containers
         /**
          * A container for 2D overlays positioned over the rendered scene.
          */
-        public var hud:Sprite = new Sprite();
+        public var foreground:Sprite = new Sprite();
 		
         /**
          * Enables/Disables stats panel.
@@ -601,7 +601,7 @@ package away3d.containers
             addChild(_session.getContainer(this));
             addChild(_interactiveLayer);
             addChild(overlay);
-            addChild(hud);
+            addChild(foreground);
         }
         
         public function get screenClipping():Clipping
