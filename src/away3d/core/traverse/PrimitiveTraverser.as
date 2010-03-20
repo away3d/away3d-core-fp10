@@ -107,9 +107,9 @@ package away3d.core.traverse
 	            		_cameraVarsStore.frustumDictionary[node.debugBoundingBox] = _cameraVarsStore.frustumDictionary[node];
 	            		_nodeClassification = _cameraVarsStore.nodeClassificationDictionary[node];
 	            		if (_nodeClassification == Frustum.INTERSECT)
-	            			(node.debugBoundingBox.material as WireframeMaterial).color = 0xFF0000;
+	            			(node.debugBoundingBox.material as WireframeMaterial).wireColor = 0xFF0000;
 	            		else
-	            			(node.debugBoundingBox.material as WireframeMaterial).color = 0x333333;
+	            			(node.debugBoundingBox.material as WireframeMaterial).wireColor = 0x333333;
 	            	}
 	            	_view._meshProjector.primitives(node.debugBoundingBox, _viewTransform, _consumer);
 	            }
@@ -120,9 +120,9 @@ package away3d.core.traverse
 	            		_cameraVarsStore.frustumDictionary[node.debugBoundingSphere] = _cameraVarsStore.frustumDictionary[node];
 	            		_nodeClassification = _cameraVarsStore.nodeClassificationDictionary[node];
 	            		if (_nodeClassification == Frustum.INTERSECT)
-	            			(node.debugBoundingSphere.material as WireframeMaterial).color = 0xFF0000;
+	            			(node.debugBoundingSphere.material as WireframeMaterial).wireColor = 0xFF0000;
 	            		else
-	            			(node.debugBoundingSphere.material as WireframeMaterial).color = 0x00FFFF;
+	            			(node.debugBoundingSphere.material as WireframeMaterial).wireColor = 0x00FFFF;
 	            	}
 	            	_view._meshProjector.primitives(node.debugBoundingSphere, _viewTransform, _consumer);
 	            }

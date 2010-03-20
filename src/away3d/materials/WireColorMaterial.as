@@ -44,7 +44,7 @@ package away3d.materials
     	/**
     	 * Determines the color value of the border wire
     	 */
-        public var wirecolor:int;
+        public var wireColor:int;
         
     	/**
     	 * Determines the alpha value of the border wire
@@ -83,7 +83,7 @@ package away3d.materials
             ini = Init.parse(init);
             
             alpha = ini.getNumber("alpha", 1, {min:0, max:1});
-            wirecolor = ini.getColor("wirecolor", 0x000000);
+            wireColor = ini.getColor("wireColor", 0x000000);
             width = ini.getNumber("width", 1, {min:0});
             wirealpha = ini.getNumber("wirealpha", 1, {min:0, max:1});
         }
@@ -101,7 +101,7 @@ package away3d.materials
 		 */
         public function renderTriangle(tri:DrawTriangle):void
         {
-			tri.source.session.renderTriangleLineFill(width, color, alpha, wirecolor, wirealpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+			tri.source.session.renderTriangleLineFill(width, color, alpha, wireColor, wirealpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
         }
         
 		/**

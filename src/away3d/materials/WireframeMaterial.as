@@ -29,7 +29,7 @@ package away3d.materials
 		/**
 		 * Determines the color value of the wire
 		 */
-        public var color:int;
+        public var wireColor:int;
 		
 		/**
 		 * Determines the alpha value of the wire
@@ -68,7 +68,7 @@ package away3d.materials
             if (color == null)
                 color = "random";
 
-            this.color = Cast.trycolor(color);
+            this.wireColor = Cast.trycolor(color);
 
             ini = Init.parse(init);
             
@@ -92,7 +92,7 @@ package away3d.materials
             if (alpha <= 0)
                 return;
 			
-			seg.source.session.renderTriangleLine(width, color, alpha, seg.screenVertices, seg.screenCommands, seg.screenIndices, seg.startIndex, seg.endIndex);
+			seg.source.session.renderTriangleLine(width, wireColor, alpha, seg.screenVertices, seg.screenCommands, seg.screenIndices, seg.startIndex, seg.endIndex);
         }
         
 		/**
@@ -103,7 +103,7 @@ package away3d.materials
             if (alpha <= 0)
                 return;
 
-            tri.source.session.renderTriangleLine(width, color, alpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+            tri.source.session.renderTriangleLine(width, wireColor, alpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
         }
         
 		/**

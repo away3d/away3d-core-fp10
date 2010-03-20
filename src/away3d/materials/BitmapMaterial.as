@@ -393,7 +393,7 @@
 		 */
         public function BitmapMaterial(bitmap:BitmapData, init:Object = null)
         {
-        	_bitmap = bitmap;
+        	_renderBitmap = _bitmap = bitmap;
             
             ini = Init.parse(init);
 			

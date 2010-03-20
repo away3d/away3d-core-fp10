@@ -436,7 +436,7 @@ package away3d.core.utils {
                     if (wire == null)
                         return new ColorMaterial(color, {alpha:alpha});
                     else
-                        return new WireColorMaterial(color, {alpha:alpha, wirecolor:wire.color, wirealpha:wire.alpha, width:wire.width});
+                        return new WireColorMaterial(color, {alpha:alpha, wireColor:wire.wireColor, wirealpha:wire.alpha, width:wire.width});
                 }
 
                 if (wire != null)

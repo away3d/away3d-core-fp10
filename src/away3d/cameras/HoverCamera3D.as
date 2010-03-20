@@ -1,7 +1,8 @@
 package away3d.cameras
 {
-	import away3d.core.base.*;
-	import away3d.core.utils.*;
+	import away3d.arcane;
+	
+	use namespace arcane;
 	
 	/**
 	 * Extended camera used to hover round a specified target object.
@@ -10,8 +11,8 @@ package away3d.cameras
 	 */
 	public class HoverCamera3D extends TargetCamera3D
 	{
-		private var _currentPanAngle:Number = 0;
-		private var _currentTiltAngle:Number = 90;
+		arcane var _currentPanAngle:Number = 0;
+		arcane var _currentTiltAngle:Number = 90;
 		
 		/**
 		 * Rotation of the camera in degrees around the y axis. Defaults to 0.
