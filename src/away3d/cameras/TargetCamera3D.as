@@ -3,7 +3,6 @@ package away3d.cameras
 	import away3d.containers.*;
     import away3d.core.base.*;
     import away3d.core.math.*;
-    import away3d.core.utils.*;
 	
 	
     /**

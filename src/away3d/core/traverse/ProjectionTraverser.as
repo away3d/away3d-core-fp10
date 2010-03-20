@@ -22,7 +22,7 @@ package away3d.core.traverse
         private var _frustum:Frustum;
         private var _cameraVarsStore:CameraVarsStore;
         private var _camera:Camera3D;
-        private var _lens:ILens;
+        private var _lens:AbstractLens;
         private var _clipping:Clipping;
         private var _cameraViewMatrix:MatrixAway3D;
         private var _viewTransform:MatrixAway3D;

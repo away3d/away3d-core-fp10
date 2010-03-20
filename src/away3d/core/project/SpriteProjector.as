@@ -1,5 +1,6 @@
 package away3d.core.project
 {
+	import away3d.arcane;
 	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
@@ -8,15 +9,15 @@ package away3d.core.project
 	import away3d.core.utils.*;
 	import away3d.sprites.*;
 	
-	import flash.utils.*;
+	use namespace arcane;
 	
 	public class SpriteProjector implements IPrimitiveProvider
 	{
 		private var _view:View3D;
 		private var _drawPrimitiveStore:DrawPrimitiveStore;
 		private var _screenVertices:Array;
-		private var _sprite:Sprite2D;
-		private var _lens:ILens;
+		private var _sprite:Sprite3D;
+		private var _lens:AbstractLens;
 		
 		public function get view():View3D
         {
@@ -32,7 +33,7 @@ package away3d.core.project
 		{
         	_screenVertices = _drawPrimitiveStore.getScreenVertices(source.id);
         	
-			_sprite = source as Sprite2D;
+			_sprite = source as Sprite3D;
 			
 			_lens = _view.camera.lens;
 			

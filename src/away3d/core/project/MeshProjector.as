@@ -1,5 +1,6 @@
 package away3d.core.project
 {
+	import away3d.arcane;
 	import away3d.cameras.*;
 	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
@@ -12,6 +13,8 @@ package away3d.core.project
 	import away3d.materials.*;
 	
 	import flash.utils.Dictionary;
+	
+	use namespace arcane;
 	
 	public class MeshProjector implements IPrimitiveProvider
 	{
@@ -36,7 +39,7 @@ package away3d.core.project
 		private var _billboardVOs:Array;
 		private var _camera:Camera3D;
 		private var _clipping:Clipping;
-		private var _lens:ILens;
+		private var _lens:AbstractLens;
 		private var _focus:Number;
 		private var _zoom:Number;
 		private var _outlineIndices:Dictionary = new Dictionary(true);

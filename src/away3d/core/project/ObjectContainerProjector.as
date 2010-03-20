@@ -1,5 +1,6 @@
 ﻿package away3d.core.project
 {
+	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.draw.*;
@@ -8,6 +9,8 @@
 	import away3d.core.utils.*;
 	
 	import flash.utils.*;
+	
+	use namespace arcane;
 	
 	public class ObjectContainerProjector implements IPrimitiveProvider
 	{

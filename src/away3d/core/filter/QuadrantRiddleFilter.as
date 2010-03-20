@@ -26,7 +26,7 @@
         private var turn:int;
         private var rivals:Array;
         private var parts:Array;
-        private var lens:ILens;
+        private var lens:AbstractLens;
         private var positiveArea:Number;
         
         private var av0z:Number;

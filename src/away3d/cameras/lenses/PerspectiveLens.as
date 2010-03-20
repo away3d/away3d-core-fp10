@@ -1,17 +1,18 @@
 package away3d.cameras.lenses
 {
+	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
-	import away3d.core.draw.*;
 	import away3d.core.geom.*;
 	import away3d.core.math.*;
 	
-	public class PerspectiveLens extends AbstractLens implements ILens
+	use namespace arcane;
+	
+	public class PerspectiveLens extends AbstractLens
 	{
-		private var _length:int;
-		
-		public override function setView(val:View3D):void
+		/** @private */
+		arcane override function setView(val:View3D):void
 		{
 			super.setView(val);
 			
@@ -20,8 +21,8 @@ package away3d.cameras.lenses
         	else
         		_near = _clipping.minZ;
 		}
-		
-        public function getFrustum(node:Object3D, viewTransform:MatrixAway3D):Frustum
+		/** @private */
+		arcane override function getFrustum(node:Object3D, viewTransform:MatrixAway3D):Frustum
 		{
 			_frustum = _cameraVarsStore.createFrustum(node);
 			_focusOverZoom = _camera.focus/_camera.zoom;
@@ -71,28 +72,25 @@ package away3d.cameras.lenses
 			
 			return _frustum;
 		}
-		
-		public function getFOV():Number
+		/** @private */
+		arcane override function getFOV():Number
 		{
 			//calculated from the arctan addition formula arctan(x) + arctan(y) = arctan(x + y / 1 - x*y)
 			return Math.atan2(_clipHeight, _camera.focus*_camera.zoom + _clipTop*_clipBottom/(_camera.focus*_camera.zoom))*toDEGREES;
 		}
-		
-		public function getZoom():Number
+		/** @private */
+		arcane override function getZoom():Number
 		{
 			var b:Number = _clipHeight/Math.tan(_camera.fov*toRADIANS);
 			return (b + Math.sqrt(Math.pow(b, 2) - 4*_clipTop*_clipBottom/_camera.zoom))/(2*_camera.focus);
 		}
-        
-		public function getPerspective(screenZ:Number):Number
+        /** @private */
+		arcane override function getPerspective(screenZ:Number):Number
 		{
 			return _camera.focus*_camera.zoom / screenZ;
 		}
-		
-       /**
-        * Projects the vertices to the screen space of the view.
-        */
-        public function project(viewTransform:MatrixAway3D, vertices:Array, screenVertices:Array):void
+		/** @private */
+		arcane override function project(viewTransform:MatrixAway3D, vertices:Array, screenVertices:Array):void
         {
         	_length = 0;
         	
@@ -123,5 +121,6 @@ package away3d.cameras.lenses
 	            _length += 3;
          	}
         }
+		private var _length:int;
 	}
 }

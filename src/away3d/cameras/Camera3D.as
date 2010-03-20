@@ -1,5 +1,6 @@
 package away3d.cameras
 {
+	import away3d.arcane;
 	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
@@ -8,6 +9,8 @@ package away3d.cameras
 	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	import away3d.events.CameraEvent;
+	
+	use namespace arcane;
 	
 	/**
 	 * Dispatched when the focus or zoom properties of a camera update.
@@ -33,7 +36,7 @@ package away3d.cameras
         private var _flipY:MatrixAway3D = new MatrixAway3D();
         private var _focus:Number;
         private var _zoom:Number = 10;
-        private var _lens:ILens;
+        private var _lens:AbstractLens;
         private var _fov:Number = 0;
         private var _clipping:Clipping;
         private var _clipTop:Number;
@@ -46,7 +49,6 @@ package away3d.cameras
     	private var _cameraVarsStore:CameraVarsStore;
     	private var _vertices:Array = new Array();
     	private var _screenVertices:Array = new Array();
-    	private var _screenIndexStart:int;
 		private var _cameraupdated:CameraEvent;
 		
         private function notifyCameraUpdate():void
@@ -147,12 +149,12 @@ package away3d.cameras
 		/**
 		 * Defines a lens object used in vertex projection
 		 */
-		public function get lens():ILens
+		public function get lens():AbstractLens
 		{
 			return _lens;
 		}
 		
-		public function set lens(value:ILens):void
+		public function set lens(value:AbstractLens):void
 		{
 			if (_lens == value)
 				return;
@@ -237,7 +239,7 @@ package away3d.cameras
             focus = ini.getNumber("focus", 100);
             zoom = ini.getNumber("zoom", _zoom);
             fixedZoom = ini.getBoolean("fixedZoom", true);
-            lens = ini.getObject("lens", AbstractLens) as ILens || new ZoomFocusLens();
+            lens = ini.getObject("lens", AbstractLens) as AbstractLens || new ZoomFocusLens();
             aperture = ini.getNumber("aperture", 22);
             maxblur = ini.getNumber("maxblur", 150);
 	        doflevels = ini.getNumber("doflevels", 16);
