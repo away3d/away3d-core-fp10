@@ -18,7 +18,7 @@ package away3d.core.project
 	{
 		private var _view:View3D;
 		private var _drawPrimitiveStore:DrawPrimitiveStore;
-		private var _dirsprite:DirSprite3D;
+		private var _dirsprite:DirSprite2D;
 		private var _vertices:Array;
 		private var _bitmaps:Dictionary;
 		private var _lens:AbstractLens;
@@ -40,7 +40,7 @@ package away3d.core.project
 		{
 			_screenVertices = _drawPrimitiveStore.getScreenVertices(source.id);
 			
-			_dirsprite = source as DirSprite3D;
+			_dirsprite = source as DirSprite2D;
 			
 			_vertices = _dirsprite.vertices;
 			_bitmaps = _dirsprite.bitmaps;

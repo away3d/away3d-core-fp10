@@ -16,7 +16,7 @@ package away3d.core.project
 		private var _view:View3D;
 		private var _drawPrimitiveStore:DrawPrimitiveStore;
 		private var _screenVertices:Array;
-		private var _sprite:Sprite3D;
+		private var _sprite:Sprite2D;
 		private var _lens:AbstractLens;
 		
 		public function get view():View3D
@@ -33,7 +33,7 @@ package away3d.core.project
 		{
         	_screenVertices = _drawPrimitiveStore.getScreenVertices(source.id);
         	
-			_sprite = source as Sprite3D;
+			_sprite = source as Sprite2D;
 			
 			_lens = _view.camera.lens;
 			
