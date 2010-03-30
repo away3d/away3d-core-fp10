@@ -125,7 +125,7 @@ package away3d.containers
         private var screenX:Number;
         private var screenY:Number;
         private var screenZ:Number = Infinity;
-        private var element:Object;
+        private var element:Element;
         private var drawpri:DrawPrimitive;
         private var material:IMaterial;
         private var object:Object3D;

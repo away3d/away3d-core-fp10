@@ -12,10 +12,8 @@
 	
 	use namespace arcane;
 	
-	public class ObjectContainerProjector implements IPrimitiveProvider
+	public class ObjectContainerProjector extends MeshProjector implements IPrimitiveProvider
 	{
-		private var _view:View3D;
-		private var _drawPrimitiveStore:DrawPrimitiveStore;
 		private var _cameraViewMatrix:MatrixAway3D;
 		private var _viewTransformDictionary:Dictionary;
 		private var _container:ObjectContainer3D;
@@ -23,19 +21,11 @@
 		private var _vy:Number;
 		private var _vz:Number;
 		private var _depthPoint:Number3D = new Number3D();
-		
-		public function get view():View3D
-        {
-        	return _view;
-        }
-        public function set view(val:View3D):void
-        {
-        	_view = val;
-        	_drawPrimitiveStore = view.drawPrimitiveStore;
-        }
         
-		public function primitives(source:Object3D, viewTransform:MatrixAway3D, consumer:IPrimitiveConsumer):void
-		{	
+		public override function primitives(source:Object3D, viewTransform:MatrixAway3D, consumer:IPrimitiveConsumer):void
+		{
+			super.primitives(source, viewTransform, consumer);
+			
 			_container = source as ObjectContainer3D;
 			
 			_cameraViewMatrix = _view.camera.viewMatrix;

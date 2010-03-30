@@ -176,12 +176,12 @@
 		/**
 		 * @inheritDoc
 		 */
-        public override function get billboards():Array
+        public override function get sprites():Array
         {
     		if (_primitiveDirty)
     			updatePrimitive();
     		
-            return _geometry.billboards;
+            return _geometry.sprites;
         }
         
 		/**

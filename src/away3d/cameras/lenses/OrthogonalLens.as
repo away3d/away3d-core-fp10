@@ -84,6 +84,7 @@ package away3d.cameras.lenses
         /** @private */
 		arcane override function getPerspective(screenZ:Number):Number
 		{
+			screenZ;
 			return _camera.zoom/_camera.focus;
 		}
 		/** @private */

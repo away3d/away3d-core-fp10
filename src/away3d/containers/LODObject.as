@@ -1,8 +1,7 @@
 package away3d.containers
 {
-    import away3d.cameras.Camera3D;
+    import away3d.cameras.*;
     import away3d.core.base.*;
-    import away3d.core.utils.*;
 
     /**
     * 3d object container that is drawn only if its scaling to perspective falls within a given range.

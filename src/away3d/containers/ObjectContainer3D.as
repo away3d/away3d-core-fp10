@@ -16,7 +16,7 @@
     /**
     * 3d object container node for other 3d objects in a scene
     */
-    public class ObjectContainer3D extends Object3D
+    public class ObjectContainer3D extends Mesh
     {
 		/** @private */
         arcane function internalAddChild(child:Object3D):void
@@ -179,7 +179,7 @@
         /**
          * Returns the number of elements in the container,
          * including elements in child nodes.
-         * Elements can be faces, segments or billboards.
+         * Elements can be faces, segments or 3d sprites.
          * @return int
          */        
         public function get polyCount():int
@@ -420,7 +420,7 @@
 		 * @param	object	[optional]	The new object instance into which all properties are copied
 		 * @return						The new object instance with duplicated properties applied
 		 */
-        public function cloneAll(object:Object3D = null):Object3D
+        public override function cloneAll(object:Object3D = null):Object3D
         {
             var container:ObjectContainer3D = (object as ObjectContainer3D) || new ObjectContainer3D();
             super.clone(container);

@@ -18,7 +18,7 @@
     /**
     * Basic bitmap material
     */
-    public class BitmapMaskMaterial extends EventDispatcher implements ITriangleMaterial, IUVMaterial, ILayerMaterial, IBillboardMaterial
+    public class BitmapMaskMaterial extends EventDispatcher implements ITriangleMaterial, IUVMaterial, ILayerMaterial, ISpriteMaterial
     {
     	/** @private */
         arcane var _id:int;
@@ -560,9 +560,9 @@
 		/**
 		 * @inheritDoc
 		 */
-        public function renderBillboard(bill:DrawBillboard):void
+        public function renderSprite(bill:DrawSprite):void
         {
-            bill.source.session.renderBillboardBitmap(_renderBitmap, bill, smooth);
+            bill.source.session.renderSpriteBitmap(_renderBitmap, bill, smooth);
         }
         
 		/**

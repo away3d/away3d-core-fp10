@@ -23,7 +23,7 @@ package away3d.core.utils
 		private var _source:Object3D;
 		private var _session:AbstractRenderSession;
 		private var _sv:ScreenVertex;
-		private var _bill:DrawBillboard;
+		private var _sprite:DrawSprite;
 		private var _seg:DrawSegment;
 		private var _tri:DrawTriangle;
 		private var _array:Array = new Array();
@@ -139,32 +139,32 @@ package away3d.core.utils
 			return _screenCommands[id] || (_screenCommands[id] = []);
 		}
 		
-	    public function createDrawBillboard(source:Object3D, billboardVO:BillboardVO, material:IBillboardMaterial, screenVertices:Array, screenIndices:Array, index:uint, scale:Number, generated:Boolean = false):DrawBillboard
+	    public function createDrawSprite(source:Object3D, spriteVO:SpriteVO, material:ISpriteMaterial, screenVertices:Array, screenIndices:Array, index:uint, scale:Number, generated:Boolean = false):DrawSprite
 	    {
 	    	if (!(_dbArray = _dbDictionary[source.session]))
 				_dbArray = _dbDictionary[source.session] = [];
 			
 	        if (_dbStore.length) {
-	        	_dbArray.push(_bill = _dbStore.pop());
+	        	_dbArray.push(_sprite = _dbStore.pop());
 	    	} else {
-	        	_dbArray.push(_bill = new DrawBillboard());
-	            _bill.view = view;
-	            _bill.create = createDrawBillboard;
+	        	_dbArray.push(_sprite = new DrawSprite());
+	            _sprite.view = view;
+	            _sprite.create = createDrawSprite;
 	        }
-	        _bill.generated = generated;
-	        _bill.source = source;
-	        _bill.material = material;
-	        _bill.billboardVO = billboardVO;
-	        _bill.screenVertices = screenVertices;
-	        _bill.screenIndices = screenIndices;
-	        _bill.index = index;
-	        _bill.width = billboardVO.width;
-	        _bill.height = billboardVO.height;
-	        _bill.rotation = billboardVO.rotation;
-	        _bill.scale = scale;
-	        _bill.calc();
+	        _sprite.generated = generated;
+	        _sprite.source = source;
+	        _sprite.material = material;
+	        _sprite.spriteVO = spriteVO;
+	        _sprite.screenVertices = screenVertices;
+	        _sprite.screenIndices = screenIndices;
+	        _sprite.index = index;
+	        _sprite.width = spriteVO.width;
+	        _sprite.height = spriteVO.height;
+	        _sprite.rotation = spriteVO.rotation;
+	        _sprite.scale = scale;
+	        _sprite.calc();
 	        
-	        return _bill;
+	        return _sprite;
 	    }
 	    
 	    public function createDrawSegment(source:Object3D, segmentVO:SegmentVO, material:ISegmentMaterial, screenVertices:Array, screenIndices:Array, screenCommands:Array, startIndex:int, endIndex:int, generated:Boolean = false):DrawSegment

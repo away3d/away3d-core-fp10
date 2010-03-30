@@ -9,7 +9,7 @@
     /**
     * Creates a 3d wire polygon.
     */ 
-    public class WireCircle extends AbstractPrimitive
+    public class WireRegularPolygon extends AbstractPrimitive
     {
         private var _radius:Number;
         private var _sides:Number;
@@ -95,7 +95,7 @@
 		 *
 		 * @param	init			[optional]	An initialisation object for specifying default instance properties.
 		 */
-        public function WireCircle(init:Object = null)
+        public function WireRegularPolygon(init:Object = null)
         {
             super(init);
 
@@ -103,7 +103,7 @@
             _sides = ini.getInt("sides", 8, {min:3});
 			_yUp = ini.getBoolean("yUp", true);
 			
-			type = "WireCircle";
+			type = "WireRegularPolygon";
         	url = "primitive";
         }
     }

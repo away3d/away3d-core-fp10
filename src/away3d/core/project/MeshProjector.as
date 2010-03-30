@@ -18,9 +18,13 @@ package away3d.core.project
 	
 	public class MeshProjector implements IPrimitiveProvider
 	{
-		private var _view:View3D;
-		private var _drawPrimitiveStore:DrawPrimitiveStore;
-		private var _cameraVarsStore:CameraVarsStore;
+		/** @private */
+		arcane var _view:View3D;
+		/** @private */
+		arcane var _drawPrimitiveStore:DrawPrimitiveStore;
+		/** @private */
+		arcane var _cameraVarsStore:CameraVarsStore;
+		
 		private var _screenVertices:Array;
 		private var _screenIndices:Array;
 		private var _screenCommands:Array;
@@ -36,7 +40,7 @@ package away3d.core.project
 		private var _defaultClippedSegmentVOs:Array = new Array();
 		private var _segmentVOs:Array;
 		private var _defaultClippedBillboards:Array = new Array();
-		private var _billboardVOs:Array;
+		private var _spriteVOs:Array;
 		private var _camera:Camera3D;
 		private var _clipping:Clipping;
 		private var _lens:AbstractLens;
@@ -45,7 +49,7 @@ package away3d.core.project
 		private var _outlineIndices:Dictionary = new Dictionary(true);
 		private var _faceMaterial:ITriangleMaterial;
 		private var _segmentMaterial:ISegmentMaterial;
-		private var _billboardMaterial:IBillboardMaterial;
+		private var _spriteMaterial:ISpriteMaterial;
 		private var _face:Face;
 		private var _faceVO:FaceVO;
 		private var _index:int;
@@ -58,8 +62,8 @@ package away3d.core.project
 		private var _segmentVO:SegmentVO;
 		private var _seg:DrawSegment;
 		private var _smaterial:ISegmentMaterial;
-		private var _billboardVO:BillboardVO;
-		private var _bmaterial:IBillboardMaterial;
+		private var _spriteVO:SpriteVO;
+		private var _spmaterial:ISpriteMaterial;
 		private var _n01:Face;
 		private var _n12:Face;
 		private var _n20:Face;
@@ -115,7 +119,7 @@ package away3d.core.project
         	
 			_faceMaterial = _mesh.faceMaterial;
 			_segmentMaterial = _mesh.segmentMaterial;
-			_billboardMaterial = _mesh.billboardMaterial;
+			_spriteMaterial = _mesh.spriteMaterial;
 			
 			_backmat = _mesh.back || _faceMaterial;
 			
@@ -135,9 +139,9 @@ package away3d.core.project
 				_faceVOs.length = 0;
             	_segmentVOs = _defaultClippedSegmentVOs;
 				_segmentVOs.length = 0;
-            	_billboardVOs = _defaultClippedBillboards;
-				_billboardVOs.length = 0;
-            	_clipping.checkElements(_mesh, _faceVOs, _segmentVOs, _billboardVOs, _vertices, _screenCommands, _screenIndices, _startIndices);
+            	_spriteVOs = _defaultClippedBillboards;
+				_spriteVOs.length = 0;
+            	_clipping.checkElements(_mesh, _faceVOs, _segmentVOs, _spriteVOs, _vertices, _screenCommands, _screenIndices, _startIndices);
 			} else {
             	_vertices = _mesh.vertices;
             	_screenCommands = _mesh.commands;
@@ -145,7 +149,7 @@ package away3d.core.project
             	_startIndices = _mesh.startIndices;
             	_faceVOs = _mesh.faceVOs;
             	_segmentVOs = _mesh.segmentVOs;
-            	_billboardVOs = _mesh.billboardVOs;
+            	_spriteVOs = _mesh.spriteVOs;
             }
             
 			_screenVertices = _drawPrimitiveStore.getScreenVertices(source.id);
@@ -278,7 +282,7 @@ package away3d.core.project
                 if (!_smaterial.visible)
                     continue;
                 
-                _seg = _drawPrimitiveStore.createDrawSegment(source, _segmentVO, _smaterial, _screenVertices, _screenIndices, _screenCommands, _startIndex, _endIndex, _segmentVO.generated)
+                _seg = _drawPrimitiveStore.createDrawSegment(source, _segmentVO, _smaterial, _screenVertices, _screenIndices, _screenCommands, _startIndex, _endIndex, _segmentVO.generated);
                 
                 //check whether screenClipping removes segment
                 if (!consumer.primitive(_seg))
@@ -293,20 +297,20 @@ package away3d.core.project
 				_seg.screenZ += _mesh.screenZOffset;
             }
             
-            //loop through all clipped billboards
-            for each (_billboardVO in _billboardVOs)
+            //loop through all clipped sprites
+            for each (_spriteVO in _spriteVOs)
             {
             	_index = _startIndices[_i++];
 				
 				if(!_clipFlag && _screenVertices[_screenIndices[_index]*3] == null)
 					continue;
                 
-                _bmaterial = _billboardVO.material || _billboardMaterial;
+                _spmaterial = _spriteVO.material || _spriteMaterial;
                 
-                if (!_bmaterial.visible)
+                if (!_spmaterial.visible)
                     continue;
 		        
-	            consumer.primitive(_drawPrimitiveStore.createDrawBillboard(source, _billboardVO, _bmaterial, _screenVertices, _screenIndices, _index, _billboardVO.scaling*_zoom / (1 + _screenVertices[_screenIndices[_index]*3+2] / _focus)));
+	            consumer.primitive(_drawPrimitiveStore.createDrawSprite(source, _spriteVO, _spmaterial, _screenVertices, _screenIndices, _index, _spriteVO.scaling*_zoom / (1 + _screenVertices[_screenIndices[_index]*3+2] / _focus)));
             }
 		}
 	}

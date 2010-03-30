@@ -2,14 +2,15 @@ package away3d.core.utils
 {
 	import away3d.core.base.*;
 	import away3d.materials.*;
+	import away3d.sprites.*;
 	
-	public class BillboardVO
+	public class SpriteVO
 	{
 		public var vertex:Vertex;
 		
 		public var command:String;
 		
-		public var material:IBillboardMaterial;
+		public var material:ISpriteMaterial;
 		
 		public var width:Number;
 		
@@ -19,6 +20,6 @@ package away3d.core.utils
 		
 		public var scaling:Number;
 		
-		public var billboard:Billboard;
+		public var sprite3d:Sprite3D;
 	}
 }

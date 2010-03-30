@@ -1,13 +1,13 @@
 package away3d.events
 {
-    import away3d.core.base.*;
+	import away3d.sprites.*;
     
     import flash.events.Event;
     
     /**
     * Passed as a parameter when a segment event occurs
     */
-    public class BillboardEvent extends Event
+    public class SpriteEvent extends Event
     {
     	/**
     	 * Defines the value of the type property of a materialChanged event object.
@@ -17,7 +17,7 @@ package away3d.events
     	/**
     	 * A reference to the Billboard object that is relevant to the event.
     	 */
-        public var billboard:Billboard;
+        public var sprite:Sprite3D;
 		
 		/**
 		 * Creates a new <code>BillboardEvent</code> object.
@@ -25,10 +25,10 @@ package away3d.events
 		 * @param	type		The type of the event. Possible values are: <code>BillboardEvent.MATERIAL_CHANGED</code>.
 		 * @param	Billboard	A reference to the Billboard object that is relevant to the event.
 		 */
-        public function BillboardEvent(type:String, billboard:Billboard)
+        public function SpriteEvent(type:String, sprite:Sprite3D)
         {
             super(type);
-            this.billboard = billboard;
+            this.sprite = sprite;
         }
 		
 		/**
@@ -36,7 +36,7 @@ package away3d.events
 		 */
         public override function clone():Event
         {
-            return new BillboardEvent(type, billboard);
+            return new SpriteEvent(type, sprite);
         }
     }
 }

@@ -1,6 +1,7 @@
-package away3d.core.base
+package away3d.sprites
 {
     import away3d.arcane;
+	import away3d.core.base.*;
     import away3d.core.utils.*;
     import away3d.events.*;
     import away3d.materials.*;
@@ -8,7 +9,7 @@ package away3d.core.base
     use namespace arcane;
     
 	 /**
-	 * Dispatched when the material of the billboard changes.
+	 * Dispatched when the material of the sprite3d changes.
 	 * 
 	 * @eventType away3d.events.FaceEvent
 	 */
@@ -19,22 +20,22 @@ package away3d.core.base
     * 
     * @see away3d.core.base.Mesh
     */
-    public class Billboard extends Element
+    public class Sprite3D extends Element
     {
 		/** @private */
         arcane var _vertex:Vertex;
 		/** @private */
-        arcane var _material:IBillboardMaterial;
+        arcane var _material:ISpriteMaterial;
         
 		private var _width:Number;
 		private var _height:Number;
 		private var _rotation:Number;
 		private var _scaling:Number;
 		
-		public var billboardVO:BillboardVO = new BillboardVO();
+		public var spriteVO:SpriteVO = new SpriteVO();
 		
 		/**
-		 * Returns an array of vertex objects that are used by the billboard.
+		 * Returns an array of vertex objects that are used by the 3d sprite.
 		 */
         public override function get vertices():Array
         {
@@ -42,7 +43,7 @@ package away3d.core.base
         }
         
 		/**
-		 * Returns an array of drawing command strings that are used by the billboard.
+		 * Returns an array of drawing command strings that are used by the 3d sprite.
 		 */
         public override function get commands():Array
         {
@@ -50,35 +51,15 @@ package away3d.core.base
         }
         
 		/**
-		 * Defines the vertex of the billboard.
+		 * Returns the vertex of the 3d sprite.
 		 */
         public function get vertex():Vertex
         {
             return _vertex;
         }
-
-        public function set vertex(value:Vertex):void
-        {
-            if (value == _vertex)
-                return;
-			
-			if (_vertex) {
-	  			_index = _vertex.parents.indexOf(this);
-	  				if(_index != -1)
-	  					_vertex.parents.splice(_index, 1);
-	  		}
-	  		
-			_commands[0] = billboardVO.command = "M";
-            _vertices[0] = _vertex = billboardVO.vertex = value;
-			
-			if (_vertex)
-				_vertex.parents.push(this);
-  			
-  			vertexDirty = true;
-        }
         
     	/**
-    	 * Defines the x coordinate of the billboard relative to the local coordinates of the parent <code>Mesh</code>.
+    	 * Defines the x coordinate of the 3d sprite relative to the local coordinates of the parent <code>Mesh</code>.
     	 */
         public function get x():Number
         {
@@ -103,7 +84,7 @@ package away3d.core.base
         }
 		
     	/**
-    	 * Defines the y coordinate of the billboard relative to the local coordinates of the parent <code>Mesh</code>.
+    	 * Defines the y coordinate of the 3d sprite relative to the local coordinates of the parent <code>Mesh</code>.
     	 */
         public function get y():Number
         {
@@ -128,7 +109,7 @@ package away3d.core.base
         }
 		
     	/**
-    	 * Defines the z coordinate of the billboard relative to the local coordinates of the parent <code>Mesh</code>.
+    	 * Defines the z coordinate of the 3d sprite relative to the local coordinates of the parent <code>Mesh</code>.
     	 */
         public function get z():Number
         {
@@ -154,14 +135,14 @@ package away3d.core.base
         }
         
 		/**
-		 * Defines the material of the billboard.
+		 * Defines the material of the 3d sprite.
 		 */
-        public function get material():IBillboardMaterial
+        public function get material():ISpriteMaterial
         {
             return _material;
         }
 
-        public function set material(value:IBillboardMaterial):void
+        public function set material(value:ISpriteMaterial):void
         {
             if (_material == value)
                 return;
@@ -169,14 +150,14 @@ package away3d.core.base
 			if (_material != null && parent)
 				parent.removeMaterial(this, _material);
 			
-            _material = billboardVO.material = value;
+            _material = spriteVO.material = value;
 			
 			if (_material != null && parent)
 				parent.addMaterial(this, _material);
         }
         
 		/**
-		 * Defines the width of the billboard.
+		 * Defines the width of the 3d sprite.
 		 */
         public function get width():Number
         {
@@ -188,13 +169,13 @@ package away3d.core.base
             if (_width == value)
                 return;
 
-            _width = billboardVO.width = value;
+            _width = spriteVO.width = value;
 			
             notifyMappingChange();
         }
         
 		/**
-		 * Defines the height of the billboard.
+		 * Defines the height of the 3d sprite.
 		 */
         public function get height():Number
         {
@@ -206,13 +187,13 @@ package away3d.core.base
             if (_height == value)
                 return;
 			
-            _height = billboardVO.height = value;
+            _height = spriteVO.height = value;
 			
             notifyMappingChange();
         }
         
 		/**
-		 * Defines the scaling of the billboard when an <code>IUVMaterial</code> is used.
+		 * Defines the scaling of the 3d sprite when an <code>IUVMaterial</code> is used.
 		 */
         public function get scaling():Number
         {
@@ -224,13 +205,13 @@ package away3d.core.base
             if (_scaling == value)
                 return;
 			
-            _scaling = billboardVO.scaling = value;
+            _scaling = spriteVO.scaling = value;
 			
             notifyMappingChange();
         }
         
 		/**
-		 * Defines the rotation of the billboard.
+		 * Defines the rotation of the 3d sprite.
 		 */
         public function get rotation():Number
         {
@@ -242,13 +223,13 @@ package away3d.core.base
             if (_rotation == value)
                 return;
 			
-            _rotation = billboardVO.rotation = value;
+            _rotation = spriteVO.rotation = value;
 			
             notifyMappingChange();
         }
         
 		/**
-		 * Returns the squared bounding radius of the billboard.
+		 * Returns the squared bounding radius of the 3d sprite.
 		 */
         public override function get radius2():Number
         {
@@ -318,21 +299,26 @@ package away3d.core.base
 		/**
 		 * Creates a new <code>Billboard</code> object.
 		 *
-		 * @param	vertex					The vertex object of the billboard
-		 * @param	material	[optional]	The material used by the billboard to render
+		 * @param	vertex					The vertex object of the 3d sprite
+		 * @param	material	[optional]	The material used by the 3d sprite to render
 		 */
-        public function Billboard(vertex:Vertex, material:IBillboardMaterial = null, width:Number = 10, height:Number = 10, rotation:Number = 0, scaling:Number = 1)
+        public function Sprite3D(material:ISpriteMaterial = null, width:Number = 10, height:Number = 10, rotation:Number = 0, scaling:Number = 1)
         {
-            this.vertex = vertex;
             this.material = material;
             this.width = width;
             this.height = height;
             this.rotation = rotation;
             this.scaling = scaling;
             
-            billboardVO.billboard = this;
+            spriteVO.sprite3d = this;
             
-            vertexDirty = true;
+        	//setup the vertex
+            _commands[0] = spriteVO.command = "M";
+            _vertices[0] = _vertex = spriteVO.vertex = new Vertex();
+			
+			_vertex.parents.push(this);
+  			
+  			vertexDirty = true;
         }
     }
 }

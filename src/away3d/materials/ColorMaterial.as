@@ -14,7 +14,7 @@ package away3d.materials
     /**
     * Material for solid color drawing
     */
-    public class ColorMaterial extends EventDispatcher implements ITriangleMaterial, IFogMaterial, IBillboardMaterial
+    public class ColorMaterial extends EventDispatcher implements ITriangleMaterial, IFogMaterial, ISpriteMaterial
     {
     	/** @private */
         arcane var _id:int;
@@ -133,9 +133,9 @@ package away3d.materials
 		/**
 		 * @inheritDoc
 		 */
-        public function renderBillboard(bill:DrawBillboard):void
+        public function renderSprite(bill:DrawSprite):void
         {
-            bill.source.session.renderBillboardColor(_color, _alpha, bill);
+            bill.source.session.renderSpriteColor(_color, _alpha, bill);
         }
         
 		/**

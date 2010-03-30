@@ -90,7 +90,7 @@ package away3d.events
 		/**
 		 * The 3d element inside which the event took place.
 		 */
-        public var element:Object;
+        public var element:Element;
         	
 		/**
 		 * The draw primitive inside which the event took place.
