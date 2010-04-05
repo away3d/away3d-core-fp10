@@ -1,7 +1,5 @@
 package away3d.core.light
-{
-	import away3d.core.base.*;
-	
+{	
     /**
     * Interface for objects that provide lighting to the scene
     */
@@ -17,7 +15,5 @@ package away3d.core.light
         function light(consumer:ILightConsumer):void;
         
         function get debug():Boolean;
-        
-        function get debugPrimitive():Object3D;
     }
 }

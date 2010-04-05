@@ -1,9 +1,11 @@
 package away3d.lights
 {
 	import away3d.arcane;
+	import away3d.containers.*;
     import away3d.core.base.*;
     import away3d.core.light.*;
-    import away3d.core.utils.*;
+	import away3d.core.math.*;
+	import away3d.events.*;
     import away3d.materials.ColorMaterial;
     import away3d.primitives.Sphere;
 	
@@ -14,46 +16,63 @@ package away3d.lights
     * The scalar value of distance does not affect the resulting light intensity, it is calulated as if the
     * source is an infinite distance away with an infinite brightness.
     */
-    public class DirectionalLight3D extends Object3D implements ILightProvider, IClonable
+    public class DirectionalLight3D extends AbstractLight
     {
-        private var _color:int;
-        private var _red:Number;
-        private var _green:Number;
-        private var _blue:Number;
+    	private var _direction:Number3D = new Number3D();
         private var _ambient:Number;
         private var _diffuse:Number;
         private var _specular:Number;
         private var _brightness:Number;
+    	private var _sceneDirection:Number3D = new Number3D();
+    	private var _sceneDirectionDirty:Boolean;
     	
-    	private var _colorDirty:Boolean;
     	private var _ambientDirty:Boolean;
     	private var _diffuseDirty:Boolean;
     	private var _specularDirty:Boolean;
 		private var _ls:DirectionalLight = new DirectionalLight();
 		private var _debugPrimitive:Sphere;
         private var _debugMaterial:ColorMaterial;
-        private var _debug:Boolean;
 		
-		/**
-		 * Defines the color of the light object.
-		 */
-		public function get color():int
+		private function onParentChange(event:Object3DEvent):void
+        {
+			_sceneDirectionDirty = true;
+        }
+        
+    	/** @private */
+		protected override function updateParent(val:ObjectContainer3D):void
 		{
-			return _color;
+			if (_parent != null) {
+                _parent.removeOnSceneChange(onParentChange);
+                _parent.removeOnSceneTransformChange(onParentChange);
+            }
+			
+            _parent = val;
+			
+            if (_parent != null) {
+                _parent.addOnSceneChange(onParentChange);
+                _parent.addOnSceneTransformChange(onParentChange);
+                
+                _sceneDirectionDirty = true;
+            }
 		}
+		        
+    	/**
+    	 * Defines the direction of the light relative to the local coordinates of the parent <code>ObjectContainer3D</code>.
+    	 */
+        public function get direction():Number3D
+        {
+            return _direction;
+        }
 		
-		public function set color(val:int):void
-		{
-			_color = val;
-			_red = ((color & 0xFF0000) >> 16)/255;
-            _green = ((color & 0xFF00) >> 8)/255;
-            _blue  = (color & 0xFF)/255;
-            _colorDirty = true;
-            _ambientDirty = true;
-            _diffuseDirty = true;
-            _specularDirty = true;
-		}
-		
+        public function set direction(value:Number3D):void
+        {
+            _direction.x = value.x;
+            _direction.y = value.y;
+            _direction.z = value.z;
+            
+			_sceneDirectionDirty = true;
+        }
+        
 		/**
 		 * Defines a coefficient for the ambient light intensity.
 		 */
@@ -101,7 +120,6 @@ package away3d.lights
             _specularDirty = true;
 		}
 		
-		//TODO: brightness on directional light needs implementing
 		/**
 		 * Defines a coefficient for the overall light intensity.
 		 */
@@ -119,24 +137,11 @@ package away3d.lights
             _specularDirty = true;
 		}
         
-        /**
-        * Toggles debug mode: light object is visualised in the scene.
-        */
-        public function get debug():Boolean
-        {
-        	return _debug;
-        }
-        
-        public function set debug(val:Boolean):void
-        {
-        	_debug = val;
-        }
-        
 		public function get debugPrimitive():Object3D
 		{
 			if (!_debugPrimitive) {
 				_debugPrimitive = new Sphere({radius:10});
-				_scene.clearId(_id);
+				//_scene.clearId(_id);
 			}
 			
 			if (!_debugMaterial) {
@@ -149,6 +154,20 @@ package away3d.lights
 			return _debugPrimitive;
 		}
 		
+		
+		public function get sceneDirection():Number3D
+		{
+			if (_sceneDirectionDirty) {
+				_sceneDirectionDirty = false;
+				
+				_sceneDirection.rotate(_direction, _parent.sceneTransform);
+				
+				_ls.setDirection(_sceneDirection);
+			}
+			
+			return _sceneDirection;
+		}
+		
 		/**
 		 * Creates a new <code>DirectionalLight3D</code> object.
 		 * 
@@ -157,27 +176,37 @@ package away3d.lights
         public function DirectionalLight3D(init:Object = null)
         {
             super(init);
-            
-            color = ini.getColor("color", 0xFFFFFF);
+            direction = ini.getNumber3D("direction") || new Number3D();
             ambient = ini.getNumber("ambient", 0.5, {min:0, max:1});
             diffuse = ini.getNumber("diffuse", 0.5, {min:0, max:10});
             specular = ini.getNumber("specular", 1, {min:0, max:1});
             brightness = ini.getNumber("brightness", 1);
             debug = ini.getBoolean("debug", false);
-            
-            _ls.light = this;
         }
         
 		/**
 		 * @inheritDoc
 		 */
-        public function light(consumer:ILightConsumer):void
+        public override function light(consumer:ILightConsumer):void
         {
+        	//update direction
+        	if (_sceneDirectionDirty) {
+        		_sceneDirectionDirty = false;
+				
+				_sceneDirection.rotate(_direction, _parent.sceneTransform);
+				
+				_ls.setDirection(_sceneDirection);
+        	}
+        	
             //update color
 			if (_colorDirty) {
 				_ls.red = _red;
 				_ls.green = _green;
 				_ls.blue = _blue;
+				
+				_ambientDirty = true;
+            	_diffuseDirty = true;
+            	_specularDirty = true;
 			}
         	
         	//update coefficients
@@ -215,20 +244,18 @@ package away3d.lights
 		/**
 		 * Duplicates the light object's properties to another <code>DirectionalLight3D</code> object
 		 * 
-		 * @param	object	[optional]	The new object instance into which all properties are copied
-		 * @return						The new object instance with duplicated properties applied
+		 * @param	light	[optional]	The new light instance into which all properties are copied
+		 * @return						The new light instance with duplicated properties applied
 		 */
-        public override function clone(object:Object3D = null):Object3D
+        public override function clone(light:AbstractLight = null):AbstractLight
         {
-            var light:DirectionalLight3D = (object as DirectionalLight3D) || new DirectionalLight3D();
-            super.clone(light);
-            light.color = color;
-            light.brightness = brightness;
-            light.ambient = ambient;
-            light.diffuse = diffuse;
-            light.specular = specular;
-            light.debug = debug;
-            return light;
+            var directionalLight3D:DirectionalLight3D = (light as DirectionalLight3D) || new DirectionalLight3D();
+            super.clone(directionalLight3D);
+            directionalLight3D.brightness = brightness;
+            directionalLight3D.ambient = ambient;
+            directionalLight3D.diffuse = diffuse;
+            directionalLight3D.specular = specular;
+            return directionalLight3D;
         }
 
     }

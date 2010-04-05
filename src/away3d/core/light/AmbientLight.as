@@ -1,7 +1,5 @@
 package away3d.core.light
 {
-	import away3d.lights.*;
-	
 	import flash.display.*;
 
     /**
@@ -9,10 +7,6 @@ package away3d.core.light
     */
     public class AmbientLight extends LightPrimitive
     {
-    	/**
-    	 * A reference to the <code>AmbientLight3D</code> object used by the light primitive.
-    	 */
-        public var light:AmbientLight3D;
         
         /**
         * Updates the bitmapData object used as the lightmap for ambient light shading.
@@ -27,4 +21,3 @@ package away3d.core.light
         }
     }
 }
-

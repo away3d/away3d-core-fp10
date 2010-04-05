@@ -29,7 +29,7 @@
         private var _normalDictionary:Dictionary = new Dictionary(true);
         private var _normalBitmap:BitmapData;
         private var _shininess:Number;
-		private var _specular:Number;
+		private var _specular:uint;
 		private var _specularTransform:MatrixAway3D;
 		private var _szx:Number;
 		private var _szy:Number;
@@ -194,12 +194,12 @@
 		/**
 		 * Coefficient for specular light level.
 		 */
-		public function get specular():Number
+		public function get specular():uint
 		{
 			return _specular;
 		}
 		
-		public function set specular(val:Number):void
+		public function set specular(val:uint):void
 		{
 			_specular = val;
 		}
@@ -229,7 +229,7 @@
 			_bitmap = bitmap;
 			
             shininess = ini.getNumber("shininess", 20);
-            specular = ini.getNumber("specular", 1);
+            specular = ini.getColor("specular", 0xFFFFFF);
             tangentSpace = ini.getBoolean("tangentSpace", false);
         }
         

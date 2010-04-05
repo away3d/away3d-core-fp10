@@ -1,16 +1,12 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.containers.View3D;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.Object3D;
-	import away3d.core.light.PointLight;
-	import away3d.core.math.MatrixAway3D;
-	import away3d.core.math.Number3D;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.core.light.*;
+	import away3d.core.math.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.Shader;
-	import flash.display.ShaderPrecision;
+	import flash.display.*;
 
 	use namespace arcane;
 	
@@ -139,7 +135,7 @@ package away3d.materials
 			// use first point light
 			if (source.lightarray.points.length > 0) {
 				point = source.lightarray.points[0];
-				_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
+				_objectLightPos.transform(point.position, invSceneTransform);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
 				_pointLightShader.data.phongComponents.value[0] = _specular*point.specular;

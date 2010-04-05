@@ -1,42 +1,34 @@
 package away3d.core.light
 {
+	import away3d.core.draw.ScreenVertex;
+	import away3d.lights.PointLight3D;
+	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.math.*;
-	import away3d.events.*;
-	import away3d.lights.*;
 	
 	import flash.utils.*;
-
+	
+	use namespace arcane;
+	
     /**
     * Point light primitive
     */
     public class PointLight extends LightPrimitive
     {
-    	private var _light:PointLight3D;
-    	
+    	public var position:Number3D = new Number3D();
         /**
         * Positions dictionary for the view positions used by shading materials.
         */
-        public var viewPositions:Dictionary;
-        
-    	/**
-    	 * A reference to the <code>PointLight3D</code> object used by the light primitive.
-    	 */
-        public function get light():PointLight3D
-        {
-        	return _light;
-        }
-        public function set light(val:PointLight3D):void
-        {
-        	_light = val;
-        	val.addOnSceneTransformChange(updatePosition);
-        }
+        public var screenPositions:Dictionary;
         
     	/**
     	 * Updates the position of the point light.
     	 */
-        public function updatePosition(e:Object3DEvent):void
+        public function setPosition(scenePosition:Number3D):void
         {
+        	//update position vector
+        	position.clone(scenePosition);
+        	
         	clearViewPositions();
         }
         
@@ -45,18 +37,21 @@ package away3d.core.light
         */
         public function clearViewPositions():void
         {
-        	viewPositions = new Dictionary(true);
+        	screenPositions = new Dictionary(true);
         }
         
         /**
         * Updates the view position.
         */
-        public function setViewPosition(view:View3D):void
+        public function setScreenPosition(view:View3D):void
         {
-        	if (!viewPositions[view])
-        		viewPositions[view] = new Number3D();
+        	var screenPosition:ScreenVertex = view.camera.screen(light.parent, (light as PointLight3D)._vertex);
         	
-        	viewPositions[view].clone(view.cameraVarsStore.viewTransformDictionary[_light].position);
+        	var persp:Number = view.camera.zoom/(1 + screenPosition.z/view.camera.focus);
+        	screenPosition.x /= persp;
+        	screenPosition.y /= persp;
+        	
+        	screenPositions[view] = screenPosition;
         }
     }
 }

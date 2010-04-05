@@ -4,8 +4,6 @@ package away3d.core.light
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.math.*;
-	import away3d.events.*;
-	import away3d.lights.*;
 	
 	import flash.display.*;
 	import flash.filters.ColorMatrixFilter;
@@ -19,7 +17,6 @@ package away3d.core.light
     */
     public class DirectionalLight extends LightPrimitive
     {
-    	private var _light:DirectionalLight3D;
         private var _normalMatrix:ColorMatrixFilter = new ColorMatrixFilter();
     	private var _matrix:Matrix = new Matrix();
     	private var _shape:Shape = new Shape();
@@ -34,11 +31,14 @@ package away3d.core.light
         private var _red:Number;
 		private var _green:Number;
 		private var _blue:Number;
+		private var _sred:uint;
+		private var _sgreen:uint;
+		private var _sblue:uint;
         private var _szx:Number;
         private var _szy:Number;
         private var _szz:Number;
 		
-        private var direction:Number3D = new Number3D();
+        public var direction:Number3D = new Number3D();
         
         /**
         * Transform dictionary for the diffuse lightmap used by shading materials.
@@ -70,19 +70,6 @@ package away3d.core.light
         */
         public var normalMatrixSpecularTransform:Dictionary = new Dictionary(true);
         
-    	/**
-    	 * A reference to the <code>DirectionalLight3D</code> object used by the light primitive.
-    	 */
-        public function get light():DirectionalLight3D
-        {
-        	return _light;
-        }
-        public function set light(val:DirectionalLight3D):void
-        {
-        	_light = val;
-        	val.addOnSceneTransformChange(updateDirection);
-        }
-        
         /**
         * Updates the bitmapData object used as the lightmap for ambient light shading.
         * 
@@ -90,11 +77,11 @@ package away3d.core.light
         */
 		public function updateAmbientBitmap():void
         {
-        	ambientBitmap = new BitmapData(256, 256, false, int(ambient*red*0xFF << 16) | int(ambient*green*0xFF << 8) | int(ambient*blue*0xFF));
+        	ambientBitmap = new BitmapData(256, 256, false, int(ambient*red << 16) | int(ambient*green << 8) | int(ambient*blue));
         	ambientBitmap.lock();
         	
         	//update colortransform
-        	ambientColorTransform = new ColorTransform(1, 1, 1, 1, ambient*red*0xFF, ambient*green*0xFF, ambient*blue*0xFF, 0);
+        	ambientColorTransform = new ColorTransform(1, 1, 1, 1, ambient*red, ambient*green, ambient*blue, 0);
         }
         
         /**
@@ -118,7 +105,7 @@ package away3d.core.light
     			if (g > 1) g = 1;
     			var b:Number = (i*diffuse/14);
     			if (b > 1) b = 1;
-    			colArray.push((r*red*0xFF << 16) | (g*green*0xFF << 8) | b*blue*0xFF);
+    			colArray.push((r*red << 16) | (g*green << 8) | b*blue);
     			alphaArray.push(1);
     			pointArray.push(int(30+225*2*Math.acos(i/14)/Math.PI));
     		}
@@ -128,7 +115,7 @@ package away3d.core.light
     		diffuseBitmap.draw(_shape);
         	
         	//update colortransform
-        	diffuseColorTransform = new ColorTransform(diffuse*red, diffuse*green, diffuse*blue, 1, 0, 0, 0, 0);
+        	diffuseColorTransform = new ColorTransform(diffuse*red/255, diffuse*green/255, diffuse*blue/255, 1, 0, 0, 0, 0);
         }
         
         /**
@@ -153,7 +140,7 @@ package away3d.core.light
     			if (g > 1) g = 1;
     			var b:Number = (i*diffuse/14 + ambient);
     			if (b > 1) b = 1;
-    			colArray.push((r*red*0xFF << 16) | (g*green*0xFF << 8) | b*blue*0xFF);
+    			colArray.push((r*red << 16) | (g*green << 8) | b*blue);
     			alphaArray.push(1);
     			pointArray.push(int(30+225*2*Math.acos(i/14)/Math.PI));
     		}
@@ -178,7 +165,7 @@ package away3d.core.light
     		var pointArray:Array = [];
     		var i:int = 15;
     		while (i--) {
-    			colArray.push((i*specular*red*0xFF/14 << 16) + (i*specular*green*0xFF/14 << 8) + i*specular*blue*0xFF/14);
+    			colArray.push((i*specular*red/14 << 16) + (i*specular*green/14 << 8) + i*specular*blue/14);
     			alphaArray.push(1);
     			pointArray.push(int(30+225*2*Math.acos(Math.pow(i/14,1/20))/Math.PI));
     		}
@@ -202,12 +189,10 @@ package away3d.core.light
     	/**
     	 * Updates the direction vector of the directional light.
     	 */
-        public function updateDirection(e:Object3DEvent):void
+        public function setDirection(sceneDirection:Number3D):void
         {
         	//update direction vector
-        	direction.x = _light.x;
-        	direction.y = _light.y;
-        	direction.z = _light.z;
+        	direction.clone(sceneDirection);
         	direction.normalize();
         	
         	nx = direction.x;
@@ -264,9 +249,9 @@ package away3d.core.light
         */
         public function setNormalMatrixDiffuseTransform(source:Object3D):void
         {
-        	_red = red*2*diffuse;
-			_green = green*2*diffuse;
-			_blue = blue*2*diffuse;
+        	_red = red*2*diffuse/255;
+			_green = green*2*diffuse/255;
+			_blue = blue*2*diffuse/255;
 			
         	_szx = diffuseTransform[source].szx;
 			_szy = -diffuseTransform[source].szy;
@@ -285,23 +270,27 @@ package away3d.core.light
         * 
         * @see colorMatrixTransform
         */
-        public function setNormalMatrixSpecularTransform(source:Object3D, view:View3D, specular:Number, shininess:Number):void
+        public function setNormalMatrixSpecularTransform(source:Object3D, view:View3D, specular:uint, shininess:Number):void
         {
         	if (!normalMatrixSpecularTransform[source])
 				normalMatrixSpecularTransform[source] = new Dictionary(true);
 			
-        	_red = (red*2 + shininess)*specular;
-			_green = (green*2 + shininess)*specular;
-			_blue = (blue*2 + shininess)*specular;
+			_sred = ((specular & 0xFF0000) >> 16)/255;
+            _sgreen = ((specular & 0xFF00) >> 8)/255;
+            _sblue  = (specular & 0xFF)/255;
+            
+        	_red = (red*2/255 + shininess)*_sred;
+			_green = (green*2/255 + shininess)*_sgreen;
+			_blue = (blue*2/255 + shininess)*_sblue;
 			
         	_szx = specularTransform[source][view].szx;
 			_szy = -specularTransform[source][view].szy;
 			_szz = specularTransform[source][view].szz;
 			
         	//multipication of [_szx, 0, 0, 0, 127 - _szx*127, 0, -_szy, 0, 0, 127 + _szy*127, 0, 0, _szz, 0, 127 - _szz*127, 0, 0, 0, 1, 0]*[_red, _red, _red, 0, -127*shininess-381*_red, _green, _green, _green, 0, -127*shininess-381*_green, _blue, _blue, _blue, 0, -127*shininess-381*_blue, 0, 0, 0, 1, 0];
-        	_normalMatrix.matrix = [_red*_szx,   _red*_szy,   _red*_szz,   0, -_red   *127*(_szx + _szy + _szz) -127*shininess*specular,
-        						    _green*_szx, _green*_szy, _green*_szz, 0, -_green *127*(_szx + _szy + _szz) -127*shininess*specular,
-        						    _blue*_szx,  _blue*_szy,  _blue*_szz,  0, -_blue  *127*(_szx + _szy + _szz) -127*shininess*specular,
+        	_normalMatrix.matrix = [_red*_szx,   _red*_szy,   _red*_szz,   0, -_red   *127*(_szx + _szy + _szz) -127*shininess*_sred,
+        						    _green*_szx, _green*_szy, _green*_szz, 0, -_green *127*(_szx + _szy + _szz) -127*shininess*_sgreen,
+        						    _blue*_szx,  _blue*_szy,  _blue*_szz,  0, -_blue  *127*(_szx + _szy + _szz) -127*shininess*_sblue,
         						   0, 0, 0, 1, 0];
         	
         	normalMatrixSpecularTransform[source][view] = _normalMatrix.clone();

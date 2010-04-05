@@ -1,18 +1,12 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.containers.View3D;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.Object3D;
-	import away3d.core.light.DirectionalLight;
-	import away3d.core.light.PointLight;
-	import away3d.core.math.MatrixAway3D;
-	import away3d.core.math.Number3D;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.core.light.*;
+	import away3d.core.math.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.Shader;
-	import flash.display.ShaderJob;
-	import flash.display.ShaderPrecision;
+	import flash.display.*;
 	
 	use namespace arcane;
 	
@@ -179,6 +173,7 @@ package away3d.materials
         {
         	var scenePosition : Number3D = _mesh.scenePosition;
         	var lightPosition : Number3D;
+        	var lightDirection : Number3D;
         	var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
         	var shaderJob : ShaderJob;
         	var diffuseStr : Number;
@@ -200,7 +195,7 @@ package away3d.materials
 		        	infinite = (point.fallOff == Number.POSITIVE_INFINITY || point.fallOff == Number.NEGATIVE_INFINITY);
 		        	
 		        	if (!infinite) {
-		        		lightPosition = point.light.scenePosition;
+		        		lightPosition = point.position;
 		        		dist = 	(lightPosition.x-scenePosition.x)*(lightPosition.x-scenePosition.x) +
 		        				(lightPosition.y-scenePosition.y)*(lightPosition.y-scenePosition.y) +
 		        				(lightPosition.z-scenePosition.z)*(lightPosition.z-scenePosition.z);
@@ -209,8 +204,8 @@ package away3d.materials
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 			        	_objectLightPos.transform(lightPosition, invSceneTransform);
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-		        		_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
-		        		_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
+		        		_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr/255, point.green*diffuseStr/255, point.blue*diffuseStr/255 ];
+		        		_pointLightShader.data.specularColor.value = [ point.red/255, point.green/255, point.blue/255 ];
 		        		_pointLightShader.data.phongComponents.value[0] = _specular*point.specular;
 		        		
 		        		_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
@@ -230,17 +225,13 @@ package away3d.materials
 	        	while (--i >= 0) {
 	        		directional = DirectionalLight(_directionals[i]);
 	        		diffuseStr = directional.diffuse*.5;
-	        		
-	        		var transform : MatrixAway3D = directional.light.transform;
 
-	        		_objectDirMatrix.multiply(invSceneTransform, directional.light.transform);
-					_objectLightPos.x = -_objectDirMatrix.sxz;
-					_objectLightPos.y = _objectDirMatrix.syz;
-					_objectLightPos.z = -_objectDirMatrix.szz;
+	        		lightDirection = directional.direction;
+	        		_objectLightPos.rotate(lightDirection, invSceneTransform);
 					_objectLightPos.normalize();
-	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-	        		_directionalLightShader.data.diffuseColor.value = [ directional.red*diffuseStr, directional.green*diffuseStr, directional.blue*diffuseStr ];
-	        		_directionalLightShader.data.specularColor.value = [ directional.red, directional.green, directional.blue ];
+	        		_directionalLightShader.data.lightDirection.value = [ -_objectLightPos.x, _objectLightPos.y, -_objectLightPos.z ];
+	        		_directionalLightShader.data.diffuseColor.value = [ directional.red*diffuseStr/255, directional.green*diffuseStr/255, directional.blue*diffuseStr/255 ];
+	        		_directionalLightShader.data.specularColor.value = [ directional.red/255, directional.green/255, directional.blue/255 ];
 	        		_directionalLightShader.data.phongComponents.value[0] = _specular*directional.specular;
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);

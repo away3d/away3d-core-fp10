@@ -89,7 +89,7 @@ package away3d.materials {
         /** @private */
         protected override function renderTri(tri:DrawTriangle, session:AbstractRenderSession, kar:Number, kag:Number, kab:Number, kdr:Number, kdg:Number, kdb:Number, ksr:Number, ksg:Number, ksb:Number):void
         {
-            br = (kar + kag + kab + kdr + kdg + kdb + ksr + ksg + ksb)/3;
+            br = (kar + kag + kab + kdr + kdg + kdb + ksr + ksg + ksb)/(3*255);
 			
             _view = tri.view;
             

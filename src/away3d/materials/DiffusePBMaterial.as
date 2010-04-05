@@ -49,9 +49,9 @@ package away3d.materials
 			
 			// calculate ambient colour
 			for each (ambient in source.lightarray.ambients) {
-				ar += ambient.red;
-				ag += ambient.green;
-				ab += ambient.blue;
+				ar += ambient.red/255;
+				ag += ambient.green/255;
+				ab += ambient.blue/255;
 			}
 			
 			if (ar >= 0xff) ar = 1;
@@ -67,7 +67,7 @@ package away3d.materials
 			if (source.lightarray.points.length > 0) {
 				point = source.lightarray.points[0];
 				diffuseStr = point.diffuse;
-				_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
+				_objectLightPos.transform(point.position, invSceneTransform);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadius.value = [ point.radius ];
 				

@@ -70,14 +70,15 @@ package away3d.materials
 		        	infinite = (point.fallOff == Number.POSITIVE_INFINITY || point.fallOff == Number.NEGATIVE_INFINITY);
 		        	
 		        	if (!infinite) {
-			        	lightPosition = point.light.scenePosition;
+			        	lightPosition = point.position;
 			        	dist = 	(lightPosition.x-scenePosition.x)*(lightPosition.x-scenePosition.x) +
 			        			(lightPosition.y-scenePosition.y)*(lightPosition.y-scenePosition.y) +
 			        			(lightPosition.z-scenePosition.z)*(lightPosition.z-scenePosition.z);
 			        }
 		        	
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {
-			        	_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
+			        	_objectLightPos.transform(point.position, invSceneTransform);
+			        	_objectLightPos.normalize();
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 		        		_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
 		        		_pointLightShader.data.lightRadius.value = [ point.radius ];
@@ -97,12 +98,10 @@ package away3d.materials
 	        	while (--i >= 0) {
 	        		directional = DirectionalLight(_directionals[i]);
 	        		diffuseStr = directional.diffuse*.5;
-					_objectDirMatrix.multiply(invSceneTransform, directional.light.transform);
-					_objectLightPos.x = -_objectDirMatrix.sxz;
-					_objectLightPos.y = _objectDirMatrix.syz;
-					_objectLightPos.z = -_objectDirMatrix.szz;
+	        		
+					_objectLightPos.rotate(directional.direction, invSceneTransform);
 					_objectLightPos.normalize();
-	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
+	        		_directionalLightShader.data.lightDirection.value = [ -_objectLightPos.x, _objectLightPos.y, -_objectLightPos.z ];
 	        		_directionalLightShader.data.diffuseColor.value = [ directional.red*.5, directional.green*.5, directional.blue*.5 ];
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);

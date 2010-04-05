@@ -1,17 +1,12 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.containers.View3D;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.Object3D;
-	import away3d.core.light.AmbientLight;
-	import away3d.core.light.PointLight;
-	import away3d.core.math.MatrixAway3D;
-	import away3d.core.math.Number3D;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.core.light.*;
+	import away3d.core.math.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.Shader;
-	import flash.display.ShaderPrecision;
+	import flash.display.*;
 
 	use namespace arcane;
 	
@@ -140,9 +135,9 @@ package away3d.materials
 			
 			// calculate ambient colour
 			for each (ambient in source.lightarray.ambients) {
-				ar += ambient.red;
-				ag += ambient.green;
-				ab += ambient.blue;
+				ar += ambient.red/255;
+				ag += ambient.green/255;
+				ab += ambient.blue/255;
 			}
 			
 			if (ar >= 0xff) ar = 1;
@@ -158,7 +153,7 @@ package away3d.materials
 			if (source.lightarray.points.length > 0) {
 				point = source.lightarray.points[0];
 				diffuseStr = point.diffuse;
-				_objectLightPos.transform(point.light.scenePosition, invSceneTransform);
+				_objectLightPos.transform(point.position, invSceneTransform);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
 				
@@ -168,9 +163,9 @@ package away3d.materials
 					_pointLightShader.data.lightRadiusFalloff.value[1] = point.fallOff - point.radius;
 
 				_pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
-				_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
+				_pointLightShader.data.specularColor.value = [ point.red/255, point.green/255, point.blue/255 ];
 				_pointLightShader.data.phongComponents.value[0] = _specular * point.specular;
-				_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
+				_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr/255, point.green*diffuseStr/255, point.blue*diffuseStr/255 ];
         	}
         	else {
         		_pointLightShader.data.diffuseColor.value = [ 0, 0, 0 ];

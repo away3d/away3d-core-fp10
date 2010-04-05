@@ -126,16 +126,6 @@ package away3d.core.traverse
 	            	}
 	            	_view._meshProjector.primitives(node.debugBoundingSphere, _viewTransform, _consumer);
 	            }
-	            
-	            if (node is ILightProvider) {
-	            	_light = node as ILightProvider;
-	            	if (_light.debug) {
-	            		_light.debugPrimitive._session = node.session;
-	            		if (_clipping.objectCulling)
-	            			_cameraVarsStore.frustumDictionary[_light.debugPrimitive] = _cameraVarsStore.frustumDictionary[_light];
-	            		_view._meshProjector.primitives(_light.debugPrimitive, _viewTransform, _consumer);
-	            	}
-	            }
 	        }
 	        
             _mouseEnabled = node._mouseEnabled = (_mouseEnabled && node.mouseEnabled);

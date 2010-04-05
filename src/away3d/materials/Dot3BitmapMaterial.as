@@ -12,7 +12,7 @@
 	public class Dot3BitmapMaterial extends CompositeMaterial
 	{
 		private var _shininess:Number;
-		private var _specular:Number;
+		private var _specular:uint;
 		private var _normalBitmap:BitmapData;
 		private var _renderNormalBitmap:BitmapData;
 		private var _textureMaterial:BitmapMaterial;
@@ -80,12 +80,12 @@
 		/**
 		 * Coefficient for specular light level.
 		 */
-		public function get specular():Number
+		public function get specular():uint
 		{
 			return _specular;
 		}
 		
-		public function set specular(val:Number):void
+		public function set specular(val:uint):void
 		{
 			if (_specular == val)
 				return;
@@ -137,7 +137,7 @@
 			super(init);
 			
 			_shininess = ini.getNumber("shininess", 20);
-			_specular = ini.getNumber("specular", 0.5, {min:0, max:1});
+			_specular = ini.getColor("specular", 0xFFFFFF);
 			
 			_normalBitmap = normalBitmap;
 				

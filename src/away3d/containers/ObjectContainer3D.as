@@ -1,5 +1,6 @@
 ﻿package away3d.containers
 {
+	import away3d.lights.AbstractLight;
     import away3d.animators.skin.*;
     import away3d.arcane;
     import away3d.core.base.*;
@@ -52,12 +53,35 @@
             
             _sessionDirty = true;
         }
+		/** @private */
+        arcane function incrementPolyCount(delta:int):void
+        {
+        	_polyCount += delta;
+        	
+        	if(this.parent)
+        		parent.incrementPolyCount(delta);
+        }
         
         private var _children:Array = [];
+        private var _lights:Array = [];
+        private var _polyCount:int;
         
         private function onChildChange(event:Object3DEvent):void
         {
             notifyDimensionsChange();
+        }
+        
+        private function updatePolyCount(child:Object3D, add:Boolean = true):void
+        {
+        	var k:int = add ? 1 : -1;
+        	var deltaPoly:int;
+        	
+        	if(child is Mesh)
+        		deltaPoly = k*Mesh(child).elements.length;
+        	else if(child is ObjectContainer3D)
+        		deltaPoly = k*ObjectContainer3D(child).polyCount;
+        	
+        	incrementPolyCount(deltaPoly);
         }
         
         protected override function updateDimensions():void
@@ -124,6 +148,26 @@
         {
             return _children;
         }
+        
+        /**
+        * Returns the lights of the container as an array of light objects
+        */
+        public function get lights():Array
+        {
+            return _lights;
+        }
+                
+        /**
+         * Returns the number of elements in the container,
+         * including elements in child nodes.
+         * Elements can be faces, segments or 3d sprites.
+         * @return int
+         */        
+        public function get polyCount():int
+        {
+        	return _polyCount;
+        }
+        
     	
 	    /**
 	    * Creates a new <code>ObjectContainer3D</code> object
@@ -176,38 +220,6 @@
             child.parent = this;
         }
         
-        /**
-         * Returns the number of elements in the container,
-         * including elements in child nodes.
-         * Elements can be faces, segments or 3d sprites.
-         * @return int
-         */        
-        public function get polyCount():int
-        {
-        	return _polyCount;
-        }
-        
-        private var _polyCount:int;
-        arcane function incrementPolyCount(delta:int):void
-        {
-        	_polyCount += delta;
-        	
-        	if(this.parent)
-        		parent.incrementPolyCount(delta);
-        }
-        private function updatePolyCount(child:Object3D, add:Boolean = true):void
-        {
-        	var k:int = add ? 1 : -1;
-        	var deltaPoly:int;
-        	
-        	if(child is Mesh)
-        		deltaPoly = k*Mesh(child).elements.length;
-        	else if(child is ObjectContainer3D)
-        		deltaPoly = k*ObjectContainer3D(child).polyCount;
-        	
-        	incrementPolyCount(deltaPoly);
-        }
-        
 		/**
 		 * Removes a 3d object from the child array of the container
 		 * 
@@ -222,6 +234,44 @@
                 return;
             updatePolyCount(child, false);
             child.parent = null;
+        }
+        
+		/**
+		 * Adds a light as a child of the container
+		 * 
+		 * @param	light	The light object to be added
+		 * @throws	Error	ObjectContainer3D.addLight(null)
+		 */
+        public function addLight(light:AbstractLight):void
+        {
+            if (light == null)
+                throw new Error("ObjectContainer3D.addLight(null)");
+            
+            _lights.push(light);
+            
+            light.parent = this;
+        }
+        
+		/**
+		 * Removes a light from the container
+		 * 
+		 * @param	child	The light object to be removed
+		 * @throws	Error	ObjectContainer3D.removeLight(null)
+		 */
+        public function removeLight(light:AbstractLight):void
+        {
+            if (light == null)
+                throw new Error("ObjectContainer3D.removeLight(null)");
+            if (light.parent != this)
+                return;
+            
+            var index:int = _lights.indexOf(light);
+            if (index == -1)
+                return;
+            
+            _lights.splice(index, 1);
+            
+            light.parent = null;
         }
         
 		/**

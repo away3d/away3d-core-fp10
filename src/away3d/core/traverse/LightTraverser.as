@@ -1,5 +1,6 @@
 package away3d.core.traverse
 {
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.*;
 	import away3d.core.light.*;
     
@@ -33,8 +34,13 @@ package away3d.core.traverse
             if (node.ownLights)
             	node.lightarray.clear();
             
-            if (node is ILightProvider)
-                (node as ILightProvider).light(node.parent.lightarray);
+            if (node is ObjectContainer3D) {
+            	var container:ObjectContainer3D = node as ObjectContainer3D;
+            	var lightProvider:ILightProvider;
+            	for each (lightProvider in container.lights) {
+            		lightProvider.light(container.lightarray);
+            	}
+            }
         }
 
     }

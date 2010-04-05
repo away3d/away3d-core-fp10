@@ -121,7 +121,7 @@
         private var draw_reflect_k:Number = 1;
         private var _diffuseTransform:MatrixAway3D;
         private var _specularTransform:MatrixAway3D;
-        private var _viewPosition:Number3D;
+        private var _screenPosition:ScreenVertex;
         private var _source:Mesh;
         private var _view:View3D;
         private var _materialupdated:MaterialEvent;
@@ -207,8 +207,8 @@
         	
         	var source_lightarray_points:Array = source.lightarray.points;
         	for each (var point:PointLight in source_lightarray_points) {
-        		if (!point.viewPositions[view] || view.scene.updatedObjects[source] || view.updated) {
-        			point.setViewPosition(view);
+        		if (!point.screenPositions[view] || view.scene.updatedObjects[source] || view.updated) {
+        			point.setScreenPosition(view);
         			_materialDirty = true;
         		}
         	}
@@ -358,44 +358,44 @@
                 green = point.green;
                 blue = point.blue;
 				
-				_viewPosition = point.viewPositions[tri.view];
+				_screenPosition = point.screenPositions[tri.view];
 				
-                dfx = _viewPosition.x - c0x;
-                dfy = _viewPosition.y - c0y;
-                dfz = _viewPosition.z - c0z;
+                dfx = _screenPosition.x - c0x;
+                dfy = _screenPosition.y - c0y;
+                dfz = _screenPosition.z - c0z;
                 df = Math.sqrt(dfx*dfx + dfy*dfy + dfz*dfz);
                 dfx /= df;
                 dfy /= df;
                 dfz /= df;
                 fade = 1 / df / df;
                 
-                amb = point.ambient * fade * ambient_brightness * 255000;
-
+                amb = point.ambient * fade * ambient_brightness;
+				
                 kar += red * amb;
                 kag += green * amb;
                 kab += blue * amb;
                 
                 nf = dfx*pa + dfy*pb + dfz*pc;
-
+				
                 if (nf < 0)
                     continue;
-
-                diff = point.diffuse * fade * nf * diffuse_brightness * 255000;
-
+				
+                diff = point.diffuse * fade * nf * diffuse_brightness;
+				
                 kdr += red * diff;
                 kdg += green * diff;
                 kdb += blue * diff;
                 
                 rfz = dfz - 2*nf*pc;
-
+				
                 if (rfz < 0)
                     continue;
-
+				
                 rfx = dfx - 2*nf*pa;
                 rfy = dfy - 2*nf*pb;
                 
-                spec = point.specular * fade * Math.pow(rfz, shininess) * specular_brightness * 255000;
-
+                spec = point.specular * fade * Math.pow(rfz, shininess) * specular_brightness;
+				
                 ksr += red * spec;
                 ksg += green * spec;
                 ksb += blue * spec;
@@ -415,14 +415,14 @@
                     ncz = (c0z + 30*pc),
                     ncx = (c0x + 30*pa) * zoom * focus / (focus + ncz),
                     ncy = (c0y + 30*pb) * zoom * focus / (focus + ncz);
-
+					
                     graphics.lineStyle(1, 0x000000, 1);
                     graphics.moveTo(cx, cy);
                     graphics.lineTo(ncx, ncy);
                     graphics.moveTo(cx, cy);
                     graphics.drawCircle(cx, cy, 2);
                 }
-
+				
                 if (draw_fall || draw_reflect)
                 {
                     var _tri_source_lightarray_points_new:Array = tri.source.lightarray.points;
@@ -435,29 +435,29 @@
                         red /= sum;
                         green /= sum;
                         blue /= sum;
-                
-                        dfx = _viewPosition.x - c0x;
-                        dfy = _viewPosition.y - c0y;
-                        dfz = _viewPosition.z - c0z;
+                		
+                        dfx = _screenPosition.x - c0x;
+                        dfy = _screenPosition.y - c0y;
+                        dfz = _screenPosition.z - c0z;
                         df = Math.sqrt(dfx*dfx + dfy*dfy + dfz*dfz);
                         dfx /= df;
                         dfy /= df;
                         dfz /= df;
-                
+                		
                         nf = dfx*pa + dfy*pb + dfz*pc;
                         if (nf < 0)
                             continue;
-                
+                		
                         if (draw_fall)
                         {
                             ffz = (c0z + 30*dfz*(1-draw_fall_k)),
                             ffx = (c0x + 30*dfx*(1-draw_fall_k)) * zoom * focus / (focus + ffz),
                             ffy = (c0y + 30*dfy*(1-draw_fall_k)) * zoom * focus / (focus + ffz),
-
+							
                             fz = (c0z + 30*dfz),
                             fx = (c0x + 30*dfx) * zoom * focus / (focus + fz),
                             fy = (c0y + 30*dfy) * zoom * focus / (focus + fz);
-
+							
                             graphics.lineStyle(1, int(red)*0x10000 + int(green)*0x100 + int(blue), 1);
                             graphics.moveTo(ffx, ffy);
                             graphics.lineTo(fx, fy);
@@ -469,11 +469,11 @@
                             rfx = dfx - 2*nf*pa;
                             rfy = dfy - 2*nf*pb;
                             rfz = dfz - 2*nf*pc;
-                    
+                    		
                             rz = (c0z - 30*rfz*draw_reflect_k),
                             rx = (c0x - 30*rfx*draw_reflect_k) * zoom * focus / (focus + rz),
                             ry = (c0y - 30*rfy*draw_reflect_k) * zoom * focus / (focus + rz);
-                        
+                        	
                             graphics.lineStyle(1, int(red*0.5)*0x10000 + int(green*0.5)*0x100 + int(blue*0.5), 1);
                             graphics.moveTo(cx, cy);
                             graphics.lineTo(rx, ry);
