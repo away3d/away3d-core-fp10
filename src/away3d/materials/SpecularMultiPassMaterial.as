@@ -202,7 +202,7 @@ package away3d.materials
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 			        	_objectLightPos.transform(lightPosition, invSceneTransform);
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-		        		_pointLightShader.data.specularColor.value = [ point.red/255, point.green/255, point.blue/255 ];
+		        		_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
 		        		
 		        		_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
 						_pointLightShader.data.lightRadiusFalloff.value[1] = infinite? -1 : point.fallOff - point.radius;
@@ -226,7 +226,7 @@ package away3d.materials
 	        		_objectLightPos.rotate(lightDirection, invSceneTransform);
 					_objectLightPos.normalize();
 	        		_directionalLightShader.data.lightDirection.value = [ -_objectLightPos.x, _objectLightPos.y, -_objectLightPos.z ];
-	        		_directionalLightShader.data.specularColor.value = [ directional.red/255, directional.green/255, directional.blue/255 ];
+	        		_directionalLightShader.data.specularColor.value = [ directional.red, directional.green, directional.blue ];
 	        		_directionalLightShader.data.phongComponents.value[0] = directional.specular*_specular;
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);

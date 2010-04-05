@@ -49,9 +49,9 @@ package away3d.materials
 			
 			// calculate ambient colour
 			for each (ambient in source.lightarray.ambients) {
-				ar += ambient.red/255;
-				ag += ambient.green/255;
-				ab += ambient.blue/255;
+				ar += ambient.red;
+				ag += ambient.green;
+				ab += ambient.blue;
 			}
 			
 			if (ar >= 0xff) ar = 1;

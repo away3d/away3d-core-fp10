@@ -369,7 +369,7 @@
                 dfz /= df;
                 fade = 1 / df / df;
                 
-                amb = point.ambient * fade * ambient_brightness;
+                amb = point.ambient * ambient_brightness;
 				
                 kar += red * amb;
                 kag += green * amb;

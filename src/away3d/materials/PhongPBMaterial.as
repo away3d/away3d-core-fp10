@@ -135,9 +135,9 @@ package away3d.materials
 			
 			// calculate ambient colour
 			for each (ambient in source.lightarray.ambients) {
-				ar += ambient.red/255;
-				ag += ambient.green/255;
-				ab += ambient.blue/255;
+				ar += ambient.red;
+				ag += ambient.green;
+				ab += ambient.blue;
 			}
 			
 			if (ar >= 0xff) ar = 1;
@@ -163,9 +163,9 @@ package away3d.materials
 					_pointLightShader.data.lightRadiusFalloff.value[1] = point.fallOff - point.radius;
 
 				_pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
-				_pointLightShader.data.specularColor.value = [ point.red/255, point.green/255, point.blue/255 ];
+				_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
 				_pointLightShader.data.phongComponents.value[0] = _specular * point.specular;
-				_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr/255, point.green*diffuseStr/255, point.blue*diffuseStr/255 ];
+				_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
         	}
         	else {
         		_pointLightShader.data.diffuseColor.value = [ 0, 0, 0 ];

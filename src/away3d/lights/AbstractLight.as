@@ -20,15 +20,15 @@ package away3d.lights
          */
 		protected var ini : Init;
 		/** @private */
-        protected var _color:int;
+        protected var _color:uint;
         /** @private */
 		protected var _colorDirty:Boolean;
 		/** @private */
-        protected var _red:int;
+        protected var _red:Number;
         /** @private */
-        protected var _green:int;
+        protected var _green:Number;
         /** @private */
-        protected var _blue:int;
+        protected var _blue:Number;
         /** @private */
 		protected var _parent:ObjectContainer3D;
 		/** @private */
@@ -40,17 +40,17 @@ package away3d.lights
 		/**
 		 * Defines the color of the light object.
 		 */
-		public function get color():int
+		public function get color():uint
 		{
 			return _color;
 		}
 		
-		public function set color(val:int):void
+		public function set color(val:uint):void
 		{
 			_color = val;
-			_red = (_color & 0xFF0000) >> 16;
-            _green = (_color & 0xFF00) >> 8;
-            _blue  = (_color & 0xFF);
+			_red = ((_color & 0xFF0000) >> 16)/255;
+            _green = ((_color & 0xFF00) >> 8)/255;
+            _blue  = (_color & 0xFF)/255;
             _colorDirty = true;
 		}
         

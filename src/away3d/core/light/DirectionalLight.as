@@ -77,11 +77,11 @@ package away3d.core.light
         */
 		public function updateAmbientBitmap():void
         {
-        	ambientBitmap = new BitmapData(256, 256, false, int(ambient*red << 16) | int(ambient*green << 8) | int(ambient*blue));
+        	ambientBitmap = new BitmapData(256, 256, false, int(ambient*red*0xFF << 16) | int(ambient*green*0xFF << 8) | int(ambient*blue*0xFF));
         	ambientBitmap.lock();
         	
         	//update colortransform
-        	ambientColorTransform = new ColorTransform(1, 1, 1, 1, ambient*red, ambient*green, ambient*blue, 0);
+        	ambientColorTransform = new ColorTransform(1, 1, 1, 1, ambient*red*0xFF, ambient*green*0xFF, ambient*blue*0xFF, 0);
         }
         
         /**
@@ -105,7 +105,7 @@ package away3d.core.light
     			if (g > 1) g = 1;
     			var b:Number = (i*diffuse/14);
     			if (b > 1) b = 1;
-    			colArray.push((r*red << 16) | (g*green << 8) | b*blue);
+    			colArray.push((r*red*0xFF << 16) | (g*green*0xFF << 8) | b*blue*0xFF);
     			alphaArray.push(1);
     			pointArray.push(int(30+225*2*Math.acos(i/14)/Math.PI));
     		}
@@ -115,7 +115,7 @@ package away3d.core.light
     		diffuseBitmap.draw(_shape);
         	
         	//update colortransform
-        	diffuseColorTransform = new ColorTransform(diffuse*red/255, diffuse*green/255, diffuse*blue/255, 1, 0, 0, 0, 0);
+        	diffuseColorTransform = new ColorTransform(diffuse*red, diffuse*green, diffuse*blue, 1, 0, 0, 0, 0);
         }
         
         /**
@@ -140,7 +140,7 @@ package away3d.core.light
     			if (g > 1) g = 1;
     			var b:Number = (i*diffuse/14 + ambient);
     			if (b > 1) b = 1;
-    			colArray.push((r*red << 16) | (g*green << 8) | b*blue);
+    			colArray.push((r*red*0xFF << 16) | (g*green*0xFF << 8) | b*blue*0xFF);
     			alphaArray.push(1);
     			pointArray.push(int(30+225*2*Math.acos(i/14)/Math.PI));
     		}
@@ -165,7 +165,7 @@ package away3d.core.light
     		var pointArray:Array = [];
     		var i:int = 15;
     		while (i--) {
-    			colArray.push((i*specular*red/14 << 16) + (i*specular*green/14 << 8) + i*specular*blue/14);
+    			colArray.push((i*specular*red*0xFF/14 << 16) + (i*specular*green*0xFF/14 << 8) + i*specular*blue*0xFF/14);
     			alphaArray.push(1);
     			pointArray.push(int(30+225*2*Math.acos(Math.pow(i/14,1/20))/Math.PI));
     		}
@@ -249,9 +249,9 @@ package away3d.core.light
         */
         public function setNormalMatrixDiffuseTransform(source:Object3D):void
         {
-        	_red = red*2*diffuse/255;
-			_green = green*2*diffuse/255;
-			_blue = blue*2*diffuse/255;
+        	_red = red*2*diffuse;
+			_green = green*2*diffuse;
+			_blue = blue*2*diffuse;
 			
         	_szx = diffuseTransform[source].szx;
 			_szy = -diffuseTransform[source].szy;
@@ -279,9 +279,9 @@ package away3d.core.light
             _sgreen = ((specular & 0xFF00) >> 8)/255;
             _sblue  = (specular & 0xFF)/255;
             
-        	_red = (red*2/255 + shininess)*_sred;
-			_green = (green*2/255 + shininess)*_sgreen;
-			_blue = (blue*2/255 + shininess)*_sblue;
+        	_red = (red*2 + shininess)*_sred;
+			_green = (green*2 + shininess)*_sgreen;
+			_blue = (blue*2 + shininess)*_sblue;
 			
         	_szx = specularTransform[source][view].szx;
 			_szy = -specularTransform[source][view].szy;
