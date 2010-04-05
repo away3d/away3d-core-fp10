@@ -10,7 +10,7 @@ package away3d.materials
 	public class PhongBitmapMaterial extends CompositeMaterial
 	{
 		private var _shininess:Number;
-		private var _specular:Number;
+		private var _specular:uint;
 		private var _textureMaterial:TransformBitmapMaterial;
 		private var _phongShader:CompositeMaterial;
 		private var _ambientShader:AmbientShader;
@@ -32,14 +32,14 @@ package away3d.materials
 		}
 		
 		/**
-		 * Coefficient for specular light level.
+		 * Color value for specular light.
 		 */
-		public function get specular():Number
+		public function get specular():uint
 		{
 			return _specular;
 		}
 		
-		public function set specular(val:Number):void
+		public function set specular(val:uint):void
 		{
 			if (_specular == val)
 				return;
@@ -75,7 +75,7 @@ package away3d.materials
 			super(init);
 			
 			_shininess = ini.getNumber("shininess", 20);
-			_specular = ini.getNumber("specular", 0.7, {min:0, max:1});
+			_specular = ini.getColor("specular", 0xFFFFFF);
 			
 			//create new materials
 			_textureMaterial = new TransformBitmapMaterial(bitmap, ini);
