@@ -31,9 +31,9 @@ package away3d.core.light
         private var _red:Number;
 		private var _green:Number;
 		private var _blue:Number;
-		private var _sred:uint;
-		private var _sgreen:uint;
-		private var _sblue:uint;
+		private var _sred:Number;
+		private var _sgreen:Number;
+		private var _sblue:Number;
         private var _szx:Number;
         private var _szy:Number;
         private var _szz:Number;
