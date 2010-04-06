@@ -12,7 +12,6 @@ package away3d.lights
     */
     public class AbstractLight implements ILightProvider
     {
-        private var _debug:Boolean;
         
         /**
          * Instance of the Init object used to hold and parse default property values
@@ -32,6 +31,10 @@ package away3d.lights
         /** @private */
 		protected var _parent:ObjectContainer3D;
 		/** @private */
+        protected var _debug:Boolean;
+        /** @private */
+        protected var _debugDirty:Boolean;
+        /** @private */
 		protected function updateParent(val:ObjectContainer3D):void
 		{
 			throw new Error("Not implemented");
@@ -65,6 +68,8 @@ package away3d.lights
         public function set debug(val:Boolean):void
         {
         	_debug = val;
+        	
+        	_debugDirty = true;
         }
 				
     	/**
