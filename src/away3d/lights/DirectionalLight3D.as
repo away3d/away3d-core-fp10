@@ -210,7 +210,7 @@ package away3d.lights
 			}
         	
         	//update coefficients
-        	_ls.ambient = _ambient*_brightness;
+        	_ls.ambient = _ambient;
         	_ls.diffuse = _diffuse*_brightness;
         	_ls.specular = _specular*_brightness;
         	

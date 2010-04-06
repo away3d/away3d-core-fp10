@@ -19,7 +19,7 @@ package away3d.core.light
         /**
         * Positions dictionary for the view positions used by shading materials.
         */
-        public var screenPositions:Dictionary;
+        public var viewPositions:Dictionary;
         
     	/**
     	 * Updates the position of the point light.
@@ -37,21 +37,18 @@ package away3d.core.light
         */
         public function clearViewPositions():void
         {
-        	screenPositions = new Dictionary(true);
+        	viewPositions = new Dictionary(true);
         }
         
         /**
         * Updates the view position.
         */
-        public function setScreenPosition(view:View3D):void
+        public function setViewPosition(view:View3D):void
         {
-        	var screenPosition:ScreenVertex = view.camera.screen(light.parent, (light as PointLight3D)._vertex);
+        	if (!viewPositions[view])
+        		viewPositions[view] = new Number3D();
         	
-        	var persp:Number = view.camera.zoom/(1 + screenPosition.z/view.camera.focus);
-        	screenPosition.x /= persp;
-        	screenPosition.y /= persp;
-        	
-        	screenPositions[view] = screenPosition;
+        	(viewPositions[view] as Number3D).transform(position, view.camera.viewMatrix);
         }
     }
 }

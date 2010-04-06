@@ -4,8 +4,7 @@
     import away3d.containers.*;
     import away3d.core.base.*;
     import away3d.core.draw.*;
-    import away3d.core.light.DirectionalLight;
-    import away3d.core.light.PointLight;
+    import away3d.core.light.*;
     import away3d.core.math.*;
     import away3d.core.render.*;
     import away3d.core.utils.*;
@@ -121,7 +120,7 @@
         private var draw_reflect_k:Number = 1;
         private var _diffuseTransform:MatrixAway3D;
         private var _specularTransform:MatrixAway3D;
-        private var _screenPosition:ScreenVertex;
+        private var _viewPosition:Number3D;
         private var _source:Mesh;
         private var _view:View3D;
         private var _materialupdated:MaterialEvent;
@@ -207,8 +206,8 @@
         	
         	var source_lightarray_points:Array = source.lightarray.points;
         	for each (var point:PointLight in source_lightarray_points) {
-        		if (!point.screenPositions[view] || view.scene.updatedObjects[source] || view.updated) {
-        			point.setScreenPosition(view);
+        		if (!point.viewPositions[view] || view.scene.updatedObjects[source] || view.updated) {
+        			point.setViewPosition(view);
         			_materialDirty = true;
         		}
         	}
@@ -358,18 +357,18 @@
                 green = point.green;
                 blue = point.blue;
 				
-				_screenPosition = point.screenPositions[tri.view];
+				_viewPosition = point.viewPositions[tri.view];
 				
-                dfx = _screenPosition.x - c0x;
-                dfy = _screenPosition.y - c0y;
-                dfz = _screenPosition.z - c0z;
+                dfx = _viewPosition.x - c0x;
+                dfy = _viewPosition.y - c0y;
+                dfz = _viewPosition.z - c0z;
                 df = Math.sqrt(dfx*dfx + dfy*dfy + dfz*dfz);
                 dfx /= df;
                 dfy /= df;
                 dfz /= df;
                 fade = 1 / df / df;
                 
-                amb = point.ambient * ambient_brightness * 250000;
+                amb = point.ambient * ambient_brightness;
 				
                 kar += red * amb;
                 kag += green * amb;
@@ -436,9 +435,9 @@
                         green /= sum;
                         blue /= sum;
                 		
-                        dfx = _screenPosition.x - c0x;
-                        dfy = _screenPosition.y - c0y;
-                        dfz = _screenPosition.z - c0z;
+                        dfx = _viewPosition.x - c0x;
+                        dfy = _viewPosition.y - c0y;
+                        dfz = _viewPosition.z - c0z;
                         df = Math.sqrt(dfx*dfx + dfy*dfy + dfz*dfz);
                         dfx /= df;
                         dfy /= df;
