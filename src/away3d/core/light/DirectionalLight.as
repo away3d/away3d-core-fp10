@@ -193,7 +193,7 @@ package away3d.core.light
         {
         	//update direction vector
         	direction.clone(sceneDirection);
-        	direction.normalize();
+        	direction.normalize(-1);
         	
         	nx = direction.x;
         	ny = direction.y;
