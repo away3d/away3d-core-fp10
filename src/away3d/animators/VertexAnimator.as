@@ -1,63 +1,49 @@
 package away3d.animators 
 {
+	import away3d.arcane;
 	import away3d.core.base.*;
 	import away3d.core.math.*;
 	import away3d.core.utils.*;
+	
+	use namespace arcane;
 	
 	/**
 	 * @author robbateman
 	 */
 	public class VertexAnimator extends Animator 
 	{
-		private var _frames:Array;
+		private var _frames:Array = new Array();
 		private var _cframe:Array;
 		private var _nframe:Array;
-		private var _vertices:Array;
+		private var _vertices:Array = new Array();
 		private var _cPosition:Number3D;
 		private var _nPosition:Number3D;
 		
         protected override function updateTarget():void
         {
         }
-        
-		public function get frames():Array
+		
+        protected override function getDefaultFps():Number
 		{
-			return _frames;
+			return 10;
 		}
 		
-		public function VertexAnimator()
-		{
-			super();
-			Debug.trace(" + VertexAnimator");
-			_frames = [];
-			_vertices = [];
-			constantFps = false;
-		}
-				
-		/**
-		 * @inheritDoc
-		 */
-        public override function update(time:Number):void
+        protected override function updateProgress(val:Number):void
         {
-        	super.update(time);
+        	super.updateProgress(val);
         	
-        	var t:Number = (_progress*length + start);
-        	var f:int = int(t*fps);
-        	var fraction:Number = t*fps - f;
-        	var invFraction:Number = 1 - fraction;
-        	
-        	if (f == _frames.length) {
-        		_cframe = _nframe = _frames[f-1];
+        	if (_currentFrame == _frames.length) {
+        		_cframe = _nframe = _frames[_currentFrame-1];
         	} else {
-	        	_cframe = _frames[f];
+	        	_cframe = _frames[_currentFrame];
 	        	
-	        	if (f == _frames.length - 1) {
+	        	if (_currentFrame == _frames.length - 1) {
 	        		if (loop)
 	        			_nframe = _frames[0];
 	        		else
-	        			_nframe = _frames[f];
+	        			_nframe = _frames[_currentFrame];
 	        	} else {
-	        		_nframe = _frames[f+1];
+	        		_nframe = _frames[_currentFrame+1];
 	        	}
         	}
         	
@@ -67,7 +53,7 @@ package away3d.animators
 	        	while(i--) {
 	        		_cPosition = _cframe[i] as Number3D;
 	        		_nPosition = _nframe[i] as Number3D;
-					(_vertices[i] as Vertex).setValue(_cPosition.x*invFraction + _nPosition.x*fraction, _cPosition.y*invFraction + _nPosition.y*fraction, _cPosition.z*invFraction + _nPosition.z*fraction);
+					(_vertices[i] as Vertex).setValue(_cPosition.x*_invFraction + _nPosition.x*_fraction, _cPosition.y*_invFraction + _nPosition.y*_fraction, _cPosition.z*_invFraction + _nPosition.z*_fraction);
 	        	}
 			} else {
 				while(i--) {
@@ -75,6 +61,17 @@ package away3d.animators
 					(_vertices[i] as Vertex).setValue(_cPosition.x, _cPosition.y, _cPosition.z);
 	        	}
         	}
+		}
+        
+		public function get frames():Array
+		{
+			return _frames;
+		}
+		
+		public function VertexAnimator(target:Object3D = null, init:Object = null)
+		{
+			super(target, init);
+			Debug.trace(" + VertexAnimator");
 		}
         
 		public function addFrame(frame:Array):void

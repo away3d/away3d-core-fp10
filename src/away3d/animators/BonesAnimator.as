@@ -2,6 +2,7 @@ package away3d.animators
 {
 	import away3d.animators.data.*;
 	import away3d.containers.*;
+	import away3d.core.base.*;
 	import away3d.core.utils.*;
 	
 	import flash.utils.*;
@@ -29,34 +30,18 @@ package away3d.animators
         		for each (var channel:Channel in _channels)
 					channel.target = (_target as ObjectContainer3D).getChildByName(channel.name);
         }
-        
-        public function BonesAnimator()
-        {
-        	super();
-            Debug.trace(" + BonesAnimator");
-			_channels = [];
-			_skinControllers = [];
-			_skinVertices = [];
-			_uniqueSkinVertices = new Dictionary(true); 
-			_skinVerticesDirty = true;
-        }
 		
-		/**
-		 * @inheritDoc
-		 */
-        public override function update(time:Number):void
+        protected override function updateProgress(val:Number):void
         {
-        	super.update(time);
+        	super.updateProgress(val);
 			
-			var t:Number = _progress*length + start;
-            
             // ensure vertex list is populated
             if (_skinVerticesDirty)
                 populateVertices();
 			
         	//update channels
             for each (var channel:Channel in _channels)
-                channel.update(t, interpolate);
+                channel.update(_time, interpolate);
             
             //update skincontrollers
             for each(_skinController in _skinControllers)
@@ -65,6 +50,17 @@ package away3d.animators
 			//update skinvertices
             for each(_skinVertex in _skinVertices)
 				_skinVertex.update();
+        }
+        
+        public function BonesAnimator(target:Object3D = null, init:Object = null)
+        {
+        	super(target, init);
+            Debug.trace(" + BonesAnimator");
+			_channels = [];
+			_skinControllers = [];
+			_skinVertices = [];
+			_uniqueSkinVertices = new Dictionary(true); 
+			_skinVerticesDirty = true;
         }
 		
 		/**

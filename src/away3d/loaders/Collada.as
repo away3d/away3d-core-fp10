@@ -253,8 +253,8 @@
 				            }
 						}
 						
-						animator.start = _animationData.start;
-						animator.length = _animationData.end - _animationData.start;
+						animator.delay = _animationData.start;
+						animator._totalFrames = (_animationData.end - _animationData.start)*animator.fps;
 						
 						_animationData.animator = animator;
 						break;
