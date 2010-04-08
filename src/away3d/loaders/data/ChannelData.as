@@ -1,6 +1,6 @@
 package away3d.loaders.data
 {
-	import away3d.animators.skin.Channel;
+	import away3d.animators.data.*;
 		
 	/**
 	 * Data class for an animation channel

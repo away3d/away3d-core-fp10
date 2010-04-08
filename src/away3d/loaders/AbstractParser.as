@@ -1,6 +1,7 @@
 package away3d.loaders
 {
-	import away3d.animators.skin.*;
+	import away3d.animators.data.SkinController;
+	
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
@@ -134,7 +135,7 @@ package away3d.loaders
         {
         	return "Abstract";
         }
-          
+        
         protected function buildMaterials():void
 		{
 			for each (var _materialData:MaterialData in _materialLibrary)

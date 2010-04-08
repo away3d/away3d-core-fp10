@@ -1,15 +1,15 @@
 ﻿package away3d.loaders
 {
-	import away3d.animators.*;
-	import away3d.animators.skin.*;
+	import away3d.animators.data.*;
+	
 	import away3d.arcane;
+	import away3d.animators.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	import away3d.loaders.data.*;
 	import away3d.loaders.utils.*;
-	import away3d.materials.*;
 	
 	import flash.utils.*;
 	
@@ -26,7 +26,6 @@
         private var channelLibrary:ChannelLibrary;
         private var yUp:Boolean;
         private var toRADIANS:Number = Math.PI / 180;
-    	private var _moveVector:Number3D = new Number3D();
 		private var rotationMatrix:MatrixAway3D = new MatrixAway3D();
     	private var scalingMatrix:MatrixAway3D = new MatrixAway3D();
     	private var translationMatrix:MatrixAway3D = new MatrixAway3D();
@@ -41,28 +40,34 @@
 		private var _channelArrayLength:int;
 		private var _defaultAnimationClip:AnimationData;
 		private var _haveClips:Boolean = false;
-		private var _materials:Object;
+		private var _skinControllers:Array = [];
+		private var _skinController:SkinController;
 		
 		private function buildAnimations():void
 		{
 			var bone:Bone;
 			
-			for each (var _geometryData:GeometryData in geometryLibrary) {
-				for each (var _skinController:SkinController in _geometryData.geometry.skinControllers) {
+			//hook up bones to skincontrollers
+			for each (_skinController in _skinControllers) {
 					bone = (_container as ObjectContainer3D).getBoneByName(_skinController.name);
-	                if (bone)
+	                if (bone) {
 	                    _skinController.joint = bone.joint;
-	                else
+						//_skinController.update();
+	                } else {
 	                	Debug.warning("no joint found for " + _skinController.name);
-	   			}
+	                }
 	  		}
 		   			
 			for each (var _animationData:AnimationData in animationLibrary)
 			{
 				switch (_animationData.animationType)
 				{
-					case AnimationData.SKIN_ANIMATION:
-						var animation:SkinAnimation = new SkinAnimation();
+					case AnimationDataType.SKIN_ANIMATION:
+						var animator:BonesAnimator = new BonesAnimator();
+						animator.target = _container;
+						
+						for each (_skinController in _skinControllers)
+							animator.addSkinController(_skinController);
 						
 						var param:Array;
 			            var rX:String;
@@ -75,8 +80,8 @@
 						for each (var channelData:ChannelData in _animationData.channels) {
 							var channel:Channel = channelData.channel;
 							
-							channel.target = _containers[channel.name];
-							animation.appendChannel(channel);
+							//channel.target = _containers[channel.name];
+							animator.addChannel(channel);
 							
 							var times:Array = channel.times;
 							
@@ -248,12 +253,12 @@
 				            }
 						}
 						
-						animation.start = _animationData.start;
-						animation.length = _animationData.end - _animationData.start;
+						animator.start = _animationData.start;
+						animator.length = _animationData.end - _animationData.start;
 						
-						_animationData.animation = animation;
+						_animationData.animator = animator;
 						break;
-					case AnimationData.VERTEX_ANIMATION:
+					case AnimationDataType.VERTEX_ANIMATION:
 						break;
 				}
 			}
@@ -767,7 +772,7 @@
                 geometryData.skinControllers.push(skinController = new SkinController());
                 skinController.name = name;
                 skinController.bindMatrix = matrix;
-                
+                _skinControllers.push(skinController);
                 i = i + 16;
             }
 			
@@ -795,6 +800,10 @@
                 c = int(vcount[i]);
                 skinVertex = new SkinVertex(geometryData.vertices[i]);
                 geometryData.skinVertices.push(skinVertex);
+                
+                for each (skinController in geometryData.skinControllers)
+					skinController.skinVertices.push(skinVertex);
+				
                 j=0;
                 while (j < c)
                 {
@@ -868,6 +877,7 @@
 			
 			//create default animation clip
 			_defaultAnimationClip = animationLibrary.addAnimation("default");
+			_defaultAnimationClip.animationType = AnimationDataType.SKIN_ANIMATION;
 			
 			for each (var channelData:ChannelData in channelLibrary)
 				_defaultAnimationClip.channels[channelData.name] = channelData;
@@ -880,7 +890,10 @@
         
         private function parseAnimationClip(clip:XML) : void
         {
+        	Debug.trace(" + Parse Animation : " + clip.@id);
+        	
 			var animationClip:AnimationData = animationLibrary.addAnimation(clip.@id);
+			animationClip.animationType = AnimationDataType.SKIN_ANIMATION;
 			
 			for each (var channel:XML in clip["instance_animation"])
 				animationClip.channels[getId(channel.@url)] = channelLibrary[getId(channel.@url)];

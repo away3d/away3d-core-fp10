@@ -1,6 +1,6 @@
-package away3d.animators.skin
+package away3d.containers
 {
-	import away3d.containers.*;
+	
 	import away3d.arcane;
 	import away3d.core.base.*;
 	

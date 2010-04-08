@@ -1,4 +1,4 @@
-﻿package away3d.animators.skin
+﻿package away3d.animators.data
 {
 	import away3d.core.base.*;
 	import away3d.core.math.Number3D;

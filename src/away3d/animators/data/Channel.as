@@ -1,6 +1,5 @@
-package away3d.animators.skin
+package away3d.animators.data
 {
-    import away3d.containers.*;
     import away3d.core.base.*;
 	
     public class Channel
@@ -86,11 +85,10 @@ package away3d.animators.skin
 			}
         }
         
-        public function clone(object:ObjectContainer3D):Channel
+        public function clone():Channel
         {
         	var channel:Channel = new Channel(name);
         	
-        	channel.target = object.getChildByName(name);
         	channel.type = type.concat();
         	channel.param = param.concat();
         	channel.inTangent = inTangent.concat();

@@ -1,14 +1,15 @@
 ﻿package away3d.containers
 {
-	import away3d.lights.AbstractLight;
-    import away3d.animators.skin.*;
+    
     import away3d.arcane;
+	import away3d.animators.data.SkinController;
     import away3d.core.base.*;
     import away3d.core.math.*;
     import away3d.core.project.*;
     import away3d.core.traverse.*;
     import away3d.core.utils.Debug;
     import away3d.events.*;
+	import away3d.lights.*;
     import away3d.loaders.data.*;
     import away3d.loaders.utils.*;
     
