@@ -106,14 +106,14 @@ package wumedia.vector {
 		 * @param align:String	A value from the DynamicText class that specifies the alignment to the x and y property
 		 * @param alignToBaseLine:Boolean	if true, we'll align to the baseline of the font instead of the top or bottom edges
 		 */
-		static public function write(graphics:*, font:String, size:Number, leading:Number, kerning:Number = 0.0, text:String = "",
+		static public function write(graphics:*, font:String, size:Number, leading:Number, letterSpacing:Number = 0.0, text:String = "",
 			x:Number = 0.0, y:Number = 0.0, width:Number = Number.POSITIVE_INFINITY, align:String = TOP_LEFT, alignToBaseLine:Boolean = false):void {
 			if ( !_fontDefinitions[font] ) {
 				trace("ERROR: missing " + font + " font");
 				return;
 			}
 			var fontDef:DefineFont = _fontDefinitions[font];
-			var scale:Number = 1 / (EM_SIZE / size);
+			var scale:Number = size / EM_SIZE;
 			var offsetX:Number;
 			var offsetY:Number;
 			var char:String;
@@ -127,12 +127,12 @@ package wumedia.vector {
 			var alignDir:int;
 			var overrideCenter:Boolean = false;
 			var advance:Number;
+			//letterSpacing *= size;
 			
 			text = text.replace(/\r/g, "\n");
-			lines = breakLines(fontDef, size, text, kerning, width);
-			widths = measureLines(fontDef, size, kerning, lines);
-			kerning *= .0016;
-			leading = (fontDef.ascent / (EM_SIZE / leading));
+			lines = breakLines(fontDef, size, text, letterSpacing, width);
+			widths = measureLines(fontDef, size, letterSpacing, lines);
+			leading = (leading + size) * fontDef.ascent / EM_SIZE;
 			
 			if ( align == TOP_LEFT
 					|| align == BOTTOM_LEFT
@@ -192,7 +192,7 @@ package wumedia.vector {
 							graphics["startNewShape"]();
 						}
 						ShapeRecord.drawShape(graphics, fontDef.glyphs[char], scale, offsetX, offsetY);
-						offsetX += (advance + advance * kerning) * scale;
+						offsetX += advance * scale + letterSpacing;
 					}
 				}
 				offsetY += leading;
@@ -214,10 +214,10 @@ package wumedia.vector {
 		 * 						If you don't want any wrapping, set this number to Number.POSITIVE_INFINITY
 		 * @param align:String	A value from the DynamicText class that specifies the alignment to the x and y property
 		 */
-		static public function writeBaseLine(graphics:*, font:String, size:Number, leading:Number, kerning:Number = 0.0, text:String = "",
+		static public function writeBaseLine(graphics:*, font:String, size:Number, leading:Number, letterSpacing:Number = 0.0, text:String = "",
 			x:Number = 0.0, y:Number = 0.0, width:Number = Number.POSITIVE_INFINITY, align:String = TOP_LEFT):void {
 			
-			write(graphics, font, size, leading, kerning, text, x, y, width, align, true);	
+			write(graphics, font, size, leading, letterSpacing, text, x, y, width, align, true);	
 		}
 		
 		/**
@@ -231,7 +231,7 @@ package wumedia.vector {
 		 * @param width:Number	Wrap to the next line if the current line exceeds this width
 		 * @return Array of String
 		 */
-		static private function breakLines(fontDef:DefineFont, size:Number, text:String, kerning:Number, width:Number ):Array {
+		static private function breakLines(fontDef:DefineFont, size:Number, text:String, letterSpacing:Number, width:Number ):Array {
 			var scale:Number = 1.0 / (EM_SIZE / size);
 			var w:Number = 0;
 			var char:String;
@@ -240,7 +240,7 @@ package wumedia.vector {
 			var lines:Array = [""];
 			var lineNum:uint = 0;
 			var advance:Number;
-			kerning *= .0016;
+			//kerning *= .0016;
 			_width = 0;
 			while ( ++charNum < charLen ) {
 				char = text.charAt(charNum);
@@ -249,7 +249,7 @@ package wumedia.vector {
 					w = 0;
 				} if (fontDef.glyphs[char]) {
 					advance = fontDef.advances[char];
-					w += (advance + advance * kerning ) * scale;
+					w += advance * scale + letterSpacing;
 					if ( w > width ) {
 						var backTrack:uint = lines[lineNum].lastIndexOf(" ");
 						if ( backTrack > 0 && backTrack < 0xffffffff ) {
@@ -264,7 +264,7 @@ package wumedia.vector {
 							w = 0;
 						} else {
 							lines[++lineNum] = char == " " ? "" : char;
-							w = (advance + advance * kerning) * scale;
+							w = advance * scale + letterSpacing;
 						}
 					} else {
 						lines[lineNum] += char;
@@ -279,7 +279,7 @@ package wumedia.vector {
 		 * Return an array that contains the width for each lines of text
 		 * @private
 		 */
-		static private function measureLines(fontDef:DefineFont, size:Number, kerning:Number, lines:Array):Array {
+		static private function measureLines(fontDef:DefineFont, size:Number, letterSpacing:Number, lines:Array):Array {
 			var scale:Number = 1.0 / (EM_SIZE / size);
 			var metrics:Array = new Array(lines.length);
 			var char:String;
@@ -291,7 +291,7 @@ package wumedia.vector {
 			var maxW:Number = 0;
 			var advance:Number;
 			var bounds:Rectangle;
-			kerning *= .0016;
+			//kerning *= .0016;
 			while ( --i > -1 ) {
 				lineText = lines[i];
 				lineW = 0;
@@ -302,13 +302,13 @@ package wumedia.vector {
 					if (fontDef.glyphs[char]) {
 						advance = fontDef.advances[char];
 						bounds = fontDef.glyphs[char].bounds;
-						lineW += (advance + advance * kerning ) * scale;
+						lineW += advance * scale + letterSpacing;
 						if ( charNum == 0 ) {
 							lineW -= bounds.left * scale;
 						}
 					}
 				}
-				lineW -= (advance * kerning + (advance - bounds.right)) * scale;
+				lineW -= (advance - bounds.right) * scale + letterSpacing;
 				metrics[i] = lineW;
 				if ( lineW > maxW ) {
 					maxW = lineW;

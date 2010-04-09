@@ -1,6 +1,7 @@
 package away3d.core.base
 {
     import away3d.arcane;
+	import away3d.core.geom.*;
     import away3d.events.*;
     
     import flash.events.EventDispatcher;
@@ -37,8 +38,8 @@ package away3d.core.base
     	protected var _index:int;
 		protected var _vertices:Array = new Array();
 		protected var _commands:Array = new Array();
-		protected var _drawingCommands:Array = new Array();
-		protected var _lastAddedVertex:Vertex;
+		protected var _pathCommands:Array = new Array();
+		protected var _lastAddedVertex:Vertex = new Vertex();
     	
 		/** @private */
         arcane var _visible:Boolean = true;
@@ -123,7 +124,7 @@ package away3d.core.base
         /**
 		 * Returns an array of drawing command objects that are used by the face.
 		 */
-        public function get drawingCommands():Array
+        public function get pathCommands():Array
         {
             throw new Error("Not implemented");
         }
@@ -208,7 +209,41 @@ package away3d.core.base
         {
             return -Math.sqrt(radius2);
         }
-		
+		        
+        
+        /**
+         * Offsets the vertices of the face by given amounts in x, y and z.
+         * @param x [Number] Offset in x.
+         * @param y [Number] Offset in y.
+         * @param z [Number] Offset in z.
+         * 
+         */    
+        public function offset(x:Number, y:Number, z:Number):void
+        {
+        	for(var i:uint; i<_pathCommands.length; i++)
+			{
+				var command:PathCommand = _pathCommands[i];
+				if(command.pControl)
+				{
+					command.pControl.x += x;
+					command.pControl.y += y;
+					command.pControl.z += z;
+				}
+				if(command.pEnd)
+				{
+					command.pEnd.x += x;
+					command.pEnd.y += y;
+					command.pEnd.z += z; 
+				}
+			}
+			
+			for each (var _vertex:Vertex in _vertices) {
+				_vertex.x += x;
+				_vertex.y += y;
+				_vertex.z += z; 
+			}
+        }
+        
 		/**
 		 * Default method for adding a vertexchanged event listener
 		 * 

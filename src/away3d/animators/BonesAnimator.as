@@ -51,7 +51,13 @@ package away3d.animators
             for each(_skinVertex in _skinVertices)
 				_skinVertex.update();
         }
-        
+        		
+		/**
+		 * Creates a new <code>BonesAnimator</code>
+		 * 
+		 * @param	target		[optional]	Defines the 3d object to which the animation is applied.
+		 * @param	init		[optional]	An initialisation object for specifying default instance properties.
+		 */
         public function BonesAnimator(target:Object3D = null, init:Object = null)
         {
         	super(target, init);

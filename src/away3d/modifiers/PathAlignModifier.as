@@ -1,58 +1,55 @@
-package away3d.geom
+package away3d.modifiers
 {
 	import away3d.core.base.*;
+	import away3d.core.geom.*;
 	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	
 	import flash.utils.Dictionary;
 
-	public class AlignToPath
+	public class PathAlignModifier
 	{
 		private var _originalMesh:Mesh;
 		private var _activeMesh:Mesh;
-		private var _path:Element;
-		private var _curves:Vector.<DrawingCommand>;
+		private var _path:Path;
+		private var _commands:Vector.<PathCommand>;
 		private var _lengths:Vector.<Number>;
 		private var _lengthArrays:Vector.<Vector.<Number>>;
 		private var _totalLength:Number = 0;
 		private var _cachedVertices:Vector.<Vector.<Number3D>>;
 		private var _cacheRef:Dictionary;
 		private var _arcLengthPrecision:Number = 0.01;
+		        
+        /**
+         * Instance of the Init object used to hold and parse default property values
+         * specified by the initialiser object in the 3d object constructor.
+         */
+		protected var ini:Init;
 		
 		/**
-		 * Constructor. 
-		 * @param mesh Mesh A mesh containing the elements to be aligned.
-		 * @param path Element A Segment or a Face containing the path's vector data for the alignment.
-		 * NOTE: The inputed mesh will be cached, so updates to the mesh will need a new instance
-		 * of the aligner.
-		 */		
-		public function AlignToPath(mesh:Mesh, path:Element)
-		{
-			duplicateMesh(mesh);
-			updatePath(path);
-			
-			_cachedVertices = new Vector.<Vector.<Number3D>>();
-			_cacheRef = new Dictionary();
-		}
+		 * Applies a vector offset to the mesh before it is modified
+		 */
+		public var offset:Number3D;
+		
+		/**
+		 * Forces the y alignment to face only 1 direction. Defaults to false.
+		 */
+		public var restrain:Boolean;
+		
+		/**
+		 * Omits arc-length parameterization yielding less precise, but faster results. Defaults to false.
+		 */
+		public var fast:Boolean;
 		
 		/**
 		 * Returns the last calculated length of the path.
 		 * @return Number
 		 */		
-		public function get length():Number
+		public function get pathLength():Number
 		{
 			return _totalLength;
 		}
-		
-		/**
-		 * Returns the quality of aligment parameter.
-		 * @return Number
-		 */		
-		public function get arcLengthPrecision():Number
-		{
-			return _arcLengthPrecision;
-		}
-		
+
 		/**
 		 * Determines the quality of the alignment.
 		 * The value is used to arc length parameterize the path. Without this technique
@@ -61,6 +58,11 @@ package away3d.geom
 		 * the faster the performance of the aligment is.
 		 * @param value Number
 		 */		
+		public function get arcLengthPrecision():Number
+		{
+			return _arcLengthPrecision;
+		}
+		
 		public function set arcLengthPrecision(value:Number):void
 		{
 			_arcLengthPrecision = value;
@@ -70,12 +72,37 @@ package away3d.geom
 		}
 		
 		/**
+		 * Creates a new <code>PathAlignModifier</code> object. The inputed mesh will be cached,
+		 * so updates to the mesh will need a new instance of the aligner.
+		 * 
+		 * @param	mesh				A mesh containing the elements to be aligned.
+		 * @param	path				A Segment or a Face containing the path's vector data for the alignment.
+		 * @param	init	[optional]	An initialisation object for specifying default instance properties.
+		 */		
+		public function PathAlignModifier(mesh:Mesh, path:Path, init:Object = null)
+		{
+			ini = Init.parse(init);
+			
+			offset = ini.getNumber3D("offset") || new Number3D();
+			restrain = ini.getBoolean("restrain", false);
+			fast = ini.getBoolean("fast", false);
+			
+			duplicateMesh(mesh);
+			updatePath(path);
+			
+			_cachedVertices = new Vector.<Vector.<Number3D>>();
+			_cacheRef = new Dictionary();
+		}
+		
+		/**
 		 * Updates the path of the alignment. 
+		 * 
 		 * @param path Element A Segment or a Face containing the path's vector data for the alignment.
 		 * @param precision Number Sets the arcLengthPrecision value.
+		 * 
 		 * @return Number The aproximated arc length of the path.
 		 */		
-		public function updatePath(path:Element, precision:Number = -1):Number
+		public function updatePath(path:Path, precision:Number = -1):Number
 		{
 			if(precision > 0)
 				_arcLengthPrecision = precision;
@@ -85,27 +112,27 @@ package away3d.geom
 			_totalLength = 0;
 			_lengthArrays = new Vector.<Vector.<Number>>();
 			_lengths = new Vector.<Number>();
-			_curves = new Vector.<DrawingCommand>();
+			_commands = new Vector.<PathCommand>();
 			
 			// Identify the curves in the segment.
 			var i:uint;
-			var loop:uint = _path.drawingCommands.length;
+			var loop:uint = _path.array.length;
 			for(i = 0; i<loop; ++i)
 			{
-				var command:DrawingCommand = _path.drawingCommands[uint(i)];
-				if(command.type != DrawingCommand.MOVE)
+				var command:PathCommand = _path.array[uint(i)];
+				if(command.type != PathCommand.MOVE)
 				{
-					if(command.type == DrawingCommand.LINE)
+					if(command.type == PathCommand.LINE)
 						BezierUtils.createControlPointForLine(command);
-					_curves.push(command);
+					_commands.push(command);
 				}
 			}
 			
 			// Get arc length info for all curves.
-			loop = _curves.length;
+			loop = _commands.length;
 			for(i = 0; i<loop; ++i)
 			{
-				command = _curves[uint(i)];
+				command = _commands[uint(i)];
 				
 				var commandLengthsArray:Vector.<Number> = BezierUtils.getArcLengthArray(command, _arcLengthPrecision);
 				_lengthArrays.push(commandLengthsArray);
@@ -121,8 +148,10 @@ package away3d.geom
 		/**
 		 * Given a point in space, this method finds the offset in
 		 * the curve that represents the closest point in the curve
-		 * to the specified point in space. 
+		 * to the specified point in space.
+		 * 
 		 * @param point Point The loose point in space.
+		 * 
 		 * @return Number The offset in the curve that yields the closest
 		 * point in the curve to the specified point.
 		 */		
@@ -132,11 +161,11 @@ package away3d.geom
 			// in order to determine which is the closest curve.
 			var minimunDistance:Number = Number.MAX_VALUE;
 			var minimunDistanceIndex:uint;
-			var loop:uint = _curves.length;
+			var loop:uint = _commands.length;
 			for(var i:uint; i<loop; ++i)
 			{
-				var command:DrawingCommand = _curves[uint(i)];
-				var control:Vertex = command.pControl;
+				var command:PathCommand = _commands[uint(i)];
+				var control:Number3D = command.pControl;
 				
 				var dX:Number = control.x - point.x;
 				var dY:Number = control.y - point.y;
@@ -162,12 +191,12 @@ package away3d.geom
 			// TO-DO: Use arc-length parameterization to obtain
 			// the closest value within the curve.
 			minimunDistance = Number.MAX_VALUE;
-			var distancesArr:Vector.<Number> = BezierUtils.getArcLengthArray(_curves[minimunDistanceIndex], 0.1);
-			var pCurvehit:Vertex;
+			var distancesArr:Vector.<Number> = BezierUtils.getArcLengthArray(_commands[minimunDistanceIndex], 0.1);
+			var pCurvehit:Number3D;
 			var minimunDistanceIndex1:uint;
 			for(i = 0; i<10; ++i)
 			{
-				var pCurve:Vertex = BezierUtils.getCoordinatesAt(i/10, _curves[minimunDistanceIndex]);
+				var pCurve:Number3D = BezierUtils.getCoordinatesAt(i/10, _commands[minimunDistanceIndex]);
 				
 				dX = pCurve.x - point.x;
 				dY = pCurve.y - point.y;
@@ -187,7 +216,7 @@ package away3d.geom
 				offset += distancesArr[uint(i)];
 			
 			// Identifies the point in the curve.
-			//var closestPoint:Vertex = _curves[minimunDistanceIndex].pStart;
+			//var closestPoint:Vertex = _commands[minimunDistanceIndex].pStart;
 			
 			// TO-DO: Avoid returning an object.
 			return {point:pCurvehit, offset:offset};
@@ -197,26 +226,24 @@ package away3d.geom
 		 * Traverses the entire path with a given offset,
 		 * storing the vertex positions. Could yield pretty intensive calculation.
 		 * The idea is to use this to precalculate alignments for later used with applyCached().
+		 * 
 		 * @param divisions The number of snapshots to take. If the length of the path is 100px,
 		 * a division of 50 would store alignment for an xOffset with 2px increment.
-		 * @param yOffset See apply().
-		 * @param restrain See apply().
-		 * @param fast See apply().
 		 */		
-		public function buildCache(divisions:Number, yOffset:Number, restrain:Boolean = false, fast:Boolean = false):void
+		public function buildCache(divisions:Number):void
 		{
 			_cachedVertices = new Vector.<Vector.<Number3D>>();
 			
 			for(var i:Number = 0; i < _totalLength; i += _totalLength/divisions)
 			{
-				apply(i, yOffset, restrain, fast);
+				offset.x = i;
+				execute();
 				
 				var snapshot:Array = [];
 				for each(var face:Face in _activeMesh.faces)
-				{
 					for each(var vertex:Vertex in face.vertices)
 						snapshot.push(new Number3D(vertex.x, vertex.y, vertex.z));
-				}
+				
 				_cachedVertices.push(snapshot);
 			}
 		}
@@ -224,14 +251,10 @@ package away3d.geom
 		/**
 		 * Caches the warped vertex positions of the mesh at a given x offset.
 		 * To recall positions cached in this way use applyCachedAt(). 
-		 * @param xOffset The x offset to cache. See apply().
-		 * @param yOffset See apply().
-		 * @param restrain See apply().
-		 * @param fast See apply().
 		 */		
-		public function buildCacheAt(xOffset:Number = 0, yOffset:Number = 0, restrain:Boolean = false, fast:Boolean = false):void
+		public function buildCacheAt():void
 		{
-			apply(xOffset, yOffset, restrain, fast);
+			execute();
 				
 			var snapshot:Vector.<Number3D> = new Vector.<Number3D>();
 			var i:uint, j:uint;
@@ -250,7 +273,7 @@ package away3d.geom
 			}
 			_cachedVertices.push(snapshot);
 			
-			_cacheRef[xOffset] = snapshot;
+			_cacheRef[offset.x] = snapshot;
 		}
 		
 		/**
@@ -271,7 +294,7 @@ package away3d.geom
 				var subArr:Array = face.vertices;
 				for(b = 0; b<subLoop; ++b)
 				{
-					var vertex:Vertex = face.vertices[uint(b)];
+					var vertex:Vertex = subArr[uint(b)];
 					
 					if(!snapshot[uint(i)])
 						continue;
@@ -316,13 +339,9 @@ package away3d.geom
 		}
 		
 		/**
-		 * Performs the alignment. 
-		 * @param xOffset Number Determines the displacement of the alignment along the path.
-		 * @param yOffset Number Determines the displacement of the alignment perpendicular to the path.
-		 * @param restrain Boolean Forces the y alignment to face only 1 direction.
-		 * @param fast Boolean If true, omits arc-length parameterization yielding less precise, but faster results.
+		 * Performs the alignment.
 		 */		
-		public function apply(xOffset:Number = 0, yOffset:Number = 0, restrain:Boolean = false, fast:Boolean = false):void
+		public function execute():void
 		{
 			// NOTE: This method is yet to be optimized.
 			
@@ -346,7 +365,7 @@ package away3d.geom
 					var transVertex:Vertex = transFace.vertices[uint(n)];
 					
 					// Get the x position marker for the vertex.
-					var X:Number = origVertex.x + xOffset;
+					var X:Number = origVertex.x + offset.x;
 					
 					if(X > 0)
 					{
@@ -408,15 +427,15 @@ package away3d.geom
 						t = u;
 					
 					// Get the coordinates of the curve at t.
-					var s:Vertex = BezierUtils.getCoordinatesAt(t, _curves[uint(i)]);
+					var s:Number3D = BezierUtils.getCoordinatesAt(t, _commands[uint(i)]);
 					
 					// Get the normal at t.
-					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _curves[uint(i)]);
+					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _commands[uint(i)]);
 					
 					var tX:Number = restrain ? -Math.abs(tangent.y) : -tangent.y;
 					var tY:Number = restrain ? Math.abs(tangent.x) : tangent.x;
 					var p:Number3D = new Number3D(tX, tY, 0);
-					p.normalize(origVertex.y + yOffset);
+					p.normalize(origVertex.y + offset.y);
 					
 					// Warp the point.
 					transVertex.x = s.x + p.x;

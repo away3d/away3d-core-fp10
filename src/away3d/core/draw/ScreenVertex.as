@@ -1,6 +1,6 @@
 package away3d.core.draw
 {
-    import away3d.core.base.*;
+    import away3d.core.geom.*;
 
     /**
     * representation of a 3d vertex resolved to the view.
@@ -16,7 +16,7 @@ package away3d.core.draw
 		private var dx:Number;
 		private var dy:Number;
 
-		public var vectorInstructionType:String = DrawingCommand.LINE;
+		public var vectorInstructionType:String = PathCommand.LINE;
 		
     	/**
     	 * The view x position of the vertex in the view.

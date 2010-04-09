@@ -15,9 +15,9 @@ package away3d.primitives
 		private var _font:String;
 		private var _size:Number;
 		private var _leading:Number;
-		private var _kerning:Number;
+		private var _letterSpacing:Number;
 		private var _text:String;
-		private var _textWidth:Number;
+		private var _width:Number;
 		private var _align:String;
 		private var _face:Face;
 		
@@ -29,7 +29,7 @@ package away3d.primitives
     		super.buildPrimitive();
     		
 			geometry.graphics.clear();
-			VectorText.write(geometry.graphics, _font, _size, _leading, _kerning, _text, 0, 0, _textWidth, _align, false);
+			VectorText.write(geometry.graphics, _font, _size, _leading, _letterSpacing, _text, 0, 0, _width, _align, false);
 			
 			//clear the materials on the shapes
 			for each (_face in geometry.faces)
@@ -73,17 +73,17 @@ package away3d.primitives
 		/**
     	 * Defines the amount of horizontal padding between characters. Defaults to 0.
     	 */
-		public function get kerning():Number
+		public function get letterSpacing():Number
 		{
-			return _kerning;
+			return _letterSpacing;
 		}
 		
-		public function set kerning(val:Number):void
+		public function set letterSpacing(val:Number):void
 		{
-			if (_kerning == val)
+			if (_letterSpacing == val)
     			return;
     		
-			_kerning = val;
+			_letterSpacing = val;
 			_primitiveDirty = true;
 		}
 				
@@ -107,17 +107,17 @@ package away3d.primitives
 		/**
     	 * Defines the fixed width of the textfield.
     	 */
-		public function get textWidth():Number
+		public function get width():Number
 		{
-			return _textWidth;
+			return _width;
 		}
 		
-		public function set textWidth(val:Number):void
+		public function set width(val:Number):void
 		{
-			if (_textWidth == val)
+			if (_width == val)
     			return;
     		
-			_textWidth = val;
+			_width = val;
 			_primitiveDirty = true;
 		}
 				
@@ -178,9 +178,9 @@ package away3d.primitives
 			
 			_size = ini.getNumber("size", 20);
 			_leading = ini.getNumber("leading", 20);
-			_kerning = ini.getNumber("kerning", 0);
+			_letterSpacing = ini.getNumber("letterSpacing", 0);
 			_text = ini.getString("text", "");
-			_textWidth = ini.getNumber("textWidth", 500);
+			_width = ini.getNumber("width", 500);
 			_align = ini.getString("align", "TL");
 			
 			_primitiveDirty = true;

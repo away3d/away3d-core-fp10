@@ -2,7 +2,8 @@ package away3d.core.draw
 {
     import away3d.arcane;
     import away3d.core.base.*;
-    import away3d.core.utils.FaceVO;
+	import away3d.core.geom.*;
+    import away3d.core.utils.*;
     import away3d.materials.*;
     
     import flash.geom.Matrix;
@@ -441,7 +442,7 @@ package away3d.core.draw
         		var iIndex:int;
         		var jIndex:int;
 				while (i < endIndex) {
-					if (screenCommands[i] == DrawingCommand.CURVE)
+					if (screenCommands[i] == PathCommand.CURVE)
 						i++;
 					
 					if ((((vertiy = screenVertices[(iIndex = screenIndices[i]*3)+1]) > y) != ((vertjy = screenVertices[(jIndex = screenIndices[j]*3)+1]) > y)) && (x < ((vertjx = screenVertices[jIndex]) - (vertix = screenVertices[iIndex]))*(y - vertiy)/(vertjy - vertiy) + vertix))
@@ -449,7 +450,7 @@ package away3d.core.draw
 					
 					j = i++;
 					
-					if (screenCommands[i] == DrawingCommand.MOVE)
+					if (screenCommands[i] == PathCommand.MOVE)
 						j = i++;
 				}
 				return c;
