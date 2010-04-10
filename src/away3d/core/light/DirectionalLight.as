@@ -275,9 +275,9 @@ package away3d.core.light
         	if (!normalMatrixSpecularTransform[source])
 				normalMatrixSpecularTransform[source] = new Dictionary(true);
 			
-			_sred = ((specular & 0xFF0000) >> 16)/255;
-            _sgreen = ((specular & 0xFF00) >> 8)/255;
-            _sblue  = (specular & 0xFF)/255;
+			_sred = this.specular*((specular & 0xFF0000) >> 16)/255;
+            _sgreen = this.specular*((specular & 0xFF00) >> 8)/255;
+            _sblue  = this.specular*(specular & 0xFF)/255;
             
         	_red = (red*2 + shininess)*_sred;
 			_green = (green*2 + shininess)*_sgreen;
