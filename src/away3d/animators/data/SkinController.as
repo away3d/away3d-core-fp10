@@ -1,11 +1,16 @@
 ﻿package away3d.animators.data
 {
+	import away3d.arcane;
 	import away3d.containers.*;
-	import away3d.core.base.*;
 	import away3d.core.math.*;
+	
+	use namespace arcane;
 	
     public class SkinController
     {
+    	private var _sceneTransform:MatrixAway3D = new MatrixAway3D();
+    	private var _sceneTransformDirty:Boolean;
+    	
         /**
          * Reference to the name of the controlling <code>Bone</code> object.
          */
@@ -26,24 +31,34 @@
          */
         public var skinVertices:Array =  new Array();
         
-        public var sceneTransform:MatrixAway3D = new MatrixAway3D();
+        public function get sceneTransform():MatrixAway3D
+		{
+			if (_sceneTransformDirty) {
+				_sceneTransformDirty = false;
+	        	sceneTransform.multiply(joint.sceneTransform, bindMatrix);
+	        	sceneTransform.multiply(inverseTransform, sceneTransform);
+			}
+			
+			return _sceneTransform;
+		}
+		
         public var inverseTransform:MatrixAway3D;
-        public var updated:Boolean;
         
         public function update():void
         {
-        	if (!joint)
+        	if (!joint || _sceneTransformDirty)
         		return;
         	
-        	if (joint.scene.updatedObjects && !joint.scene.updatedObjects[joint]) {
-        		updated = false;
-        		return;
-        	} else {
-        		updated = true;
-        	}
+        	_sceneTransformDirty = true;
         	
-        	sceneTransform.multiply(joint.sceneTransform, bindMatrix);
-        	sceneTransform.multiply(inverseTransform, sceneTransform);
+        	var child:Bone;
+        	for each (child in joint.children)
+        		if (child && child.controller)
+        			child.controller.update();
+        	
+			var skinVertex:SkinVertex;
+        	for each (skinVertex in skinVertices)
+        		skinVertex.skinnedVertex._positionDirty = true;
         }
         
     }

@@ -1,6 +1,7 @@
 package away3d.core.base
 {
     import away3d.arcane;
+	import away3d.animators.data.*;
     import away3d.core.draw.*;
     import away3d.core.math.*;
     import away3d.core.utils.*;
@@ -22,6 +23,8 @@ package away3d.core.base
         /** @private */
         arcane var _z:Number;
         /** @private */
+        arcane var _positionDirty:Boolean;
+        /** @private */
         arcane function getVertexDirty():Boolean
         {
         	if (_positionDirty)
@@ -35,12 +38,14 @@ package away3d.core.base
         	return false;
         }
         private var _position:Number3D = new Number3D();
-        private var _positionDirty:Boolean;
         private var _vertexDirty:Boolean;
         private var _persp:Number;
         
         private function updatePosition():void
         {
+        	if (skinVertex)
+        		skinVertex.update();
+        	
         	_positionDirty = false;
 			
 			for each (var _element:Element in parents)
@@ -56,6 +61,8 @@ package away3d.core.base
         public var parents:Array = [];
         
         public var geometry:Geometry;
+        
+        public var skinVertex:SkinVertex;
         
         /**
         * An object that contains user defined properties. Defaults to  null.

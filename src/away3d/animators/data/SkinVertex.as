@@ -20,13 +20,6 @@
 
         public function update() : void
         {
-        	var updated:Boolean = false;
-        	for each (var skinController:SkinController in controllers)
-        		updated = updated || skinController.updated;
-        	
-        	if (!updated)
-        		return;
-        	
         	//reset values
             skinnedVertex.reset();
             

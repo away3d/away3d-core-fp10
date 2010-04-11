@@ -1,5 +1,7 @@
 package away3d.containers
 {
+	import away3d.core.math.MatrixAway3D;
+	import away3d.animators.data.SkinController;
 	
 	import away3d.arcane;
 	import away3d.core.base.*;
@@ -9,6 +11,8 @@ package away3d.containers
     public class Bone extends ObjectContainer3D
     {
     	public var joint:ObjectContainer3D;
+    	
+    	public var controller:SkinController;
     	
 		//Collada 3.05B
 		public var boneId:String;
@@ -24,6 +28,9 @@ package away3d.containers
         public function set jointRotationX(rot:Number):void
         {
             joint.rotationX = rot;
+            
+            if (controller)
+            	controller.update();
         }
 		
     	/**
@@ -37,6 +44,9 @@ package away3d.containers
         public function set jointRotationY(rot:Number):void
         {
             joint.rotationY = rot;
+            
+            if (controller)
+            	controller.update();
         }
 		
     	/**
@@ -50,6 +60,9 @@ package away3d.containers
         public function set jointRotationZ(rot:Number):void
         {
             joint.rotationZ = rot;
+            
+            if (controller)
+            	controller.update();
         }
 		
     	/**
@@ -63,6 +76,9 @@ package away3d.containers
         public function set jointScaleX(scale:Number):void
         {
         	joint.scaleX = scale;
+        	
+            if (controller)
+            	controller.update();
         }
 		
     	/**
@@ -76,6 +92,9 @@ package away3d.containers
         public function set jointScaleY(scale:Number):void
         {
 			joint.scaleY = scale;
+			
+            if (controller)
+            	controller.update();
         }
 		
     	/**
@@ -89,6 +108,90 @@ package away3d.containers
         public function set jointScaleZ(scale:Number):void
         {
 			joint.scaleZ = scale;
+			
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set x(val:Number):void
+        {
+        	super.x = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set y(val:Number):void
+        {
+        	super.y = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set z(val:Number):void
+        {
+        	super.z = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set rotationX(val:Number):void
+        {
+        	super.rotationX = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set rotationY(val:Number):void
+        {
+        	super.rotationY = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set rotationZ(val:Number):void
+        {
+        	super.rotationZ = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set scaleX(val:Number):void
+        {
+        	super.scaleX = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set scaleY(val:Number):void
+        {
+        	super.scaleY = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        public override function set scaleZ(val:Number):void
+        {
+        	super.scaleZ = val;
+        	
+            if (controller)
+            	controller.update();
+        }
+        
+        
+        public override function set transform(val:MatrixAway3D):void
+        {
+        	super.transform = val;
+        	
+            if (controller)
+            	controller.update();
         }
         
         public function Bone(init:Object = null, ...childarray) : void

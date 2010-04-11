@@ -10,20 +10,7 @@ package away3d.animators
 	public class BonesAnimator extends Animator
     {
         private var _channels:Array;
-		private var _skinControllers:Array;
-		private var _skinController:SkinController;
-		private var _skinVertices:Array;
-		private var _skinVerticesDirty:Boolean;
-		private var _uniqueSkinVertices:Dictionary;
-		private var _skinVertex:SkinVertex;
-				
-		private function populateVertices():void 
-		{
-			_skinVerticesDirty = false;
-			
-			for (var obj:Object in _uniqueSkinVertices) 
-				_skinVertices.push(SkinVertex(obj));
-		}
+		
         protected override function updateTarget():void
         {
         	if (_target)
@@ -35,23 +22,13 @@ package away3d.animators
         {
         	super.updateProgress(val);
 			
-            // ensure vertex list is populated
-            if (_skinVerticesDirty)
-                populateVertices();
-			
         	//update channels
             for each (var channel:Channel in _channels)
                 channel.update(_time, interpolate);
-            
-            //update skincontrollers
-            for each(_skinController in _skinControllers)
-				_skinController.update();
-			
-			//update skinvertices
-            for each(_skinVertex in _skinVertices)
-				_skinVertex.update();
+                
+            //updateSkin();
         }
-        		
+        
 		/**
 		 * Creates a new <code>BonesAnimator</code>
 		 * 
@@ -63,10 +40,6 @@ package away3d.animators
         	super(target, init);
             Debug.trace(" + BonesAnimator");
 			_channels = [];
-			_skinControllers = [];
-			_skinVertices = [];
-			_uniqueSkinVertices = new Dictionary(true); 
-			_skinVerticesDirty = true;
         }
 		
 		/**
@@ -79,20 +52,7 @@ package away3d.animators
         	
 			_channels.push(channel);
         }
-		
-		/**
-		 * Adds a <code>SkinController</code> and all associated <code>SkinVertex</code> objects to the animation.
-		 */
-        public function addSkinController(skinController:SkinController):void
-        {
-        	if (_skinControllers.indexOf(skinController) != -1)
-        		return;
-        	
-			_skinControllers.push(skinController);
-			
-			for each (_skinVertex in skinController.skinVertices)
-                _uniqueSkinVertices[_skinVertex] = 1;
-        }
+        
 		/**
 		 * @inheritDoc
 		 */

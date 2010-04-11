@@ -52,6 +52,7 @@
 					bone = (_container as ObjectContainer3D).getBoneByName(_skinController.name);
 	                if (bone) {
 	                    _skinController.joint = bone.joint;
+	                    bone.controller = _skinController;
 						//_skinController.update();
 	                } else {
 	                	Debug.warning("no joint found for " + _skinController.name);
@@ -65,9 +66,6 @@
 					case AnimationDataType.SKIN_ANIMATION:
 						var animator:BonesAnimator = new BonesAnimator();
 						animator.target = _container;
-						
-						for each (_skinController in _skinControllers)
-							animator.addSkinController(_skinController);
 						
 						var param:Array;
 			            var rX:String;
@@ -799,6 +797,7 @@
             {
                 c = int(vcount[i]);
                 skinVertex = new SkinVertex(geometryData.vertices[i]);
+                geometryData.vertices[i].skinVertex = skinVertex;
                 geometryData.skinVertices.push(skinVertex);
                 
                 for each (skinController in geometryData.skinControllers)
@@ -825,6 +824,10 @@
 			
         	//Check for animations
 			var anims:XML = collada["library_animations"][0];
+			
+			//create default animation clip
+			_defaultAnimationClip = animationLibrary.addAnimation("default");
+			_defaultAnimationClip.animationType = AnimationDataType.SKIN_ANIMATION;
 			
 			if (!anims) {
         		Debug.trace(" ! ------------- No animations to parse -------------");
@@ -874,10 +877,6 @@
 				for each (var clip:XML in clips["animation_clip"])
 					parseAnimationClip(clip);
 			}
-			
-			//create default animation clip
-			_defaultAnimationClip = animationLibrary.addAnimation("default");
-			_defaultAnimationClip.animationType = AnimationDataType.SKIN_ANIMATION;
 			
 			for each (var channelData:ChannelData in channelLibrary)
 				_defaultAnimationClip.channels[channelData.name] = channelData;
