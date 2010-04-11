@@ -155,6 +155,15 @@ package away3d.materials {
         {
         	return _bitmap;
         }
+                
+        public function set bitmap(val:BitmapData):void
+        {
+        	_bitmap = val;
+        	
+        	_materialDirty = true;
+        	
+        	CacheStore.whiteShadingCache[_bitmap] = new Dictionary(true);
+        }
         
 		/**
 		 * @inheritDoc
