@@ -1,11 +1,9 @@
-package away3d.materials {
-	import away3d.core.light.PointLight;
-	import away3d.core.light.DirectionalLight;
-	import away3d.cameras.lenses.*;		import away3d.containers.*;
-	import away3d.arcane;
+package away3d.materials
+{
+	import away3d.arcane;	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.draw.*;
-	import away3d.core.render.*;
+	import away3d.core.light.*;
 	import away3d.core.utils.*;
 	
 	import flash.display.*;
@@ -47,8 +45,7 @@ package away3d.materials {
         		}
         	}
         	
-        	if (_materialDirty)
-        		notifyMaterialUpdate();
+        	super.updateMaterial(source, view);
         }
     	/** @private */
         arcane override function renderTriangle(tri:DrawTriangle):void
@@ -112,7 +109,14 @@ package away3d.materials {
                 v = 0xFF;
             return Math.exp(Math.round(Math.log(v)*step)/step);
         }
-    	                
+    	
+        protected override function invalidateFaces(source:Object3D = null, view:View3D = null):void
+        {
+        	super.invalidateFaces(source, view);
+        	
+        	CacheStore.whiteShadingCache[_bitmap] = new Dictionary(true);
+        }
+        
         /**
         * Coefficient for shininess level
         */
