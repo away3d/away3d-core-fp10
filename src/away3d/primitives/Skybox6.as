@@ -16,16 +16,16 @@
 		 * @param	material		The material to use for generating all six skybox sides.
 		 * 
 		 */
-        public function Skybox6(material:ITriangleMaterial)
+        public function Skybox6(material:Material)
         {
             super({material:material});
 
             var udelta:Number = 1 / 600;
             var vdelta:Number = 1 / 400;
 
-            if (material is IUVMaterial)
+            if (material is BitmapMaterial)
             {
-                var uvm:IUVMaterial = material as IUVMaterial;
+                var uvm:BitmapMaterial = material as BitmapMaterial;
                 udelta = 1 / uvm.width;
                 vdelta = 1 / uvm.height;
             }

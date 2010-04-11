@@ -1,16 +1,28 @@
 ﻿package away3d.materials
 {
+	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.materials.shaders.*;
 	
 	import flash.display.*;
 	
+	use namespace arcane;
+	
 	/**
 	 * Bitmap material with DOT3 shading.
 	 */
 	public class Dot3BitmapMaterial extends CompositeMaterial
 	{
+		/** @private */
+        arcane override function updateMaterial(source:Object3D, view:View3D):void
+        {
+        	if (_normalBitmapDirty)
+        		updateNormalBitmap();
+        	
+        	super.updateMaterial(source, view);
+        }
+        
 		private var _shininess:Number;
 		private var _specular:uint;
 		private var _normalBitmap:BitmapData;
@@ -157,16 +169,5 @@
 			if (_specular)
 				addMaterial(_specularDot3Shader);
 		}
-		 
-		/**
-		 * @inheritDoc
-		 */
-		public override function updateMaterial(source:Object3D, view:View3D):void
-        {
-        	if (_normalBitmapDirty)
-        		updateNormalBitmap();
-        	
-        	super.updateMaterial(source, view);
-        }
 	}
 }

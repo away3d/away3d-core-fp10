@@ -21,7 +21,7 @@
 		 * @param	down		The material to use for the skybox down.
 		 * 
 		 */
-        public function Skybox(front:ITriangleMaterial, left:ITriangleMaterial, back:ITriangleMaterial, right:ITriangleMaterial, up:ITriangleMaterial, down:ITriangleMaterial)
+        public function Skybox(front:Material, left:Material, back:Material, right:Material, up:Material, down:Material)
         {
             super();
 

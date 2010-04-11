@@ -303,7 +303,7 @@ package away3d.core.utils {
             return name;
         }
 
-        public static function material(data:*):IMaterial
+        public static function material(data:*):Material
         {
             if (data == null)
                 return null;
@@ -323,7 +323,7 @@ package away3d.core.utils {
                 }
             }
 
-            if (data is IMaterial)
+            if (data is Material)
                 return data;
 
             if (data is int) 
@@ -436,7 +436,7 @@ package away3d.core.utils {
                     if (wire == null)
                         return new ColorMaterial(color, {alpha:alpha});
                     else
-                        return new WireColorMaterial(color, {alpha:alpha, wireColor:wire.wireColor, wirealpha:wire.alpha, width:wire.width});
+                        return new WireColorMaterial(color, {alpha:alpha, wireColor:wire.wireColor, wireAlpha:wire.wireAlpha, thickness:wire.thickness});
                 }
 
                 if (wire != null)
@@ -446,12 +446,12 @@ package away3d.core.utils {
             throw new CastError("Can't cast to material: "+data);
         }
 
-        public static function wirematerial(data:*):ISegmentMaterial
+        public static function wirematerial(data:*):Material
         {
             if (data == null)
                 return null;
 
-            if (data is ISegmentMaterial)
+            if (data is Material)
                 return data;
 
             if (data is int) 

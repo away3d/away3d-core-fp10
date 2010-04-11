@@ -37,7 +37,7 @@ package away3d.events
     	/**
     	 * A reference to the material object that is relevant to the event.
     	 */
-        public var material:IMaterial;
+        public var material:Material;
 		
     	/**
     	 * A reference to a user defined extra object that is relevant to the event.
@@ -50,7 +50,7 @@ package away3d.events
 		 * @param	type		The type of the event. Possible values are: <code>MaterialEvent.RESIZED</code>.
 		 * @param	material	A reference to the material object that is relevant to the event.
 		 */
-        public function MaterialEvent(type:String, material:IMaterial)
+        public function MaterialEvent(type:String, material:Material)
         {
             super(type);
             this.material = material;

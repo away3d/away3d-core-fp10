@@ -14,11 +14,136 @@ package away3d.materials
 	use namespace arcane;
 	
     /** Basic bitmap texture material */
-    public class TransformBitmapMaterial extends BitmapMaterial implements ITriangleMaterial, IUVMaterial
+    public class TransformBitmapMaterial extends BitmapMaterial
     {
         /** @private */
         arcane var _transform:Matrix = new Matrix();
-        
+        /** @private */
+		arcane override function updateMaterial(source:Object3D, view:View3D):void
+        {
+        	_graphics = null;
+        	
+        	if (_colorTransformDirty)
+        		updateColorTransform();
+        	
+        	if (_bitmapDirty)
+        		updateRenderBitmap();
+        	
+        	if (_projectionDirty || _transformDirty)
+        		invalidateFaces();
+        	
+        	if (_transformDirty)
+        		updateTransform();
+        	
+        	if (_materialDirty || _blendModeDirty)
+        		updateFaces();
+        	
+        	_projectionDirty = false;
+        	_blendModeDirty = false;
+        }
+        /** @private */
+		arcane override function renderTriangle(tri:DrawTriangle):void
+        {
+        	if (_projectionVector && !throughProjection) {
+        		
+        		if (globalProjection) {
+        			normalR.rotate(tri.faceVO.face.normal, tri.source.sceneTransform);
+        			if (normalR.dot(_projectionVector) < 0)
+        				return;
+        		} else if (tri.faceVO.face.normal.dot(_projectionVector) < 0)
+        			return;
+        	}
+        	
+			super.renderTriangle(tri);
+        }
+        /** @private */
+		arcane override function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
+		{	
+			//retrieve the transform
+			if (_transform)
+				_mapping = _transform.clone();
+			else
+				_mapping = new Matrix();
+			
+			//if not projected, draw the source bitmap once
+			if (!_projectionVector)
+				renderSource(tri.source, containerRect, _mapping);
+			
+			//get the correct faceMaterialVO
+			_faceMaterialVO = getFaceMaterialVO(tri.faceVO.face.faceVO);
+			
+			//pass on resize value
+			if (parentFaceMaterialVO.resized) {
+				parentFaceMaterialVO.resized = false;
+				_faceMaterialVO.resized = true;
+			}
+			
+			//pass on invtexturemapping value
+			_faceMaterialVO.invtexturemapping = parentFaceMaterialVO.invtexturemapping;
+			
+			//check to see if rendering can be skipped
+			if (parentFaceMaterialVO.updated || _faceMaterialVO.invalidated || _faceMaterialVO.updated) {
+				parentFaceMaterialVO.updated = false;
+				
+				//retrieve the bitmapRect
+				_bitmapRect = tri.faceVO.face.bitmapRect;
+				
+				//reset booleans
+				if (_faceMaterialVO.invalidated)
+					_faceMaterialVO.invalidated = false;
+				else
+					_faceMaterialVO.updated = true;
+				
+				//store a clone
+				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
+				
+				//update the transform based on scaling or projection vector
+				if (_projectionVector) {
+					
+					//calulate mapping
+					_invtexturemapping = _faceMaterialVO.invtexturemapping;
+					_mapping.concat(projectMapping(tri));
+					_mapping.concat(_invtexturemapping);
+					
+					normalR.clone(tri.faceVO.face.normal);
+					
+					if (_globalProjection)
+						normalR.rotate(normalR, tri.source.sceneTransform);
+					
+					//check to see if the bitmap (non repeating) lies inside the drawtriangle area
+					if ((throughProjection || normalR.dot(_projectionVector) >= 0) && (repeat || !findSeparatingAxis(getFacePoints(_invtexturemapping), getMappingPoints(_mapping)))) {
+						
+						//store a clone
+						if (_faceMaterialVO.cleared)
+							_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
+						
+						_faceMaterialVO.cleared = false;
+						_faceMaterialVO.updated = true;
+						
+						//draw into faceBitmap
+						_graphics = _s.graphics;
+						_graphics.clear();
+						_graphics.beginBitmapFill(_bitmap, _mapping, repeat, smooth);
+						_graphics.drawRect(0, 0, _bitmapRect.width, _bitmapRect.height);
+			            _graphics.endFill();
+						_faceMaterialVO.bitmap.draw(_s, null, _colorTransform, _blendMode, _faceMaterialVO.bitmap.rect);
+					}
+				} else {
+					
+					//check to see if the bitmap (non repeating) lies inside the containerRect area
+					if (repeat || !findSeparatingAxis(getContainerPoints(containerRect), getMappingPoints(_mapping))) {
+						_faceMaterialVO.cleared = false;
+						_faceMaterialVO.updated = true;
+						
+						//draw into faceBitmap
+						_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, _bitmapRect, _zeroPoint, null, null, true);
+					}
+				}
+			}
+			
+			return _faceMaterialVO;
+		}
+		
         private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);
         private var _scaleX:Number = 1;
         private var _scaleY:Number = 1;
@@ -645,139 +770,5 @@ package away3d.materials
             throughProjection = ini.getBoolean("throughProjection", true);
             globalProjection = ini.getBoolean("globalProjection", false);
         }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public override function updateMaterial(source:Object3D, view:View3D):void
-        {
-        	_graphics = null;
-        	
-        	if (_colorTransformDirty)
-        		updateColorTransform();
-        	
-        	if (_bitmapDirty)
-        		updateRenderBitmap();
-        	
-        	if (_projectionDirty || _transformDirty)
-        		invalidateFaces();
-        	
-        	if (_transformDirty)
-        		updateTransform();
-        	
-        	if (_materialDirty || _blendModeDirty)
-        		updateFaces();
-        	
-        	_projectionDirty = false;
-        	_blendModeDirty = false;
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public override function renderTriangle(tri:DrawTriangle):void
-        {
-        	if (_projectionVector && !throughProjection) {
-        		
-        		if (globalProjection) {
-        			normalR.rotate(tri.faceVO.face.normal, tri.source.sceneTransform);
-        			if (normalR.dot(_projectionVector) < 0)
-        				return;
-        		} else if (tri.faceVO.face.normal.dot(_projectionVector) < 0)
-        			return;
-        	}
-        	
-			super.renderTriangle(tri);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-		public override function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
-		{	
-			//retrieve the transform
-			if (_transform)
-				_mapping = _transform.clone();
-			else
-				_mapping = new Matrix();
-			
-			//if not projected, draw the source bitmap once
-			if (!_projectionVector)
-				renderSource(tri.source, containerRect, _mapping);
-			
-			//get the correct faceMaterialVO
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO.face.faceVO);
-			
-			//pass on resize value
-			if (parentFaceMaterialVO.resized) {
-				parentFaceMaterialVO.resized = false;
-				_faceMaterialVO.resized = true;
-			}
-			
-			//pass on invtexturemapping value
-			_faceMaterialVO.invtexturemapping = parentFaceMaterialVO.invtexturemapping;
-			
-			//check to see if rendering can be skipped
-			if (parentFaceMaterialVO.updated || _faceMaterialVO.invalidated || _faceMaterialVO.updated) {
-				parentFaceMaterialVO.updated = false;
-				
-				//retrieve the bitmapRect
-				_bitmapRect = tri.faceVO.face.bitmapRect;
-				
-				//reset booleans
-				if (_faceMaterialVO.invalidated)
-					_faceMaterialVO.invalidated = false;
-				else
-					_faceMaterialVO.updated = true;
-				
-				//store a clone
-				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
-				
-				//update the transform based on scaling or projection vector
-				if (_projectionVector) {
-					
-					//calulate mapping
-					_invtexturemapping = _faceMaterialVO.invtexturemapping;
-					_mapping.concat(projectMapping(tri));
-					_mapping.concat(_invtexturemapping);
-					
-					normalR.clone(tri.faceVO.face.normal);
-					
-					if (_globalProjection)
-						normalR.rotate(normalR, tri.source.sceneTransform);
-					
-					//check to see if the bitmap (non repeating) lies inside the drawtriangle area
-					if ((throughProjection || normalR.dot(_projectionVector) >= 0) && (repeat || !findSeparatingAxis(getFacePoints(_invtexturemapping), getMappingPoints(_mapping)))) {
-						
-						//store a clone
-						if (_faceMaterialVO.cleared)
-							_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
-						
-						_faceMaterialVO.cleared = false;
-						_faceMaterialVO.updated = true;
-						
-						//draw into faceBitmap
-						_graphics = _s.graphics;
-						_graphics.clear();
-						_graphics.beginBitmapFill(_bitmap, _mapping, repeat, smooth);
-						_graphics.drawRect(0, 0, _bitmapRect.width, _bitmapRect.height);
-			            _graphics.endFill();
-						_faceMaterialVO.bitmap.draw(_s, null, _colorTransform, _blendMode, _faceMaterialVO.bitmap.rect);
-					}
-				} else {
-					
-					//check to see if the bitmap (non repeating) lies inside the containerRect area
-					if (repeat || !findSeparatingAxis(getContainerPoints(containerRect), getMappingPoints(_mapping))) {
-						_faceMaterialVO.cleared = false;
-						_faceMaterialVO.updated = true;
-						
-						//draw into faceBitmap
-						_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, _bitmapRect, _zeroPoint, null, null, true);
-					}
-				}
-			}
-			
-			return _faceMaterialVO;
-		}
     }
 }

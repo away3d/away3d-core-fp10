@@ -14,7 +14,7 @@ package away3d.extrusions
 		private var _subdivisionsXY:Number;
 		private var _depth:Number;
 		private var _effectivePathCommands:Array;
-		private var _material:ITriangleMaterial;
+		private var _material:Material;
 		
 		public function TextExtrusion(mesh:Mesh, init:Object=null)
 		{
@@ -26,7 +26,7 @@ package away3d.extrusions
 			_subdivisionsXY = ini.getNumber("subdivisionsXY", 1, {min:1, max:100});
 			_depth = ini.getNumber("depth", 100);
 			
-			_material = mesh.material as ITriangleMaterial;
+			_material = mesh.material as Material;
 			
 			for each(var face:Face in mesh.faces)
 				generateFaceExtrusion(face);

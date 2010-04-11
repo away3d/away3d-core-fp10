@@ -127,7 +127,7 @@ package away3d.containers
         private var screenZ:Number = Infinity;
         private var element:Element;
         private var drawpri:DrawPrimitive;
-        private var material:IMaterial;
+        private var material:Material;
         private var object:Object3D;
         private var uv:UV;
         private var sceneX:Number;
@@ -194,8 +194,8 @@ package away3d.containers
                     {
                         var tri:DrawTriangle = pri as DrawTriangle;
                         var testuv:UV = tri.getUV(screenX, screenY);
-                        if (tri.material is IUVMaterial) {
-                            var testmaterial:IUVMaterial = (tri.material as IUVMaterial);
+                        if (tri.material is BitmapMaterial) {
+                            var testmaterial:BitmapMaterial = (tri.material as BitmapMaterial);
                             //return if material pixel is transparent
                             //TODO: sort out eventuality for composite materials
                             if (!(testmaterial.getPixel32(testuv.u, testuv.v) >> 24) && !(testmaterial is CompositeMaterial))
@@ -406,7 +406,7 @@ package away3d.containers
         /**
          * Current material under the mouse.
          */
-        public var mouseMaterial:IMaterial;
+        public var mouseMaterial:Material;
         
         /**
          * Defines whether the view always redraws on a render, or just redraws what 3d objects change. Defaults to false.

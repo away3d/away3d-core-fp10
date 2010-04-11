@@ -10,7 +10,7 @@ package away3d.core.utils
 		
 		public var command:String;
 		
-		public var material:ISpriteMaterial;
+		public var material:Material;
 		
 		public var width:Number;
 		

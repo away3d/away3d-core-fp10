@@ -122,7 +122,7 @@ package away3d.core.utils
         	return _uv;
         }
         
-        public function createFaceVO(face:Face, material:ITriangleMaterial, back:ITriangleMaterial, uv0:UV, uv1:UV, uv2:UV):FaceVO
+        public function createFaceVO(face:Face, material:Material, back:Material, uv0:UV, uv1:UV, uv2:UV):FaceVO
         {
         	if (_fStore.length)
         		_fActive.push(_faceVO = _fStore.pop());
@@ -140,7 +140,7 @@ package away3d.core.utils
         	return _faceVO;
         }
         
-        public function createSegmentVO(material:ISegmentMaterial):SegmentVO
+        public function createSegmentVO(material:Material):SegmentVO
         {
         	if (_sStore.length)
         		_sActive.push(_segmentVO = _sStore.pop());

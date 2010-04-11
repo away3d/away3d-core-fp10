@@ -1,49 +1,21 @@
-﻿package away3d.materials
+package away3d.core.utils 
 {
-    import away3d.arcane;
-    import away3d.containers.*;
-    import away3d.core.base.*;
-    import away3d.core.draw.*;
-    import away3d.core.light.*;
-    import away3d.core.math.*;
-    import away3d.core.render.*;
-    import away3d.core.utils.*;
-    import away3d.events.*;
-    
-    import flash.display.*;
-    import flash.events.*;
-    import flash.utils.*;
+	import away3d.core.render.*;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.core.draw.*;
+	import away3d.core.light.*;
+	import away3d.core.math.*;
 	
-	use namespace arcane;
+	import flash.display.*;
 	
-    /**
-    * Abstract class for materials that calculate lighting for the face's center
-    * Not intended for direct use - use <code>ShadingColorMaterial</code> or <code>WhiteShadingBitmapMaterial</code>.
-    */
-    public class CenterLightingMaterial extends EventDispatcher implements ITriangleMaterial
-    {
-    	/** @private */
-        arcane var _id:int;
-        /** @private */
-        arcane var session:AbstractRenderSession;
-        /** @private */
-        arcane var _materialDirty:Boolean;
-		/** @private */
-        arcane function notifyMaterialUpdate():void
-        {
-        	_materialDirty = false;
-        	
-            if (!hasEventListener(MaterialEvent.MATERIAL_UPDATED))
-                return;
-			
-            if (_materialupdated == null)
-                _materialupdated = new MaterialEvent(MaterialEvent.MATERIAL_UPDATED, this);
-                
-            dispatchEvent(_materialupdated);
-        }
-        
-		//private var directional:DirectionalLight;
-        private var focus:Number;
+	/**
+	 * @author robbateman
+	 */
+	public class FaceNormalShader 
+	{
+		private var session:AbstractRenderSession;
+		private var focus:Number;
         private var zoom:Number;
         private var persp:Number;
         private var v0x:Number;
@@ -123,110 +95,8 @@
         private var _viewPosition:Number3D;
         private var _source:Mesh;
         private var _view:View3D;
-        private var _materialupdated:MaterialEvent;
         
-        /**
-        * Instance of the Init object used to hold and parse default property values
-        * specified by the initialiser object in the 3d object constructor.
-        */
-		protected var ini:Init;
-		
-        /** @private */
-        protected function renderTri(tri:DrawTriangle, session:AbstractRenderSession, kar:Number, kag:Number, kab:Number, kdr:Number, kdg:Number, kdb:Number, ksr:Number, ksg:Number, ksb:Number):void
-        {
-            throw new Error("Not implemented");
-        }
-        
-        /**
-        * Coefficient for ambient light level
-        */
-        public var ambient_brightness:Number = 1;
-        
-        /**
-        * Coefficient for diffuse light level
-        */
-        public var diffuse_brightness:Number = 1;
-        
-        /**
-        * Coefficient for specular light level
-        */
-        public var specular_brightness:Number = 1;
-        
-        /**
-        * Coefficient for shininess level
-        */
-        public var shininess:Number = 20;
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function get visible():Boolean
-        {
-            throw new Error("Not implemented");
-        }
-                
-		/**
-		 * @inheritDoc
-		 */
-        public function get id():int
-        {
-            return _id;
-        }
-        
-		/**
-		 * @private
-		 */
-        public function CenterLightingMaterial(init:Object = null)
-        {
-            ini = Init.parse(init);
-
-            shininess = ini.getColor("shininess", 20);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function updateMaterial(source:Object3D, view:View3D):void
-        {
-        	var _source_lightarray_directionals:Array = source.lightarray.directionals;
-        	for each (var directional:DirectionalLight in _source_lightarray_directionals) {
-        		if (!directional.diffuseTransform[source] || view.scene.updatedObjects[source]) {
-        			directional.setDiffuseTransform(source);
-        			_materialDirty = true;
-        		}
-        		
-        		if (!directional.specularTransform[source])
-        			directional.specularTransform[source] = new Dictionary(true);
-        		
-        		if (!directional.specularTransform[source][view] || view.scene.updatedObjects[source] || view.updated) {
-        			directional.setSpecularTransform(source, view);
-        			_materialDirty = true;
-        		}
-        	}
-        	
-        	var source_lightarray_points:Array = source.lightarray.points;
-        	for each (var point:PointLight in source_lightarray_points) {
-        		if (!point.viewPositions[view] || view.scene.updatedObjects[source] || view.updated) {
-        			point.setViewPosition(view);
-        			_materialDirty = true;
-        		}
-        	}
-        	
-        	if (_materialDirty)
-        		updateFaces(source, view);
-        }
-        
-        public function updateFaces(source:Object3D = null, view:View3D = null):void
-        {
-			source = source;
-			view = view;
-        	notifyMaterialUpdate();
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function renderTriangle(tri:DrawTriangle):void
+		public function getTriangleShade(tri:DrawTriangle, shininess:Number):FaceNormalShaderVO
         {
         	session = tri.source.session;
             focus = tri.view.camera.focus;
@@ -316,7 +186,7 @@
                 ny = tri.faceVO.face.normal.y;
                 nz = tri.faceVO.face.normal.z;
                 
-                amb = directional.ambient * ambient_brightness;
+                amb = directional.ambient;
 				
                 kar += red * amb;
                 kag += green * amb;
@@ -327,7 +197,7 @@
                 if (nf < 0)
                     continue;
 				
-                diff = directional.diffuse * nf * diffuse_brightness;
+                diff = directional.diffuse * nf;
                 
                 kdr += red * diff;
                 kdg += green * diff;
@@ -341,7 +211,7 @@
 				
 				rf = rfx*nx + rfy*ny + rfz*nz;
 				
-                spec = directional.specular * Math.pow(rf, shininess) * specular_brightness;
+                spec = directional.specular * Math.pow(rf, shininess);
                 
                 ksr += red * spec;
                 ksg += green * spec;
@@ -368,7 +238,7 @@
                 dfz /= df;
                 fade = 1 / df / df;
                 
-                amb = point.ambient * ambient_brightness;
+                amb = point.ambient;
 				
                 kar += red * amb;
                 kag += green * amb;
@@ -379,7 +249,7 @@
                 if (nf < 0)
                     continue;
 				
-                diff = point.diffuse * fade * nf * diffuse_brightness * 250000;
+                diff = point.diffuse * fade * nf * 250000;
 				
                 kdr += red * diff;
                 kdg += green * diff;
@@ -393,14 +263,12 @@
                 rfx = dfx - 2*nf*pa;
                 rfy = dfy - 2*nf*pb;
                 
-                spec = point.specular * fade * Math.pow(rfz, shininess) * specular_brightness * 250000;
+                spec = point.specular * fade * Math.pow(rfz, shininess) * 250000;
 				
                 ksr += red * spec;
                 ksg += green * spec;
                 ksb += blue * spec;
             }
-			
-            renderTri(tri, session, kar, kag, kab, kdr, kdg, kdb, ksr, ksg, ksb);
 			
             if (draw_fall || draw_reflect || draw_normal)
             {
@@ -481,22 +349,8 @@
                     }
                 }
             }
+			
+            return new FaceNormalShaderVO(kar, kag, kab, kdr, kdg, kdb, ksr, ksg, ksb);
         }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function addOnMaterialUpdate(listener:Function):void
-        {
-        	addEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false, 0, true);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function removeOnMaterialUpdate(listener:Function):void
-        {
-        	removeEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false);
-        }
-    }
+	}
 }

@@ -26,7 +26,7 @@
 		private var _edgeCache:Array;
 		private var _gen:Array = [];
 		private var _normDir:Boolean;
-		private var _material:ITriangleMaterial;
+		private var _material:Material;
 		       
 		private const resol:int = 1000;
 		public static const PATCH:int = 0;
@@ -107,7 +107,7 @@
 			
 			super(init);
 
-			_material = material as ITriangleMaterial;
+			_material = material as Material;
 			patchData = patchDataPrm;
 			_pI = patchData.patchInfo;
 			xOffset = ini.getNumber("xoffset", 0);

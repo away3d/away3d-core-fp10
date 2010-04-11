@@ -224,7 +224,7 @@ package away3d.core.draw
     	/**
     	 * The material object used as the triangle primitive's texture.
     	 */
-        public var material:ITriangleMaterial;
+        public var material:Material;
         
         public var screenVertices:Array;
         

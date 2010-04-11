@@ -1,70 +1,67 @@
 package away3d.materials
 {
 	import away3d.arcane;
-    import away3d.containers.*;
-    import away3d.core.base.*;
     import away3d.core.draw.*;
-    import away3d.core.render.*;
     import away3d.core.utils.*;
-    import away3d.events.*;
-    
-    import flash.events.*;
 	
 	use namespace arcane;
 	
     /**
     * Wire material for solid color drawing with optional face border outlining
     */
-    public class WireColorMaterial extends EventDispatcher implements ITriangleMaterial
+    public class WireColorMaterial extends WireframeMaterial
     {
-    	/** @private */
-        arcane var _id:int;
+		/** @private */
+        arcane override function renderTriangle(tri:DrawTriangle):void
+        {
+			tri.source.session.renderTriangleLineFill(_thickness, _color, _alpha, _wireColor, _wireAlpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+        }
         
-        /**
-        * Instance of the Init object used to hold and parse default property values
-        * specified by the initialiser object in the 3d object constructor.
-        */
-		protected var ini:Init;
-		
+        protected var _alpha:Number;
+        protected var _color:uint;
+        
 		/**
-		 * Determines the color value of the material
+		 * 24 bit color value representing the material color
 		 */
-        public var color:int;
+        public function get color():uint
+        {
+        	return _color;
+        }
+        
+        public function set color(val:uint):void
+        {
+        	if (_color == val)
+        		return;
+        	
+        	_color = val;
+        	
+        	_materialDirty = true;
+        }
         
     	/**
     	 * Determines the alpha value of the material
     	 */
-        public var alpha:Number;
-        
-    	/**
-    	 * Determines the wire width
-    	 */
-        public var width:Number;
-        
-    	/**
-    	 * Determines the color value of the border wire
-    	 */
-        public var wireColor:int;
-        
-    	/**
-    	 * Determines the alpha value of the border wire
-    	 */
-        public var wirealpha:Number;
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function get visible():Boolean
+        public function get alpha():Number
         {
-            return (alpha > 0) || (wirealpha > 0);
+        	return _alpha;
+        }
+        
+        public function set alpha(val:Number):void
+        {
+        	if (_alpha == val)
+        		return;
+        	
+        	_alpha = val;
+        	
+        	_materialDirty = true;
         }
         
 		/**
 		 * @inheritDoc
 		 */
-        public function get id():int
+        public override function get visible():Boolean
         {
-            return _id;
+            return (alpha > 0) || (wireAlpha > 0);
         }
         
 		/**
@@ -75,49 +72,32 @@ package away3d.materials
 		 */
         public function WireColorMaterial(color:* = null, init:Object = null)
         {
-            if (color == null)
+        	if (color == null)
                 color = "random";
-
+            
             this.color = Cast.trycolor(color);
-
-            ini = Init.parse(init);
+            
+        	ini = Init.parse(init);
+        	
+            super(ini.getColor("wireColor", 0x0), ini);
             
             alpha = ini.getNumber("alpha", 1, {min:0, max:1});
-            wireColor = ini.getColor("wireColor", 0x000000);
-            width = ini.getNumber("width", 1, {min:0});
-            wirealpha = ini.getNumber("wirealpha", 1, {min:0, max:1});
         }
         
 		/**
-		 * @inheritDoc
+		 * Duplicates the material properties to another material object.  Usage: existingMaterial = materialToClone.clone( existingMaterial ) as WireColorMaterial;
+		 * 
+		 * @param	object	[optional]	The new material instance into which all properties are copied. The default is <code>WireColorMaterial</code>.
+		 * @return						The new material instance with duplicated properties applied.
 		 */
-        public function updateMaterial(source:Object3D, view:View3D):void
+        public override function clone(material:Material = null):Material
         {
+        	var mat:WireColorMaterial = (material as WireColorMaterial) || new WireColorMaterial();
+        	super.clone(mat);
+        	mat.color = _color;
+        	mat.alpha = _alpha;
         	
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function renderTriangle(tri:DrawTriangle):void
-        {
-			tri.source.session.renderTriangleLineFill(width, color, alpha, wireColor, wirealpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function addOnMaterialUpdate(listener:Function):void
-        {
-        	addEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false, 0, true);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function removeOnMaterialUpdate(listener:Function):void
-        {
-        	removeEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false);
+        	return mat;
         }
     }
 }

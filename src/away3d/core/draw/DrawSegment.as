@@ -107,7 +107,7 @@ package away3d.core.draw
 		/**
 		 * The material of the segment primitive.
 		 */
-        public var material:ISegmentMaterial;
+        public var material:Material;
         
         public var screenVertices:Array;
         

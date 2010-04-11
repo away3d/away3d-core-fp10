@@ -139,7 +139,7 @@ package away3d.core.utils
 			return _screenCommands[id] || (_screenCommands[id] = []);
 		}
 		
-	    public function createDrawSprite(source:Object3D, spriteVO:SpriteVO, material:ISpriteMaterial, screenVertices:Array, screenIndices:Array, index:uint, scale:Number, generated:Boolean = false):DrawSprite
+	    public function createDrawSprite(source:Object3D, spriteVO:SpriteVO, material:Material, screenVertices:Array, screenIndices:Array, index:uint, scale:Number, generated:Boolean = false):DrawSprite
 	    {
 	    	if (!(_dbArray = _dbDictionary[source.session]))
 				_dbArray = _dbDictionary[source.session] = [];
@@ -167,7 +167,7 @@ package away3d.core.utils
 	        return _sprite;
 	    }
 	    
-	    public function createDrawSegment(source:Object3D, segmentVO:SegmentVO, material:ISegmentMaterial, screenVertices:Array, screenIndices:Array, screenCommands:Array, startIndex:int, endIndex:int, generated:Boolean = false):DrawSegment
+	    public function createDrawSegment(source:Object3D, segmentVO:SegmentVO, material:Material, screenVertices:Array, screenIndices:Array, screenCommands:Array, startIndex:int, endIndex:int, generated:Boolean = false):DrawSegment
 	    {
 	    	if (!(_dsArray = _dsDictionary[source.session]))
 				_dsArray = _dsDictionary[source.session] = [];
@@ -193,7 +193,7 @@ package away3d.core.utils
 	        return _seg;
 	    }
 	    
-		public function createDrawTriangle(source:Object3D, faceVO:FaceVO, material:ITriangleMaterial, screenVertices:Array, screenIndices:Array, screenCommands:Array, startIndex:int, endIndex:int, uv0:UV, uv1:UV, uv2:UV, generated:Boolean = false):DrawTriangle
+		public function createDrawTriangle(source:Object3D, faceVO:FaceVO, material:Material, screenVertices:Array, screenIndices:Array, screenCommands:Array, startIndex:int, endIndex:int, uv0:UV, uv1:UV, uv2:UV, generated:Boolean = false):DrawTriangle
 		{
 			if (!(_dtArray = _dtDictionary[source.session]))
 				_dtArray = _dtDictionary[source.session] = [];

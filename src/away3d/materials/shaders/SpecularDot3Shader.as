@@ -22,6 +22,48 @@
 	 */
     public class SpecularDot3Shader extends AbstractShader
     {
+        /** @private */
+		arcane override function updateMaterial(source:Object3D, view:View3D):void
+        {
+        	if (_bitmapDirty)
+        		invalidateFaces();
+        	
+        	var _source_lightarray_directionals:Array = source.lightarray.directionals;
+			var directional:DirectionalLight;
+        	for each (directional in _source_lightarray_directionals) {
+        		if (!directional.specularTransform[source])
+        			directional.specularTransform[source] = new Dictionary(true);
+        		
+        		if (!directional.specularTransform[source][view] || view.scene.updatedObjects[source] || view.updated) {
+        			directional.setSpecularTransform(source, view);
+        			directional.setNormalMatrixSpecularTransform(source, view, _specular, _shininess);
+        			updateFaces(source, view);
+        		}
+        	}
+        }
+		/** @private */
+		arcane override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
+        {
+        	super.renderLayer(tri, layer, level);
+        	
+        	var _lights_directionals:Array = _lights.directionals;
+			var directional:DirectionalLight;
+        	for each (directional in _lights_directionals)
+        	{
+				_shape = _session.getLightShape(this, level++, layer, directional);
+        		_shape.filters = [directional.normalMatrixSpecularTransform[_source][_view]];
+        		_shape.blendMode = blendMode;
+        		_graphics = _shape.graphics;
+        		
+				_source.session.renderTriangleBitmap(_bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, false, _graphics);
+        	}
+			
+			if (debug)
+                _source.session.renderTriangleLine(0, 0x0000FF, 1, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+            
+            return level;
+        }
+        
         private var _zeroPoint:Point = new Point(0, 0);
         private var _bitmap:BitmapData;
         private var _sourceDictionary:Dictionary = new Dictionary(true);
@@ -231,53 +273,6 @@
             shininess = ini.getNumber("shininess", 20);
             specular = ini.getColor("specular", 0xFFFFFF);
             tangentSpace = ini.getBoolean("tangentSpace", false);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-		public override function updateMaterial(source:Object3D, view:View3D):void
-        {
-        	if (_bitmapDirty)
-        		invalidateFaces();
-        	
-        	var _source_lightarray_directionals:Array = source.lightarray.directionals;
-			var directional:DirectionalLight;
-        	for each (directional in _source_lightarray_directionals) {
-        		if (!directional.specularTransform[source])
-        			directional.specularTransform[source] = new Dictionary(true);
-        		
-        		if (!directional.specularTransform[source][view] || view.scene.updatedObjects[source] || view.updated) {
-        			directional.setSpecularTransform(source, view);
-        			directional.setNormalMatrixSpecularTransform(source, view, _specular, _shininess);
-        			updateFaces(source, view);
-        		}
-        	}
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
-        {
-        	super.renderLayer(tri, layer, level);
-        	
-        	var _lights_directionals:Array = _lights.directionals;
-			var directional:DirectionalLight;
-        	for each (directional in _lights_directionals)
-        	{
-				_shape = _session.getLightShape(this, level++, layer, directional);
-        		_shape.filters = [directional.normalMatrixSpecularTransform[_source][_view]];
-        		_shape.blendMode = blendMode;
-        		_graphics = _shape.graphics;
-        		
-				_source.session.renderTriangleBitmap(_bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, false, _graphics);
-        	}
-			
-			if (debug)
-                _source.session.renderTriangleLine(0, 0x0000FF, 1, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
-            
-            return level;
         }
     }
 }

@@ -17,7 +17,7 @@ package away3d.core.utils
 		
         public var v1:Vertex;
         
-		public var material:ISegmentMaterial;
+		public var material:Material;
 		
 		//public var segment:Segment;
 	}

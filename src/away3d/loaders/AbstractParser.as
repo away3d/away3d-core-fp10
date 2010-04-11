@@ -108,7 +108,7 @@ package away3d.loaders
         private var _parseStart:int;
         private var _parseTime:int;
         private var _materials:Object;
-        private var _faceMaterial:ITriangleMaterial;
+        private var _faceMaterial:Material;
     	private var _face:Face;
         private var _moveVector:Number3D = new Number3D();
         
@@ -262,7 +262,7 @@ package away3d.loaders
 				//create faces from face and mesh data
 				for each(_faceData in _geometryData.faces) {
 					if (_faceData.materialData)
-						_faceMaterial = _faceData.materialData.material as ITriangleMaterial;
+						_faceMaterial = _faceData.materialData.material as Material;
 					else
 						_faceMaterial = null;
 					
@@ -312,7 +312,7 @@ package away3d.loaders
     	/**
     	 * Overrides all materials in the model.
     	 */
-        public var material:ITriangleMaterial;
+        public var material:Material;
         
     	/**
     	 * Controls the automatic centering of geometry data in the model, improving culling and the accuracy of bounding dimension values. Defaults to false.
@@ -401,7 +401,7 @@ package away3d.loaders
 			_geometryLibrary = new GeometryLibrary();
         	
         	parseTimeout = ini.getNumber("parseTimeout", 40000);
-        	material = ini.getMaterial("material") as ITriangleMaterial;
+        	material = ini.getMaterial("material") as Material;
         	materials = ini.getObject("materials") || {};
         	centerMeshes = ini.getBoolean("centerMeshes", false);
         }

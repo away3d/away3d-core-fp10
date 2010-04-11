@@ -21,7 +21,15 @@ package away3d.materials
 	 * The base class for Pixel Bender pixel shader (or rather Texel shader) materials
 	 */
 	internal class PixelShaderMaterial extends BitmapMaterial
-	{
+	{	
+		/** @private */
+        arcane override function updateMaterial(source:Object3D, view:View3D):void
+		{
+			updatePixelShader(source, view);
+			_bitmapDirty = true;
+			super.updateMaterial(source, view);
+		}
+		
 		protected var _mesh : Mesh;
 		protected var _positionMap : BitmapData;
 		protected var _normalMap : BitmapData;
@@ -172,16 +180,6 @@ package away3d.materials
 			}
 			
 			_positionMap.draw(container, null, null, null, null, true);
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function updateMaterial(source:Object3D, view:View3D):void
-		{
-			updatePixelShader(source, view);
-			_bitmapDirty = true;
-			super.updateMaterial(source, view);
 		}
 		
 		/**

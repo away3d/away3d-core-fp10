@@ -23,14 +23,8 @@ package away3d.materials.shaders
 	 * Base class for shaders.
     * Not intended for direct use - use one of the shading materials in the materials package.
     */
-    public class AbstractShader extends EventDispatcher implements ILayerMaterial
+    public class AbstractShader extends LayerMaterial
     {
-    	/** @private */
-        arcane var _id:int;
-        /** @private */
-        arcane var _materialDirty:Boolean;
-        /** @private */
-		arcane var _materialupdated:MaterialEvent;
         /** @private */
         arcane var _faceDictionary:Dictionary = new Dictionary(true);
         /** @private */
@@ -97,19 +91,6 @@ package away3d.materials.shaders
 		arcane var _focus:Number;
 		/** @private */
 		arcane var _mapping:Matrix;
-		/** @private */
-        arcane function notifyMaterialUpdate():void
-        {
-        	_materialDirty = false;
-        	
-            if (!hasEventListener(MaterialEvent.MATERIAL_UPDATED))
-                return;
-			
-            if (_materialupdated == null)
-                _materialupdated = new MaterialEvent(MaterialEvent.MATERIAL_UPDATED, this);
-                
-            dispatchEvent(_materialupdated);
-        }
         /** @private */
 		arcane final function contains(v0x:Number, v0y:Number, v1x:Number, v1y:Number, v2x:Number, v2y:Number, x:Number, y:Number):Boolean
         {   
@@ -124,12 +105,71 @@ package away3d.materials.shaders
 
             return true;
         }
+        /** @private */
+        arcane override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
+        {
+        	_source = tri.source as Mesh;
+        	_session = _source.session;
+			_view = tri.view;
+			_faceVO = tri.faceVO;
+			_face = _faceVO.face;
+			_lights = tri.source.lightarray;
+			
+			return level;
+        }
         
-        /**
-        * Instance of the Init object used to hold and parse default property values
-        * specified by the initialiser object in the 3d object constructor.
-        */
-        protected var ini:Init;
+		/** @private */
+        arcane override function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
+        {
+        	_source = tri.source as Mesh;
+        	_session = _source.session;
+			_view = tri.view;
+			_faceVO = tri.faceVO;
+			_face = _faceVO.face;
+			_parentFaceMaterialVO = parentFaceMaterialVO;
+			
+			_faceMaterialVO = getFaceMaterialVO(_faceVO, _source, _view);
+			
+			//pass on inverse texturemapping
+			_faceMaterialVO.invtexturemapping = parentFaceMaterialVO.invtexturemapping;
+			
+			//pass on resize value
+			if (parentFaceMaterialVO.resized) {
+				parentFaceMaterialVO.resized = false;
+				_faceMaterialVO.resized = true;
+			}
+			
+			//check to see if rendering can be skipped
+			if (parentFaceMaterialVO.updated || _faceMaterialVO.invalidated || _faceMaterialVO.updated) {
+				parentFaceMaterialVO.updated = false;
+				
+				//retrieve the bitmapRect
+				_bitmapRect = _faceVO.face.bitmapRect;
+				
+				//reset booleans
+				if (_faceMaterialVO.invalidated)
+					_faceMaterialVO.invalidated = false;
+				else 
+					_faceMaterialVO.updated = true;
+				
+				//store a clone
+				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap;
+				
+				//draw shader
+				renderShader(tri);
+			}
+			
+			return _faceMaterialVO;
+        }
+		/** @private */
+        arcane function getFaceMaterialVO(faceVO:FaceVO, source:Object3D = null, view:View3D = null):FaceMaterialVO
+        {
+        	source;view;//TODO : FDT Warning
+        	if ((_faceMaterialVO = _faceDictionary[faceVO]))
+        		return _faceMaterialVO;
+        	
+        	return _faceDictionary[faceVO] = new FaceMaterialVO(source, view);
+        }
         
         /**
         * Renders the shader to the specified face.
@@ -226,30 +266,9 @@ package away3d.materials.shaders
         public var smooth:Boolean;
         
         /**
-        * Determines if faces with the shader applied are drawn with outlines
-        */
-        public var debug:Boolean;
-        
-        /**
         * Defines a blendMode value for the shader bitmap.
         */
         public var blendMode:String;
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function get visible():Boolean
-        {
-            return true;
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function get id():int
-        {
-            return _id;
-        }
         
 		/**
 		 * Creates a new <code>AbstractShader</code> object.
@@ -258,110 +277,10 @@ package away3d.materials.shaders
 		 */
         public function AbstractShader(init:Object = null)
         {
-            ini = Init.parse(init);
+            super(init);
             
             smooth = ini.getBoolean("smooth", false);
-            debug = ini.getBoolean("debug", false);
             blendMode = ini.getString("blendMode", BlendMode.NORMAL);
-            
-            //_id = 
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-		public function updateMaterial(source:Object3D, view:View3D):void
-        {
-        	throw new Error("Not implemented");
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
-        {
-        	_source = tri.source as Mesh;
-        	_session = _source.session;
-			_view = tri.view;
-			_faceVO = tri.faceVO;
-			_face = _faceVO.face;
-			_lights = tri.source.lightarray;
-			
-			return level;
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
-        {
-        	_source = tri.source as Mesh;
-        	_session = _source.session;
-			_view = tri.view;
-			_faceVO = tri.faceVO;
-			_face = _faceVO.face;
-			_parentFaceMaterialVO = parentFaceMaterialVO;
-			
-			_faceMaterialVO = getFaceMaterialVO(_faceVO, _source, _view);
-			
-			//pass on inverse texturemapping
-			_faceMaterialVO.invtexturemapping = parentFaceMaterialVO.invtexturemapping;
-			
-			//pass on resize value
-			if (parentFaceMaterialVO.resized) {
-				parentFaceMaterialVO.resized = false;
-				_faceMaterialVO.resized = true;
-			}
-			
-			//check to see if rendering can be skipped
-			if (parentFaceMaterialVO.updated || _faceMaterialVO.invalidated || _faceMaterialVO.updated) {
-				parentFaceMaterialVO.updated = false;
-				
-				//retrieve the bitmapRect
-				_bitmapRect = _faceVO.face.bitmapRect;
-				
-				//reset booleans
-				if (_faceMaterialVO.invalidated)
-					_faceMaterialVO.invalidated = false;
-				else 
-					_faceMaterialVO.updated = true;
-				
-				//store a clone
-				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap;
-				
-				//draw shader
-				renderShader(tri);
-			}
-			
-			return _faceMaterialVO;
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function getFaceMaterialVO(faceVO:FaceVO, source:Object3D = null, view:View3D = null):FaceMaterialVO
-        {
-        	source;view;//TODO : FDT Warning
-        	if ((_faceMaterialVO = _faceDictionary[faceVO]))
-        		return _faceMaterialVO;
-        	
-        	return _faceDictionary[faceVO] = new FaceMaterialVO(source, view);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function addOnMaterialUpdate(listener:Function):void
-        {
-        	addEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false, 0, true);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function removeOnMaterialUpdate(listener:Function):void
-        {
-        	removeEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false);
         }
     }
 }

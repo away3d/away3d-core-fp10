@@ -825,10 +825,6 @@
         	//Check for animations
 			var anims:XML = collada["library_animations"][0];
 			
-			//create default animation clip
-			_defaultAnimationClip = animationLibrary.addAnimation("default");
-			_defaultAnimationClip.animationType = AnimationDataType.SKIN_ANIMATION;
-			
 			if (!anims) {
         		Debug.trace(" ! ------------- No animations to parse -------------");
         		return;
@@ -877,6 +873,10 @@
 				for each (var clip:XML in clips["animation_clip"])
 					parseAnimationClip(clip);
 			}
+			
+			//create default animation clip
+			_defaultAnimationClip = animationLibrary.addAnimation("default");
+			_defaultAnimationClip.animationType = AnimationDataType.SKIN_ANIMATION;
 			
 			for each (var channelData:ChannelData in channelLibrary)
 				_defaultAnimationClip.channels[channelData.name] = channelData;

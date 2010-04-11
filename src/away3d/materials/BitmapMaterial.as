@@ -7,10 +7,8 @@
     import away3d.core.math.*;
     import away3d.core.render.*;
     import away3d.core.utils.*;
-    import away3d.events.*;
     
     import flash.display.*;
-    import flash.events.*;
     import flash.geom.*;
     import flash.utils.*;
     
@@ -19,9 +17,7 @@
     /**
     * Basic bitmap material
     */
-    public class BitmapMaterial extends EventDispatcher implements ITriangleMaterial, IUVMaterial, ILayerMaterial, ISpriteMaterial    {
-    	/** @private */
-        arcane var _id:int;
+    public class BitmapMaterial extends LayerMaterial    {
     	/** @private */
     	arcane var _texturemapping:Matrix;    	/** @private */    	arcane var _view:View3D;
     	/** @private */
@@ -30,8 +26,6 @@
     	arcane var _focus:Number;
         /** @private */
     	arcane var _bitmap:BitmapData;
-        /** @private */
-        arcane var _materialDirty:Boolean;
         /** @private */
     	arcane var _renderBitmap:BitmapData;
         /** @private */
@@ -53,8 +47,6 @@
         /** @private */
 		arcane var _blue:Number = 1;
         /** @private */
-        arcane var _alpha:Number = 1;
-        /** @private */
         arcane var _faceDictionary:Dictionary = new Dictionary(true);
         /** @private */
     	arcane var _zeroPoint:Point = new Point(0, 0);
@@ -71,70 +63,13 @@
         /** @private */
 		arcane var _sourceVO:FaceMaterialVO;
         /** @private */
-        arcane var _session:AbstractRenderSession;
-		/** @private */
-        arcane function notifyMaterialUpdate():void
-        {
-        	_materialDirty = false;        	
-            if (!hasEventListener(MaterialEvent.MATERIAL_UPDATED))
-                return;
-			
-            if (_materialupdated == null)
-                _materialupdated = new MaterialEvent(MaterialEvent.MATERIAL_UPDATED, this);
-                
-            dispatchEvent(_materialupdated);
-        }
-        
-        /** @private */
-		arcane function renderSource(source:Object3D, containerRect:Rectangle, mapping:Matrix):void
-		{
-			//check to see if sourceDictionary exists
-			if (!(_sourceVO = _faceDictionary[source]))
-				_sourceVO = _faceDictionary[source] = new FaceMaterialVO();
-			
-			_sourceVO.resize(containerRect.width, containerRect.height);
-			
-			//check to see if rendering can be skipped
-			if (_sourceVO.invalidated || _sourceVO.updated) {
-				
-				//calulate scale matrix
-				mapping.scale(containerRect.width/width, containerRect.height/height);
-				
-				//reset booleans
-				_sourceVO.invalidated = false;
-				_sourceVO.cleared = false;
-				_sourceVO.updated = false;
-				
-				//draw the bitmap
-				if (mapping.a == 1 && mapping.d == 1 && mapping.b == 0 && mapping.c == 0 && mapping.tx == 0 && mapping.ty == 0) {
-					//speedier version for non-transformed bitmap
-					_sourceVO.bitmap.copyPixels(_bitmap, containerRect, _zeroPoint);
-				}else {
-					_graphics = _s.graphics;
-					_graphics.clear();
-					_graphics.beginBitmapFill(_bitmap, mapping, repeat, smooth);
-					_graphics.drawRect(0, 0, containerRect.width, containerRect.height);
-		            _graphics.endFill();
-					_sourceVO.bitmap.draw(_s, null, _colorTransform, _blendMode, _sourceVO.bitmap.rect);
-				}
-			}
-		}
-				private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);		private var _screenVertices:Array;		private var _screenCommands:Array;		private var _screenIndices:Array;
+        arcane var _session:AbstractRenderSession;		/** @private */        arcane override function updateMaterial(source:Object3D, view:View3D):void        {        	_graphics = null;        		        	if (_colorTransformDirty)        		updateColorTransform();        		        	if (_bitmapDirty)        		updateRenderBitmap();        	        	if (_materialDirty || _blendModeDirty)        		updateFaces(source, view);        	        	_blendModeDirty = false;        }        /** @private */        arcane override function renderTriangle(tri:DrawTriangle):void        {			_session = tri.source.session;			_screenCommands = tri.screenCommands;			_screenVertices = tri.screenVertices;			_screenIndices = tri.screenIndices;        	_view = tri.view;        	_near = _view.screenClipping.minZ;			_uvtData = getUVData(tri);        				_session.renderTriangleBitmap(_renderBitmap, _uvtData, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);            if (debug)                _session.renderTriangleLine(thickness, wireColor, wireAlpha, _screenVertices, _screenCommands, _screenIndices, tri.startIndex, tri.endIndex);							if(showNormals){								_nn.rotate(tri.faceVO.face.normal, tri.view.cameraVarsStore.viewTransformDictionary[tri.source]);				 				_sv0x = (tri.v0x + tri.v1x + tri.v2x) / 3;				_sv0y = (tri.v0y + tri.v1y + tri.v2y) / 3;				 				_sv1x = (_sv0x - (30*_nn.x));				_sv1y = (_sv0y - (30*_nn.y));				 				_session.renderLine(_sv0x, _sv0y, _sv1x, _sv1y, 0, 0xFF00FF, 1);			}        }		/** @private */        arcane override function renderSprite(bill:DrawSprite):void        {            bill.source.session.renderSpriteBitmap(_renderBitmap, bill, smooth);        }		/** @private */        arcane override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int        {        	if (blendMode == BlendMode.NORMAL) {        		_graphics = layer.graphics;        	} else {        		_session = tri.source.session;        		        		_shape = _session.getShape(this, level++, layer);	    			    		_shape.blendMode = _blendMode;	    			    		_graphics = _shape.graphics;        	}    		    		    		renderTriangle(tri);    		    		return level;        }		/** @private */        arcane override function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO		{			//draw the bitmap once			renderSource(tri.source, containerRect, new Matrix());						//get the correct faceMaterialVO			_faceMaterialVO = getFaceMaterialVO(tri.faceVO.face.faceVO);						//pass on resize value			if (parentFaceMaterialVO.resized) {				parentFaceMaterialVO.resized = false;				_faceMaterialVO.resized = true;			}						//pass on invtexturemapping value			_faceMaterialVO.invtexturemapping = parentFaceMaterialVO.invtexturemapping;						//check to see if face update can be skipped			if (parentFaceMaterialVO.updated || _faceMaterialVO.invalidated || _faceMaterialVO.updated) {				parentFaceMaterialVO.updated = false;								//reset booleans				_faceMaterialVO.invalidated = false;				_faceMaterialVO.cleared = false;				_faceMaterialVO.updated = true;								//store a clone				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();								//draw into faceBitmap				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, tri.faceVO.face.bitmapRect, _zeroPoint, null, null, true);			}						return _faceMaterialVO;		}		/** @private */        arcane function getFaceMaterialVO(faceVO:FaceVO, source:Object3D = null, view:View3D = null):FaceMaterialVO        {        	//check to see if faceMaterialVO exists        	if ((_faceMaterialVO = _faceDictionary[faceVO]))        		return _faceMaterialVO;        	        	return _faceDictionary[faceVO] = new FaceMaterialVO();        }        		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);		protected var _screenVertices:Array;		protected var _screenCommands:Array;		protected var _screenIndices:Array;
 		private var _near:Number;
 		private var _smooth:Boolean;
-		private var _debug:Boolean;
 		private var _repeat:Boolean;
-        private var _precision:Number;
     	private var _shape:Shape;
-    	private var _materialupdated:MaterialEvent;
         private var x:Number;
-		private var y:Number;		private var _showNormals:Boolean;		private var _nn:Number3D = new Number3D();		private var _sv0x:Number;		private var _sv0y:Number;		private var _sv1x:Number;		private var _sv1y:Number;        
-        /**
-        * Instance of the Init object used to hold and parse default property values
-        * specified by the initialiser object in the 3d object constructor.
-        */
-        protected var ini:Init;
-        
+		private var y:Number;		private var _showNormals:Boolean;		private var _nn:Number3D = new Number3D();		private var _sv0x:Number;		private var _sv0y:Number;		private var _sv1x:Number;		private var _sv1y:Number;        		protected function renderSource(source:Object3D, containerRect:Rectangle, mapping:Matrix):void		{			//check to see if sourceDictionary exists			if (!(_sourceVO = _faceDictionary[source]))				_sourceVO = _faceDictionary[source] = new FaceMaterialVO();						_sourceVO.resize(containerRect.width, containerRect.height);						//check to see if rendering can be skipped			if (_sourceVO.invalidated || _sourceVO.updated) {								//calulate scale matrix				mapping.scale(containerRect.width/width, containerRect.height/height);								//reset booleans				_sourceVO.invalidated = false;				_sourceVO.cleared = false;				_sourceVO.updated = false;								//draw the bitmap				if (mapping.a == 1 && mapping.d == 1 && mapping.b == 0 && mapping.c == 0 && mapping.tx == 0 && mapping.ty == 0) {					//speedier version for non-transformed bitmap					_sourceVO.bitmap.copyPixels(_bitmap, containerRect, _zeroPoint);				}else {					_graphics = _s.graphics;					_graphics.clear();					_graphics.beginBitmapFill(_bitmap, mapping, repeat, smooth);					_graphics.drawRect(0, 0, containerRect.width, containerRect.height);		            _graphics.endFill();					_sourceVO.bitmap.draw(_s, null, _colorTransform, _blendMode, _sourceVO.bitmap.rect);				}			}		}		        protected function updateFaces(source:Object3D = null, view:View3D = null):void        {        	notifyMaterialUpdate();        	        	for each (_faceMaterialVO in _faceDictionary)        		if (!_faceMaterialVO.cleared)        			_faceMaterialVO.clear();        }                protected function invalidateFaces(source:Object3D = null, view:View3D = null):void        {        	_materialDirty = true;        	        	for each (_faceMaterialVO in _faceDictionary)        		_faceMaterialVO.invalidated = true;        }        
     	/**
     	 * Updates the colortransform object applied to the texture from the <code>color</code> and <code>alpha</code> properties.
     	 * 
@@ -217,25 +152,6 @@
         	_materialDirty = true;
         }
         
-        
-        /**
-        * Toggles debug mode: textured triangles are drawn with white outlines, precision correction triangles are drawn with blue outlines.
-        */
-        public function get debug():Boolean
-        {
-        	return _debug;
-        }
-        
-        public function set debug(val:Boolean):void
-        {
-        	if (_debug == val)
-        		return;
-        	
-        	_debug = val;
-        	
-        	_materialDirty = true;
-        }
-        
         /**
         * Determines if texture bitmap will tile in uv-space
         */
@@ -250,24 +166,6 @@
         		return;
         	
         	_repeat = val;
-        	
-        	_materialDirty = true;
-        }
-        
-        
-        /**
-        * Corrects distortion caused by the affine transformation (non-perspective) of textures.
-        * The number refers to the pixel correction value - ie. a value of 2 means a distorion correction to within 2 pixels of the correct perspective distortion.
-        * 0 performs no precision.
-        */
-        public function get precision():Number
-        {
-        	return _precision;
-        }
-        
-        public function set precision(val:Number):void
-        {
-        	_precision = val*val*1.4;
         	
         	_materialDirty = true;
         }
@@ -321,11 +219,11 @@
 		/**
 		 * Defines a colored tint for the texture bitmap.
 		 */
-		public function get color():uint
+		public override function get color():uint
 		{
 			return _color;
 		}
-        public function set color(val:uint):void
+        public override function set color(val:uint):void
 		{
 			if (_color == val)
 				return;
@@ -341,12 +239,12 @@
         /**
         * Defines an alpha value for the texture bitmap.
         */
-        public function get alpha():Number
+        public override function get alpha():Number
         {
             return _alpha;
         }
         
-        public function set alpha(value:Number):void
+        public override function set alpha(value:Number):void
         {
             if (value > 1)
                 value = 1;
@@ -384,7 +282,7 @@
         	_blendMode = val;
         	_blendModeDirty = true;
         }
-				/**        * Displays the normals per face in pink lines.        */        public function get showNormals():Boolean        {        	return _showNormals;        }                public function set showNormals(val:Boolean):void        {        	if (_showNormals == val)        		return;        	        	_showNormals = val;        	        	_materialDirty = true;        }        		/**		 * @inheritDoc		 */        public function get visible():Boolean        {            return _alpha > 0;        }                		/**		 * @inheritDoc		 */        public function get id():int        {            return _id;        }        
+				/**        * Displays the normals per face in pink lines.        */        public function get showNormals():Boolean        {        	return _showNormals;        }                public function set showNormals(val:Boolean):void        {        	if (_showNormals == val)        		return;        	        	_showNormals = val;        	        	_materialDirty = true;        }        
 		/**
 		 * Creates a new <code>BitmapMaterial</code> object.
 		 * 
@@ -393,140 +291,14 @@
 		 */
         public function BitmapMaterial(bitmap:BitmapData, init:Object = null)
         {
-        	_renderBitmap = _bitmap = bitmap;
-            
-            ini = Init.parse(init);
+        	_renderBitmap = _bitmap = bitmap;        				super(init);
 			
             smooth = ini.getBoolean("smooth", false);
             debug = ini.getBoolean("debug", false);
             repeat = ini.getBoolean("repeat", false);
-            precision = ini.getNumber("precision", 0);
             _blendMode = ini.getString("blendMode", BlendMode.NORMAL);
-            alpha = ini.getNumber("alpha", _alpha, {min:0, max:1});
-            color = ini.getColor("color", _color);
             colorTransform = ini.getObject("colorTransform", ColorTransform) as ColorTransform;
-            showNormals = ini.getBoolean("showNormals", false);            _colorTransformDirty = true;
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function updateMaterial(source:Object3D, view:View3D):void
-        {
-        	_graphics = null;
-        		
-        	if (_colorTransformDirty)
-        		updateColorTransform();
-        		
-        	if (_bitmapDirty)
-        		updateRenderBitmap();
-        	
-        	if (_materialDirty || _blendModeDirty)
-        		updateFaces(source, view);        	
-        	_blendModeDirty = false;
-        }
-        
-        public function getFaceMaterialVO(faceVO:FaceVO, source:Object3D = null, view:View3D = null):FaceMaterialVO
-        {        	//check to see if faceMaterialVO exists
-        	if ((_faceMaterialVO = _faceDictionary[faceVO]))
-        		return _faceMaterialVO;
-        	
-        	return _faceDictionary[faceVO] = new FaceMaterialVO();
-        }
-                		/**		 * @inheritDoc		 */        public function updateFaces(source:Object3D = null, view:View3D = null):void        {
-        	notifyMaterialUpdate();        	
-        	for each (_faceMaterialVO in _faceDictionary)        		if (!_faceMaterialVO.cleared)        			_faceMaterialVO.clear();        }
-        
-		/**		 * @inheritDoc		 */        public function invalidateFaces(source:Object3D = null, view:View3D = null):void        {
-        	_materialDirty = true;        	        	for each (_faceMaterialVO in _faceDictionary)        		_faceMaterialVO.invalidated = true;        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
-        {
-        	if (blendMode == BlendMode.NORMAL) {
-        		_graphics = layer.graphics;
-        	} else {
-        		_session = tri.source.session;
-        		        		_shape = _session.getShape(this, level++, layer);	    		
-	    		_shape.blendMode = _blendMode;
-	    		
-	    		_graphics = _shape.graphics;
-        	}
-    		
-    		
-    		renderTriangle(tri);
-    		    		return level;
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function renderTriangle(tri:DrawTriangle):void
-        {			_session = tri.source.session;
-			_screenCommands = tri.screenCommands;
-			_screenVertices = tri.screenVertices;			_screenIndices = tri.screenIndices;        	_view = tri.view;
-        	_near = _view.screenClipping.minZ;
-			_uvtData = getUVData(tri);
-        	
-			_session.renderTriangleBitmap(_renderBitmap, _uvtData, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
-            if (debug)
-                _session.renderTriangleLine(0, 0x0000FF, 1, _screenVertices, _screenCommands, _screenIndices, tri.startIndex, tri.endIndex);
-							if(showNormals){								_nn.rotate(tri.faceVO.face.normal, tri.view.cameraVarsStore.viewTransformDictionary[tri.source]);				 				_sv0x = (tri.v0x + tri.v1x + tri.v2x) / 3;				_sv0y = (tri.v0y + tri.v1y + tri.v2y) / 3;				 				_sv1x = (_sv0x - (30*_nn.x));				_sv1y = (_sv0y - (30*_nn.y));				 				_session.renderLine(_sv0x, _sv0y, _sv1x, _sv1y, 0, 0xFF00FF, 1);			}        }        		/**		 * @inheritDoc		 */        public function renderSprite(bill:DrawSprite):void        {            bill.source.session.renderSpriteBitmap(_renderBitmap, bill, smooth);        }
-        
-		/**
-		 * @inheritDoc
-		 */
-		public function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
-		{
-			//draw the bitmap once
-			renderSource(tri.source, containerRect, new Matrix());
-			
-			//get the correct faceMaterialVO			_faceMaterialVO = getFaceMaterialVO(tri.faceVO.face.faceVO);
-			
-			//pass on resize value
-			if (parentFaceMaterialVO.resized) {
-				parentFaceMaterialVO.resized = false;
-				_faceMaterialVO.resized = true;
-			}
-			
-			//pass on invtexturemapping value
-			_faceMaterialVO.invtexturemapping = parentFaceMaterialVO.invtexturemapping;
-			
-			//check to see if face update can be skipped
-			if (parentFaceMaterialVO.updated || _faceMaterialVO.invalidated || _faceMaterialVO.updated) {
-				parentFaceMaterialVO.updated = false;
-				
-				//reset booleans
-				_faceMaterialVO.invalidated = false;
-				_faceMaterialVO.cleared = false;
-				_faceMaterialVO.updated = true;
-				
-				//store a clone
-				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
-				
-				//draw into faceBitmap
-				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, tri.faceVO.face.bitmapRect, _zeroPoint, null, null, true);
-			}
-			
-			return _faceMaterialVO;
-		}
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function addOnMaterialUpdate(listener:Function):void
-        {
-        	addEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false, 0, true);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public function removeOnMaterialUpdate(listener:Function):void
-        {
-        	removeEventListener(MaterialEvent.MATERIAL_UPDATED, listener, false);
+            showNormals = ini.getBoolean("showNormals", false);                        _colorTransformDirty = true;
         }
     }
 }

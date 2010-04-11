@@ -47,9 +47,7 @@ package away3d.core.project
 		private var _focus:Number;
 		private var _zoom:Number;
 		private var _outlineIndices:Dictionary = new Dictionary(true);
-		private var _faceMaterial:ITriangleMaterial;
-		private var _segmentMaterial:ISegmentMaterial;
-		private var _spriteMaterial:ISpriteMaterial;
+		private var _material:Material;
 		private var _face:Face;
 		private var _faceVO:FaceVO;
 		private var _index:int;
@@ -57,13 +55,13 @@ package away3d.core.project
 		private var _endIndex:int;
 		private var _tri:DrawTriangle;
         private var _backface:Boolean;
-		private var _backmat:ITriangleMaterial;
+		private var _backmat:Material;
 		private var _segment:Segment;
 		private var _segmentVO:SegmentVO;
 		private var _seg:DrawSegment;
-		private var _smaterial:ISegmentMaterial;
+		private var _smaterial:Material;
 		private var _spriteVO:SpriteVO;
-		private var _spmaterial:ISpriteMaterial;
+		private var _spmaterial:Material;
 		private var _n01:Face;
 		private var _n12:Face;
 		private var _n20:Face;
@@ -117,11 +115,8 @@ package away3d.core.project
         	_focus = _camera.focus;
         	_zoom = _camera.zoom;
         	
-			_faceMaterial = _mesh.faceMaterial;
-			_segmentMaterial = _mesh.segmentMaterial;
-			_spriteMaterial = _mesh.spriteMaterial;
-			
-			_backmat = _mesh.back || _faceMaterial;
+			_material = _mesh.material;
+			_backmat = _mesh.back || _material;
 			
             //check if an element needs clipping
             _clipFlag = _cameraVarsStore.nodeClassificationDictionary[source] == Frustum.INTERSECT && !(_clipping is RectangleClipping);
@@ -206,7 +201,7 @@ package away3d.core.project
                     if (_backface)
                         _tri.material = _backmat;
                     else
-                        _tri.material = _faceMaterial;
+                        _tri.material = _material;
                 }
                 
 				//do not draw material if visible is false
@@ -277,7 +272,7 @@ package away3d.core.project
 						continue;
 				}
 				
-            	_smaterial = _segmentVO.material || _segmentMaterial;
+            	_smaterial = _segmentVO.material || _material;
 				
                 if (!_smaterial.visible)
                     continue;
@@ -305,7 +300,7 @@ package away3d.core.project
 				if(!_clipFlag && _screenVertices[_screenIndices[_index]*3] == null)
 					continue;
                 
-                _spmaterial = _spriteVO.material || _spriteMaterial;
+                _spmaterial = _spriteVO.material || _material;
                 
                 if (!_spmaterial.visible)
                     continue;

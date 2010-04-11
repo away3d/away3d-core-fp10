@@ -161,9 +161,9 @@
 
             if (width*height == 0)
             {
-                if (material is IUVMaterial)
+                if (material is BitmapMaterial)
                 {
-                    var uvm:IUVMaterial = material as IUVMaterial;
+                    var uvm:BitmapMaterial = material as BitmapMaterial;
                     if (width == 0)
                         width = uvm.width;
                     if (height == 0)

@@ -23,9 +23,9 @@ package away3d.core.utils
 		
         public var uv2:UV;
 		
-		public var material:ITriangleMaterial;
+		public var material:Material;
 		
-		public var back:ITriangleMaterial;
+		public var back:Material;
 		
 		public var face:Face;
 		

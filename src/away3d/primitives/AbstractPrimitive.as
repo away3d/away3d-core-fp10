@@ -63,7 +63,7 @@
             return _uv;
 		}
 		/** @private */
-		arcane function createFace(v0:Vertex, v1:Vertex, v2:Vertex, material:ITriangleMaterial = null, uv0:UV = null, uv1:UV = null, uv2:UV = null):Face
+		arcane function createFace(v0:Vertex, v1:Vertex, v2:Vertex, material:Material = null, uv0:UV = null, uv1:UV = null, uv2:UV = null):Face
 		{
 			if (_faceStore.length) {
             	_faceActive.push(_face = _faceStore.pop());
@@ -80,7 +80,7 @@
             return _face;
 		}
 		/** @private */
-		arcane function createSegment(v0:Vertex, v1:Vertex, material:ISegmentMaterial = null):Segment
+		arcane function createSegment(v0:Vertex, v1:Vertex, material:Material = null):Segment
 		{
 			if (_segmentStore.length) {
             	_segmentActive.push(_segment = _segmentStore.pop());

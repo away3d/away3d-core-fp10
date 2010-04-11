@@ -25,7 +25,7 @@ package away3d.sprites
 		/** @private */
         arcane var _vertex:Vertex;
 		/** @private */
-        arcane var _material:ISpriteMaterial;
+        arcane var _material:Material;
         
 		private var _width:Number;
 		private var _height:Number;
@@ -137,12 +137,12 @@ package away3d.sprites
 		/**
 		 * Defines the material of the 3d sprite.
 		 */
-        public function get material():ISpriteMaterial
+        public function get material():Material
         {
             return _material;
         }
 
-        public function set material(value:ISpriteMaterial):void
+        public function set material(value:Material):void
         {
             if (_material == value)
                 return;
@@ -193,7 +193,7 @@ package away3d.sprites
         }
         
 		/**
-		 * Defines the scaling of the 3d sprite when an <code>IUVMaterial</code> is used.
+		 * Defines the scaling of the 3d sprite when an <code>BitmapMaterial</code> is used.
 		 */
         public function get scaling():Number
         {
@@ -302,7 +302,7 @@ package away3d.sprites
 		 * @param	vertex					The vertex object of the 3d sprite
 		 * @param	material	[optional]	The material used by the 3d sprite to render
 		 */
-        public function Sprite3D(material:ISpriteMaterial = null, width:Number = 10, height:Number = 10, rotation:Number = 0, scaling:Number = 1)
+        public function Sprite3D(material:Material = null, width:Number = 10, height:Number = 10, rotation:Number = 0, scaling:Number = 1)
         {
             this.material = material;
             this.width = width;

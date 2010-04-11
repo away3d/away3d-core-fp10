@@ -88,7 +88,7 @@ package away3d.loaders
 					_materialData.textureBitmap = Bitmap(loader.content).bitmapData;
 					_materialData.material = new BitmapMaterial(_materialData.textureBitmap);
 					for each(_face in _materialData.elements)
-						_face.material = _materialData.material as ITriangleMaterial;
+						_face.material = _materialData.material as Material;
 				}
 			}
 		}

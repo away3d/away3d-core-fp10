@@ -281,7 +281,7 @@ package away3d.core.utils
             return result;
         }
 
-        public function getMaterial(name:String):IMaterial
+        public function getMaterial(name:String):Material
         {
             if (init == null)
                 return null;
@@ -289,22 +289,7 @@ package away3d.core.utils
             if (!init.hasOwnProperty(name))
                 return null;
         
-            var result:IMaterial = Cast.material(init[name]);
-
-            delete init[name];
-        
-            return result;
-        }
-
-        public function getSegmentMaterial(name:String):ISegmentMaterial
-        {
-            if (init == null)
-                return null;
-        
-            if (!init.hasOwnProperty(name))
-                return null;
-        
-            var result:ISegmentMaterial = Cast.wirematerial(init[name]);
+            var result:Material = Cast.material(init[name]);
 
             delete init[name];
         
