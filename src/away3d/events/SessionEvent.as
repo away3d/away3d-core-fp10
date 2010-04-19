@@ -22,7 +22,7 @@ package away3d.events
 		/**
 		 * Creates a new <code>FaceEvent</code> object.
 		 * 
-		 * @param	type	The type of the event. Possible values are: <code>FaceEvent.UPDATED</code></code>.
+		 * @param	type	The type of the event. Possible values are: <code>FaceEvent.UPDATED</code>.
 		 * @param	session	A reference to the session object that is relevant to the event.
 		 */
         public function SessionEvent(type:String, session:AbstractRenderSession)

@@ -22,7 +22,7 @@ package away3d.events
 		/**
 		 * Creates a new <code>FaceEvent</code> object.
 		 * 
-		 * @param	type	The type of the event. Possible values are: <code>FaceEvent.UPDATED</code></code>.
+		 * @param	type	The type of the event. Possible values are: <code>FaceEvent.UPDATED</code>.
 		 * @param	camera	A reference to the camera object that is relevant to the event.
 		 */
         public function CameraEvent(type:String, camera:Camera3D)
