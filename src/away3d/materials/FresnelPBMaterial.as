@@ -19,30 +19,24 @@ package away3d.materials
 		[Embed(source="../pbks/FresnelShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
 		
-		[Embed(source="../pbks/FresnelReflMapShader.pbj", mimeType="application/octet-stream")]
-		private var ReflMapKernel : Class;
-		
-		private var _faces : Array;
 		private var _envMapAlpha : Number = 1;
 		
-		private var _outerRefraction : Number = 1.0008;
+		private var _outerRefraction : Number = 1.0002926;
 		private var _innerRefraction : Number = 1.330;
-		private var _fresnelMap : ByteArray;
+		private var _fresnelMap : BitmapData;
 		
 		private var _refractionStrength : Number = 0;
-		
-		private var _reflectivityMap : BitmapData;
 		
 		/**
 		 * Creates a new FresnelPBMaterial object.
 		 * 
 		 * @param bitmap The texture to be used for the diffuse shading
 		 * @param normalMap An object-space normal map
-		 * @param faces An array of equally sized square textures for each face of the cube map. Every value in CubeFaces must be defined as a key to this array and have a BitmapData assigned to it.
+		 * @param envMap The spherical environment map used for reflections
 		 * @param targetModel The target mesh for which this shader is applied
 		 * @param init An initialisation object
 		 */
-		public function FresnelPBMaterial(bitmap:BitmapData, normalMap:BitmapData, faces : Array, targetModel:Mesh, init:Object=null)
+		public function FresnelPBMaterial(bitmap:BitmapData, normalMap:BitmapData, envMap : BitmapData, targetModel:Mesh, init:Object=null)
 		{
 			super(bitmap, normalMap, new Shader(new Kernel()), targetModel, init);
 			_useWorldCoords = true;
@@ -50,64 +44,13 @@ package away3d.materials
 			_outerRefraction = ini.getNumber("outerRefraction", 1.0008);
 			_innerRefraction = ini.getNumber("innerRefraction", 1.330);
 			_refractionStrength = ini.getNumber("refractionStrength", 1);
-			_faces = faces;
-			
+
 			initFresnelMap();
 			
 			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
-			_pointLightShader.data.left.input = faces[CubeFaces.LEFT];
-			_pointLightShader.data.right.input = faces[CubeFaces.RIGHT];
-			_pointLightShader.data.top.input = faces[CubeFaces.TOP];
-			_pointLightShader.data.bottom.input = faces[CubeFaces.BOTTOM];
-			_pointLightShader.data.front.input = faces[CubeFaces.FRONT];
-			_pointLightShader.data.back.input = faces[CubeFaces.BACK];
-			_pointLightShader.data.cubeDim.value = [ faces[CubeFaces.LEFT].width*.5 ];
+			_pointLightShader.data.envMap.input = envMap;
+			_pointLightShader.data.envMapDim.value = [ envMap.width*.5 ];
 			_pointLightShader.data.refractionStrength.value = [ _refractionStrength ];
-		}
-		
-		/**
-		 * A texture map that indicates the reflection amount for each texel
-		 */
-		public function get reflectivityMap() : BitmapData
-		{
-			return _reflectivityMap;
-		}
-		
-		public function set reflectivityMap(value : BitmapData) : void
-		{
-			var copyNeeded : Boolean;
-			var shader : Shader;
-			
-			if (!_reflectivityMap && value) {
-				shader = new Shader(new ReflMapKernel());
-				copyNeeded = true;
-			}
-			else if (_reflectivityMap && !value) {
-				shader = new Shader(new Kernel());
-				copyNeeded = true;
-			}
-			
-			if (value) shader.data.reflectivityMap.input = value;
-			
-			if (copyNeeded) {
-				shader.data.alpha.value = [ _envMapAlpha ];
-				shader.data.left.input = _faces[CubeFaces.LEFT];
-				shader.data.right.input = _faces[CubeFaces.RIGHT];
-				shader.data.top.input = _faces[CubeFaces.TOP];
-				shader.data.bottom.input = _faces[CubeFaces.BOTTOM];
-				shader.data.front.input = _faces[CubeFaces.FRONT];
-				shader.data.back.input = _faces[CubeFaces.BACK];
-				shader.data.cubeDim.value = [ _faces[CubeFaces.LEFT].width*.5 ];
-				shader.data.normalTransformation.value = _pointLightShader.data.normalTransformation.value;
-				shader.data.positionTransformation.value = _pointLightShader.data.positionTransformation.value;
-				shader.data.positionMap.input = _positionMap;
-				shader.data.normalMap.input = _normalMap;
-				shader.data.fresnelMap.input = _fresnelMap;
-				shader.data.fresnelMap.width = 256;
-				shader.data.fresnelMap.height = 1;
-				_pointLightShader = shader;
-			} 
-			_reflectivityMap = value;
 		}
 		
 		/**
@@ -133,8 +76,10 @@ package away3d.materials
 			var fres : Number;
 			var t1 : Number;
 			var t2 : Number;
-			
-			_fresnelMap = new ByteArray();
+			var vec : Vector.<uint> = new Vector.<uint>(256);
+
+			// TO DO, see if can be changed to BMD
+			_fresnelMap = new BitmapData(256, 1, false, 1);
 			
 			while (i--) {
 				angle = Math.acos(i/256);
@@ -148,14 +93,12 @@ package away3d.materials
 				fres = t1*t1+t2*t2;
 				if (fres > 1.0) fres = 1.0;
 				else if (fres < 0.0) fres = 0.0;
-				_fresnelMap.writeFloat(fres);
-				_fresnelMap.writeFloat(fres);
-				_fresnelMap.writeFloat(fres);
+				vec[256-i] = 0xff000000 | Math.round(fres*0xff) << 16;
 			}
-			
+			                                 
+			_fresnelMap.setVector(_fresnelMap.rect, vec);
+
 			_pointLightShader.data.fresnelMap.input = _fresnelMap;
-			_pointLightShader.data.fresnelMap.width = 256;
-			_pointLightShader.data.fresnelMap.height = 1;
 		}
 		
 		/**

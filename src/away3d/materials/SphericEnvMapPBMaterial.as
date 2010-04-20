@@ -38,12 +38,12 @@ package away3d.materials
 			
 			_envMapAlpha = ini.getNumber("envMapAlpha", 1);
 			_envMap = envMap;
-			_useWorldCoords = true;
+			_useWorldCoords = true;                                       
 			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
 			_pointLightShader.data.envMap.input = envMap;
 			_pointLightShader.data.envMapDim.value = [ envMap.width*.5 ];
 		}
-		
+
 		/**
 		 * A texture map that indicates the reflection amount for each texel
 		 */
