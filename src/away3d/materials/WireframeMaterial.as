@@ -61,7 +61,7 @@ package away3d.materials
 		protected var ini:Init;
 		
         protected var _wireAlpha:Number;
-        protected var _wireColor:uint;
+        protected var _wireColor:uint = 0x0;
         protected var _thickness:Number;
 		
 		protected function getDefaultThickness():Number

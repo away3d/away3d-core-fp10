@@ -291,7 +291,7 @@
 		 */
         public function BitmapMaterial(bitmap:BitmapData, init:Object = null)
         {
-        	_renderBitmap = _bitmap = bitmap;        				super(init);
+        	_renderBitmap = _bitmap = bitmap;        	        	ini = Init.parse(init);        	wireColor = ini.getColor("wireColor", 0x0000FF);        				super(ini);
 			
             smooth = ini.getBoolean("smooth", false);
             debug = ini.getBoolean("debug", false);

@@ -79,7 +79,7 @@ package away3d.materials
             
         	ini = Init.parse(init);
         	
-            super(ini.getColor("wireColor", 0x0), ini);
+            super(ini.getColor("wireColor", wireColor), ini);
             
             alpha = ini.getNumber("alpha", 1, {min:0, max:1});
         }
