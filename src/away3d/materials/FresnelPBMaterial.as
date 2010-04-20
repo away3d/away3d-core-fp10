@@ -1,5 +1,6 @@
 package away3d.materials
 {
+	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.Mesh;
 	import away3d.core.base.Object3D;
@@ -93,6 +94,7 @@ package away3d.materials
 				fres = t1*t1+t2*t2;
 				if (fres > 1.0) fres = 1.0;
 				else if (fres < 0.0) fres = 0.0;
+				fres = 1-fres;
 				vec[256-i] = 0xff000000 | Math.round(fres*0xff) << 16;
 			}
 			                                 
@@ -117,7 +119,8 @@ package away3d.materials
 		
 		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
-			_pointLightShader.data.viewPos.value = [ view.camera.x, view.camera.y, view.camera.z ];
+			var camera : Camera3D = view.camera;
+			_pointLightShader.data.viewPos.value = [ camera.x, camera.y, camera.z ];
 			super.updatePixelShader(source, view);
 		}
 	}

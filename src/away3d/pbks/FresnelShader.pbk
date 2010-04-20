@@ -35,7 +35,7 @@ kernel CubicEnvMapShader
 		minValue: float3x3(-8000.0);
 		maxValue: float3x3(8000.0);
 		defaultValue: float3x3(0.0);
-		description: "The transformation matrix that transforms the displayObject to stage coordinates";
+		description: "The transformation matrix that transforms the normalmap to scene coordinates";
 	>;
 	
 	parameter float4x4 positionTransformation
@@ -66,17 +66,22 @@ kernel CubicEnvMapShader
 		float3 coord3d = sampleNearest(positionMap, outCoord());
 		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
 		float3 view = normalize(viewPos-coord3d);
-		view.y = -view.y;
-		float3 normalSample = 2.0*(sampleNearest(normalMap, outCoord())-float3(0.5));
-		float3 n = normalize(normalTransformation*normalSample);
-		float3 refl = view - 2.0*dot(n, view)*n;
+		view.y = -view.y;		
+        float3 normal = normalize(normalTransformation*(2.0*sampleNearest(normalMap, outCoord())-1.0));
+        float viewDotNormal = dot(normal, view);
+        
+        // get reflection colour from map
+		float3 refl = view - 2.0*viewDotNormal*normal;
 		refl.y = -refl.y;
 		refl.z = refl.z-1.0;
 		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
 		
-		float fresnel = (1.0-sampleNearest(fresnelMap, float2(dot(n, -view)*256.0, 0.0)).x)*alpha;
-		dst = sampleNearest(diffuse, outCoord()+refractionStrength*n.xy);
-		dst.xyz *= 1.0-fresnel;
+        // get reflection strength (fresnel)
+		float fresnel = sampleNearest(fresnelMap, float2(-viewDotNormal*256.0, 0.0)).x*alpha;
+		dst = sampleNearest(diffuse, outCoord()+refractionStrength*normal.xy);
+		
+        // blend
+        dst.xyz *= 1.0-fresnel;
         dst.xyz += reflection*fresnel;
         dst.a += fresnel;
 	}

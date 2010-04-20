@@ -214,7 +214,7 @@ package away3d.materials
 																		sceneTransform.sxy, sceneTransform.syy, sceneTransform.szy,
 																		sceneTransform.sxz, sceneTransform.syz, sceneTransform.szz
 																	];
-																
+
 				_pointLightShader.data.positionTransformation.value = [ 	_posMtx.sxx, _posMtx.syx, _posMtx.szx, 0,
 															 				_posMtx.sxy, _posMtx.syy, _posMtx.szy, 0,
 															 				_posMtx.sxz, _posMtx.syz, _posMtx.szz, 0,
