@@ -156,7 +156,6 @@ package away3d.loaders
 				{
 					case MaterialData.TEXTURE_MATERIAL:
 						_materialLibrary.textureLoadRequired = true;
-						_materialData.material = new WireColorMaterial();
 						break;
 					case MaterialData.SHADING_MATERIAL:
 						_materialData.material = new ShadingColorMaterial(null, {ambient:_materialData.ambientColor, diffuse:_materialData.diffuseColor, specular:_materialData.specularColor, shininess:_materialData.shininess});
