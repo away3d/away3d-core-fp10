@@ -36,11 +36,11 @@ package away3d.materials
 		 * @param envMap The spherical environment map used for reflections
 		 * @param targetModel The target mesh for which this shader is applied
 		 * @param init An initialisation object
-		 */
+		 */                                                     
 		public function FresnelPBMaterial(bitmap:BitmapData, normalMap:BitmapData, envMap : BitmapData, targetModel:Mesh, init:Object=null)
 		{
 			super(bitmap, normalMap, new Shader(new Kernel()), targetModel, init);
-			_useWorldCoords = true;
+			_useWorldCoords = true;         
 			_envMapAlpha = ini.getNumber("envMapAlpha", 1);
 			_outerRefraction = ini.getNumber("outerRefraction", 1.0008);
 			_innerRefraction = ini.getNumber("innerRefraction", 1.330);
@@ -90,11 +90,10 @@ package away3d.materials
 				
 				t1 = Math.sin(angle-refrAngle)/Math.sin(angle+refrAngle);
 				t2 = Math.tan(angle-refrAngle)/Math.tan(angle+refrAngle);
-				
+				                                                                          
 				fres = t1*t1+t2*t2;
 				if (fres > 1.0) fres = 1.0;
 				else if (fres < 0.0) fres = 0.0;
-				fres = 1-fres;
 				vec[256-i] = 0xff000000 | Math.round(fres*0xff) << 16;
 			}
 			                                 
@@ -113,7 +112,7 @@ package away3d.materials
 		
 		public function set envMapAlpha(value : Number) : void
 		{
-			_envMapAlpha = value;
+			_envMapAlpha = value; 
 			_pointLightShader.data.alpha.value = [ value ];
 		}
 		

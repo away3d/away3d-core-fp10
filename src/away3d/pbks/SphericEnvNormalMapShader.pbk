@@ -57,12 +57,13 @@ kernel SphericEnvMapShader
 		float3 coord3d = sampleNearest(positionMap, outCoord());
 		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
 		float3 view = normalize(viewPos-coord3d);
-		view.y = -view.y;
+		//view.y = -view.y;
 		float3 normalSample = 2.0*(sampleNearest(normalMap, outCoord())-float3(0.5));
+        normalSample.xz = -normalSample.xz;
 		float3 n = normalize(normalTransformation*normalSample);
 		
 		float3 refl = view - 2.0*dot(n, view)*n;
-		refl.y = -refl.y;
+		//refl.y = -refl.y;
 		refl.z = refl.z-1.0;
 		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
 		

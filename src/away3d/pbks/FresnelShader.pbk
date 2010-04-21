@@ -63,22 +63,25 @@ kernel CubicEnvMapShader
 	
 	void evaluatePixel()
 	{
-		float3 coord3d = sampleNearest(positionMap, outCoord());
+        float2 texCoord = outCoord();
+		float3 coord3d = sampleNearest(positionMap, texCoord);
 		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
 		float3 view = normalize(viewPos-coord3d);
-		view.y = -view.y;		
-        float3 normal = normalize(normalTransformation*(2.0*sampleNearest(normalMap, outCoord())-1.0));
+		//view.y = -view.y;		
+        float3 normalSample = 2.0*sampleNearest(normalMap, texCoord)-1.0;
+        normalSample.xz = -normalSample.xz;
+        float3 normal = normalize(normalTransformation*normalSample);
         float viewDotNormal = dot(normal, view);
         
         // get reflection colour from map
 		float3 refl = view - 2.0*viewDotNormal*normal;
-		refl.y = -refl.y;
+		//refl.y = -refl.y;
 		refl.z = refl.z-1.0;
 		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
 		
         // get reflection strength (fresnel)
-		float fresnel = sampleNearest(fresnelMap, float2(-viewDotNormal*256.0, 0.0)).x*alpha;
-		dst = sampleNearest(diffuse, outCoord()+refractionStrength*normal.xy);
+		float fresnel = (1.0-sampleNearest(fresnelMap, float2(viewDotNormal*256.0, 0.0)).x)*alpha;
+		dst = sampleNearest(diffuse, texCoord+refractionStrength*normal.xy);
 		
         // blend
         dst.xyz *= 1.0-fresnel;

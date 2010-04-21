@@ -44,7 +44,7 @@ package away3d.materials
 		private var _posMtx : MatrixAway3D = new MatrixAway3D();		
 		
 		private var _positionMapMatrix : MatrixAway3D;
-		
+		private var _normalMapMatrix : MatrixAway3D;
 		
 		/**
 		 * Creates a new PixelShaderMaterial object.
@@ -206,15 +206,17 @@ package away3d.materials
 		protected function updatePixelShader(source:Object3D, view : View3D) : void
 		{
 			if (_useWorldCoords) {
-				var sceneTransform : MatrixAway3D = _mesh.sceneTransform;
+				 if (!_normalMapMatrix) _normalMapMatrix = new MatrixAway3D();
+				_normalMapMatrix.inverse(_mesh.sceneTransform);
 				
-				_posMtx.multiply(sceneTransform, _positionMapMatrix);
-				
-				_pointLightShader.data.normalTransformation.value = [ 	sceneTransform.sxx, sceneTransform.syx, sceneTransform.szx,
-																		sceneTransform.sxy, sceneTransform.syy, sceneTransform.szy,
-																		sceneTransform.sxz, sceneTransform.syz, sceneTransform.szz
-																	];
+				_posMtx.multiply(_mesh.sceneTransform, _positionMapMatrix);
 
+				// the transpose of the inverse 
+				_pointLightShader.data.normalTransformation.value = [ 	_normalMapMatrix.sxx, _normalMapMatrix.sxy, _normalMapMatrix.sxz,
+																		_normalMapMatrix.syx, _normalMapMatrix.syy, _normalMapMatrix.syz,
+																		_normalMapMatrix.szx, _normalMapMatrix.szy, _normalMapMatrix.szz
+																	];
+				
 				_pointLightShader.data.positionTransformation.value = [ 	_posMtx.sxx, _posMtx.syx, _posMtx.szx, 0,
 															 				_posMtx.sxy, _posMtx.syy, _posMtx.szy, 0,
 															 				_posMtx.sxz, _posMtx.syz, _posMtx.szz, 0,
