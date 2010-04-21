@@ -5,11 +5,10 @@ package away3d.core.traverse
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
 	import away3d.core.draw.*;
-	import away3d.core.geom.Frustum;
+	import away3d.core.geom.*;
 	import away3d.core.light.*;
 	import away3d.core.math.*;
 	import away3d.core.project.*;
-	import away3d.core.render.*;
 	import away3d.core.utils.*;
 	import away3d.materials.*;
 	
@@ -31,8 +30,6 @@ package away3d.core.traverse
     	private var _mouseEnabled:Boolean;
     	private var _mouseEnableds:Array = new Array();
     	private var _projectorDictionary:Dictionary = new Dictionary(true);
-    	
-		private var _light:ILightProvider;
 		
 		/**
 		 * Defines the view being used.
@@ -72,8 +69,12 @@ package away3d.core.traverse
         {
         	_clipping = _view.clipping;
         	
-            if (!node.visible || (_clipping.objectCulling && !_cameraVarsStore.nodeClassificationDictionary[node]))
+        	if (node._preCulled)
+        		return true;
+        	
+        	if (!node.visible || (_clipping.objectCulling && !_cameraVarsStore.nodeClassificationDictionary[node]))
                 return false;
+            
             if (node is ILODObject)
                 return (node as ILODObject).matchLOD(_view.camera);
             return true;

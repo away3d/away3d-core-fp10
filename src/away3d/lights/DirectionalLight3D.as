@@ -30,8 +30,6 @@ package away3d.lights
     	private var _diffuseDirty:Boolean;
     	private var _specularDirty:Boolean;
 		private var _ls:DirectionalLight = new DirectionalLight();
-		private var _debugPrimitive:Sphere;
-        private var _debugMaterial:ColorMaterial;
 		
 		private function onParentChange(event:Object3DEvent):void
         {
@@ -136,24 +134,6 @@ package away3d.lights
             _diffuseDirty = true;
             _specularDirty = true;
 		}
-        
-		public function get debugPrimitive():Object3D
-		{
-			if (!_debugPrimitive) {
-				_debugPrimitive = new Sphere({radius:10});
-				//_scene.clearId(_id);
-			}
-			
-			if (!_debugMaterial) {
-				_debugMaterial = new ColorMaterial();
-				_debugPrimitive.material = _debugMaterial;
-			}
-			
-            _debugMaterial.color = color;
-            
-			return _debugPrimitive;
-		}
-		
 		
 		public function get sceneDirection():Number3D
 		{

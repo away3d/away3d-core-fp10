@@ -71,6 +71,8 @@ package away3d.core.draw
 		 */
 		public var quadrant:PrimitiveQuadrantTreeNode;
 		
+		public var ignoreSort : Boolean;
+		
 		/**
 		 * Calculates the min, max and screen properties required for rendering the drawing primitive.
 		 */
