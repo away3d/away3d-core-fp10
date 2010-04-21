@@ -20,7 +20,7 @@ package away3d.materials
 	/**
 	 * The base class for Pixel Bender pixel shader (or rather Texel shader) materials
 	 */
-	internal class PixelShaderMaterial extends BitmapMaterial
+	internal class PixelShaderMaterial extends TransformBitmapMaterial
 	{	
 		/** @private */
         arcane override function updateMaterial(source:Object3D, view:View3D):void
