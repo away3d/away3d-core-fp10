@@ -240,14 +240,15 @@ package away3d.materials.shaders
         	else
         		_focus = 0;
 			
-			if (tri.generated) {
+			_faceMaterialVO.invalidated = false;
+			//if (tri.generated) {
 				_uvt[2] = 1/(_focus + tri.v0z);
 				_uvt[5] = 1/(_focus + tri.v1z);
 				_uvt[8] = 1/(_focus + tri.v2z);
 				
 	    		return calcUVT(tri, _uvt);
-			}
-			
+			//}
+			/*
 			_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);
 			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);
 			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);
@@ -255,9 +256,9 @@ package away3d.materials.shaders
 			if (!_faceMaterialVO.invalidated)
 				return _faceMaterialVO.uvtData;
 			
-			_faceMaterialVO.invalidated = false;
         	
 			return calcUVT(tri, _faceMaterialVO.uvtData);
+			*/
 		}
 		
     	/**
