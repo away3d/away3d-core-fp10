@@ -28,8 +28,9 @@ package away3d.materials
         	_bitmapDirty = false; 
         	
         	super.updateRenderBitmap();
-	        
-	        _pointLightShader.data.diffuse.input = _renderBitmap;
+
+			if (_pointLightShader.data.hasOwnProperty("diffuse"))
+	        	_pointLightShader.data.diffuse.input = _renderBitmap;
 	        shaderJob = new ShaderJob(_pointLightShader, _renderBitmap);
 	        shaderJob.start(true);
 	        invalidateFaces();
