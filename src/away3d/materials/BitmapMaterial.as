@@ -171,7 +171,7 @@
         }
         
 		/**
-		 * @inheritDoc
+		 * Returns the width of the bitmapData being used as the material texture.
 		 */
         public function get width():Number
         {
@@ -179,7 +179,7 @@
         }
         
 		/**
-		 * @inheritDoc
+		 * Returns the height of the bitmapData being used as the material texture.
 		 */
         public function get height():Number
         {
@@ -187,7 +187,7 @@
         }
         
 		/**
-		 * @inheritDoc
+		 * Defines the bitmapData object being used as the material texture.
 		 */
         public function get bitmap():BitmapData
         {
@@ -202,7 +202,7 @@
         }
         
 		/**
-		 * @inheritDoc
+		 * Returns the argb value of the bitmapData pixel at the given u v coordinate.
 		 */
         public function getPixel32(u:Number, v:Number):uint
         {
