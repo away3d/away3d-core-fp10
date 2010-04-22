@@ -53,7 +53,6 @@ package away3d.materials
 			_pointLightShader.data.envMap.input = envMap;
 			_pointLightShader.data.envMapDim.value = [ envMap.width*.5 ];
 			_pointLightShader.data.refractionRatio.value = [ _outerRefraction/_innerRefraction ];
-			_pointLightShader.precisionHint = ShaderPrecision.FAST;
 		}
 
 		public function get glassColor() : uint
