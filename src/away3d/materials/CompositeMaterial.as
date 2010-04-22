@@ -338,26 +338,64 @@ package away3d.materials
         	
         	_materialDirty = true;
         }
-        
+		
 		/**
-		 * Creates a new <code>BitmapMaterialContainer</code> object.
+		 * Returns the width of the bitmapData being used as the material texture. 
+		 */
+		public override function get width():Number
+		{
+			return _width;
+		}
+		
+		public function set width(val:Number):void
+		{
+			if (_width == val)
+				return;
+			
+			_width = val;
+			
+			if (_width && _height)
+				_bitmap = new BitmapData(_width, _height, true, 0x00FFFFFF);
+			
+			_bitmapRect = new Rectangle(0, 0, _width, _height);
+		}
+		
+		/**
+		 * Returns the height of the bitmapData being used as the material texture. 
+		 */
+		public override function get height():Number
+		{
+			return _height;
+		}
+		
+		public function set height(val:Number):void
+		{
+			if (_height == val)
+				return;
+			
+			_height = val;
+			
+			if (_width && _height)
+				_bitmap = new BitmapData(_width, _height, true, 0x00FFFFFF);
+			
+			_bitmapRect = new Rectangle(0, 0, _width, _height);
+		}
+		
+		/**
+		 * Creates a new <code>CompositeMaterial</code> object.
 		 * 
-		 * @param	width				The containing width of the texture, applied to all child materials.
-		 * @param	height				The containing height of the texture, applied to all child materials.
 		 * @param	init	[optional]	An initialisation object for specifying default instance properties.
 		 */
 		public function CompositeMaterial(init:Object = null)
 		{
-            ini = Init.parse(init);
+			ini = Init.parse(init);
 			
-			_width = ini.getNumber("width", 128);
-			_height = ini.getNumber("height", 128);
+			width = ini.getNumber("width", 128);
+			height = ini.getNumber("height", 128);
 			
-			super(new BitmapData(_width, _height, true, 0x00FFFFFF), ini);
+			super(_bitmap, ini);
 			
 			materials = ini.getArray("materials");
-			
-			_bitmapRect = new Rectangle(0, 0, _width, _height);
             
             for each (var _material:LayerMaterial in materials)
             	_material.addOnMaterialUpdate(onMaterialUpdate);
