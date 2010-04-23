@@ -1,0 +1,115 @@
+<languageVersion: 1.0;>
+kernel GlassShader
+<
+	namespace: "com.away3d";
+	vendor: "Away3d";
+	version: 1;
+	description: "Applies a cubic environment map with the fresnel effect and support for normal maps.";
+>
+{
+	input image3 refractionMap;
+	input image3 envMap;
+	input image3 normalMap;
+	input image3 positionMap;
+	input image3 fresnelMap;
+	output pixel4 dst;
+	
+	parameter float alpha
+	<
+		minValue: float(0.0);
+		maxValue: float(1.0);
+		defaultValue: float(0.5);
+		description: "The alpha of the environment map";
+	>;
+    
+    parameter float3 color
+	<
+		minValue: float3(0.0);
+		maxValue: float3(1.0);
+		defaultValue: float3(1.0);
+		description: "The color of the glass";
+	>;
+	
+	parameter float envMapDim
+	<
+		minValue: float(0.0);
+		maxValue: float(1024.0);
+		defaultValue: float(160.0);
+		description: "Half the size of the cube map's edges";
+	>;
+
+	parameter float3x3 normalTransformation
+	<
+		minValue: float3x3(-8000.0);
+		maxValue: float3x3(8000.0);
+		defaultValue: float3x3(0.0);
+		description: "The transformation matrix that transforms the normalmap to scene coordinates";
+	>;
+	
+	parameter float4x4 positionTransformation
+	<
+		minValue: float4x4(-8000.0);
+		maxValue: float4x4(8000.0);
+		defaultValue: float4x4(0.0);
+	>;
+	
+	parameter float3 viewPos
+	<
+		minValue: float3(0.0);
+		maxValue: float3(100000.0);
+		defaultValue: float3(0.0);
+		description: "The position of the camera";
+	>;
+	
+	parameter float refractionRatio
+	<
+		minValue: float(0.0);
+		maxValue: float(100.0);
+		defaultValue: float(10.0);
+		description: "The ratio of outer and inner refraction indices.";
+	>;
+    
+    parameter float3 dispersion
+    <
+        minValue: float3(0.0);
+        maxValue: float3(1.0);
+        defaultValue: float3(1.0);
+    >;
+	
+	void evaluatePixel()
+	{
+        float2 texCoord = outCoord();
+		float3 coord3d = sampleNearest(positionMap, texCoord);
+		coord3d = (positionTransformation*float4(coord3d.x, coord3d.y, coord3d.z, 1.0)).xyz;
+		float3 view = normalize(viewPos-coord3d);
+		//view.y = -view.y;		
+        float3 normalSample = 2.0*sampleNearest(normalMap, texCoord)-1.0;
+        normalSample.xz = -normalSample.xz;
+        float3 normal = normalize(normalTransformation*normalSample);
+        float viewDotNormal = dot(normal, view);
+        
+        // get reflection colour from map
+		float3 refl = view - 2.0*viewDotNormal*normal;
+		//refl.y = -refl.y;
+		refl.z = refl.z-1.0;
+		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
+        
+        //float theta = sqrt(1.0 - ((refractionRatio*refractionRatio) * (1.0 - (viewDotNormal*viewDotNormal))));
+        //float3 refr = (refractionRatio * view) + (theta - refractionRatio * viewDotNormal) * normal;
+        float3 refrR = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.r * normal;
+        float3 refrG = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.g * normal;
+        float3 refrB = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.b * normal;
+        pixel3 refraction;
+        refraction.r = sampleNearest(envMap, envMapDim*(refrR.xy/length(refrR)+float2(1.0, 1.0))).r*color.r;
+        refraction.g = sampleNearest(envMap, envMapDim*(refrG.xy/length(refrG)+float2(1.0, 1.0))).g*color.g;
+        refraction.b = sampleNearest(envMap, envMapDim*(refrB.xy/length(refrB)+float2(1.0, 1.0))).b*color.b;
+        
+        
+        // get reflection strength (fresnel)
+		float fresnel = (1.0-sampleNearest(fresnelMap, float2(viewDotNormal*256.0, 0.0)).x)*alpha;
+		
+		// blend
+        dst.xyz = refraction*(1.0-fresnel) + reflection*fresnel;
+        dst.a = 1.0;
+	}
+}

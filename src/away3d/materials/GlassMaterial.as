@@ -19,15 +19,21 @@ package away3d.materials
 	public class GlassMaterial extends SinglePassShaderMaterial
 	{
 		[Embed(source="../pbks/GlassShader.pbj", mimeType="application/octet-stream")]
-		private var Kernel : Class;
+		private var KernelBasic : Class;
+
+		[Embed(source="../pbks/GlassShaderChrDisp.pbj", mimeType="application/octet-stream")]
+		private var KernelChroma : Class;
 		
 		private var _envMapAlpha : Number = 1;
 		
 		private var _outerRefraction : Number = 1.0002926;
 		private var _innerRefraction : Number = 1.330;
 		private var _fresnelMap : BitmapData;
-		private var _refractionMap : BitmapData;
 		private var _glassColor : uint;
+		private var _dispersionR : Number = 1;
+		private var _dispersionG : Number = 1;
+		private var _dispersionB : Number = 1;
+		private var _chromaticDispersion : Boolean;
 
 		
 		/**
@@ -38,21 +44,28 @@ package away3d.materials
 		 * @param targetModel The target mesh for which this shader is applied
 		 * @param init An initialisation object
 		 */                                                     
-		public function GlassMaterial(normalMap:BitmapData, envMap : BitmapData, targetModel:Mesh, init:Object=null)
+		public function GlassMaterial(normalMap:BitmapData, envMap : BitmapData, targetModel:Mesh, chromaticDispersion : Boolean = false, init:Object=null)
 		{
-			super(new BitmapData(normalMap.width, normalMap.height, false), normalMap, new Shader(new Kernel()), targetModel, init);
+			var kernel : ByteArray = chromaticDispersion ? new KernelChroma() : new KernelBasic();
+			super(new BitmapData(normalMap.width, normalMap.height, false), normalMap, new Shader(kernel), targetModel, init);
 			_useWorldCoords = true;         
 			_envMapAlpha = ini.getNumber("envMapAlpha", 1);
 			_outerRefraction = ini.getNumber("outerRefraction", 1.0008);
 			_innerRefraction = ini.getNumber("innerRefraction", 1.330);
-			glassColor = ini.getInt("glassColor", 0xffffff); 
+			_dispersionR = ini.getNumber("dispersionR", 1);
+			_dispersionG = ini.getNumber("dispersionG", .95);
+			_dispersionB = ini.getNumber("dispersionB", .9);
+			_chromaticDispersion = chromaticDispersion;
+			glassColor = ini.getInt("glassColor", 0xffffff);
 
 			initFresnelMap();
-			
+
 			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
 			_pointLightShader.data.envMap.input = envMap;
 			_pointLightShader.data.envMapDim.value = [ envMap.width*.5 ];
 			_pointLightShader.data.refractionRatio.value = [ _outerRefraction/_innerRefraction ];
+			if (chromaticDispersion)
+				_pointLightShader.data.dispersion.value = [ _dispersionR, _dispersionG, _dispersionB ];
 		}
 
 		public function get glassColor() : uint
@@ -67,7 +80,40 @@ package away3d.materials
 			var b : Number = (value & 0xff)/0xff;
 			_glassColor = value;
 			_pointLightShader.data.color.value = [ r, g, b ];
-		}                                 
+		}
+
+		public function get dispersionR() : Number
+		{
+			return _dispersionR;
+		}
+
+		public function set dispersionR(value : Number) : void
+		{
+			if (_chromaticDispersion) _pointLightShader.data.dispersion.value[0] = value;
+			_dispersionR = value;
+		}
+
+		public function get dispersionG() : Number
+		{
+			return _dispersionG;
+		}
+
+		public function set dispersionG(value : Number) : void
+		{
+			if (_chromaticDispersion) _pointLightShader.data.dispersion.value[1] = value;
+			_dispersionG = value;
+		}
+
+		public function get dispersionB() : Number
+		{
+			return _dispersionB;
+		}
+
+		public function set dispersionB(value : Number) : void
+		{
+			if (_chromaticDispersion) _pointLightShader.data.dispersion.value[2] = value;
+			_dispersionB = value;
+		}
 
 		private function initFresnelMap() : void
 		{
