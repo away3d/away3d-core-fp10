@@ -25,7 +25,9 @@ package away3d.materials
 		private var _outerRefraction : Number = 1.0002926;
 		private var _innerRefraction : Number = 1.330;
 		private var _fresnelMap : BitmapData;
-		
+		private var _fresnelMapDirty : Boolean = true;
+		private var _exponent : Number = 5;
+
 		private var _refractionStrength : Number = 0;
 		
 		/**
@@ -45,9 +47,8 @@ package away3d.materials
 			_outerRefraction = ini.getNumber("outerRefraction", 1.0008);
 			_innerRefraction = ini.getNumber("innerRefraction", 1.330);
 			_refractionStrength = ini.getNumber("refractionStrength", 1);
+			_exponent = ini.getNumber("exponent", 5);
 
-			initFresnelMap();
-			
 			_pointLightShader.data.alpha.value = [ _envMapAlpha ];
 			_pointLightShader.data.envMap.input = envMap;
 			_pointLightShader.data.envMapDim.value = [ envMap.width*.5 ];
@@ -67,41 +68,76 @@ package away3d.materials
 			_refractionStrength = value;
 			_pointLightShader.data.refractionStrength.value = [ _refractionStrength ];
 		}
-		
+
+		/**
+		 * The refractive index of the outer medium (where the view ray starts)
+		 */
+		public function get outerRefraction() : Number
+		{
+			return _outerRefraction;
+		}
+
+		public function set outerRefraction(value : Number) : void
+		{
+			_outerRefraction = value;
+			_fresnelMapDirty = true;
+		}
+
+		/**
+		 * The refractive index of the inner medium (ie the material itself)
+		 */
+		public function get innerRefraction() : Number
+		{
+			return _innerRefraction;
+		}
+
+		public function set innerRefraction(value : Number) : void
+		{
+			_innerRefraction = value;
+			_fresnelMapDirty = true;
+		}
+
+		/**
+		 * The exponent of the calculated fresnel term. Lower values will only show reflections at steeper view angles.
+		 */
+		public function get exponent() : Number
+		{
+			return _exponent;
+		}
+
+		public function set exponent(value : Number) : void
+		{
+			_exponent = value;
+			_fresnelMapDirty = true;
+		}
+
 		private function initFresnelMap() : void
 		{
 			var i : int = 256;
-			var dot : Number;
-			var angle : Number;
-			var refrAngle : Number;
 			var fres : Number;
-			var t1 : Number;
-			var t2 : Number;
 			var vec : Vector.<uint> = new Vector.<uint>(256);
+			var dot : Number;
 
-			// TO DO, see if can be changed to BMD
-			_fresnelMap = new BitmapData(256, 1, false, 1);
-			
+			var r0 : Number = (_outerRefraction-_innerRefraction)*(_outerRefraction-_innerRefraction)/((_outerRefraction+_innerRefraction)*(_outerRefraction+_innerRefraction));
+
+			if(!_fresnelMap) _fresnelMap = new BitmapData(256, 1, false, 1);
+
 			while (i--) {
-				angle = Math.acos(i/256);
-				
-				// snel's law: n1*sin(a1) = n2*sin(a2)
-				refrAngle = Math.asin(Math.sin(angle)*_outerRefraction/_innerRefraction);
-				
-				t1 = Math.sin(angle-refrAngle)/Math.sin(angle+refrAngle);
-				t2 = Math.tan(angle-refrAngle)/Math.tan(angle+refrAngle);
-				                                                                          
-				fres = t1*t1+t2*t2;
+				// view vector is inverted in pixel shader (and so is dot product), hence no 1-i/256 as is usual
+				dot = i/256;
+				fres = r0+(1-r0)*Math.pow(dot, _exponent);
+
 				if (fres > 1.0) fres = 1.0;
 				else if (fres < 0.0) fres = 0.0;
-				vec[256-i] = 0xff000000 | Math.round(fres*0xff) << 16;
+
+				vec[i] = int(fres*0xff) << 16;
 			}
-			                                 
+
 			_fresnelMap.setVector(_fresnelMap.rect, vec);
 
 			_pointLightShader.data.fresnelMap.input = _fresnelMap;
 		}
-		
+
 		/**
 		 * The opacity of the environment map, ie: how reflective the surface is. 1 is a perfect mirror.
 		 */
@@ -118,6 +154,11 @@ package away3d.materials
 		
 		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
+			if (_fresnelMapDirty) {
+				initFresnelMap();
+				_fresnelMapDirty = false;
+			}
+
 			var camera : Camera3D = view.camera;
 			_pointLightShader.data.viewPos.value = [ camera.x, camera.y, camera.z ];
 			super.updatePixelShader(source, view);

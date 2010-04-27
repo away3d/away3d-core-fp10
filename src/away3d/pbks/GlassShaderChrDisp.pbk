@@ -94,8 +94,10 @@ kernel GlassShader
 		refl.z = refl.z-1.0;
 		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
         
-        //float theta = sqrt(1.0 - ((refractionRatio*refractionRatio) * (1.0 - (viewDotNormal*viewDotNormal))));
-        //float3 refr = (refractionRatio * view) + (theta - refractionRatio * viewDotNormal) * normal;
+        // get reflection strength (fresnel)
+		float fresnel = (1.0-sampleNearest(fresnelMap, float2(viewDotNormal*256.0, 0.0)).x)*alpha;
+        
+        // get offset refraction per colour channel
         float3 refrR = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.r * normal;
         float3 refrG = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.g * normal;
         float3 refrB = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.b * normal;
@@ -105,10 +107,7 @@ kernel GlassShader
         refraction.b = sampleNearest(envMap, envMapDim*(refrB.xy/length(refrB)+float2(1.0, 1.0))).b*color.b;
         
         
-        // get reflection strength (fresnel)
-		float fresnel = (1.0-sampleNearest(fresnelMap, float2(viewDotNormal*256.0, 0.0)).x)*alpha;
-		
-		// blend
+        // blend
         dst.xyz = refraction*(1.0-fresnel) + reflection*fresnel;
         dst.a = 1.0;
 	}
