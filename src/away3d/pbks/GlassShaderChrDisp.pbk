@@ -92,7 +92,7 @@ kernel GlassShader
 		float3 refl = view - 2.0*viewDotNormal*normal;
 		//refl.y = -refl.y;
 		refl.z = refl.z-1.0;
-		pixel3 reflection = sampleNearest(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
+		pixel3 reflection = sampleLinear(envMap, envMapDim*(refl.xy/length(refl)+float2(1.0, 1.0)));
         
         // get reflection strength (fresnel)
 		float fresnel = (1.0-sampleNearest(fresnelMap, float2(viewDotNormal*256.0, 0.0)).x)*alpha;
@@ -102,9 +102,9 @@ kernel GlassShader
         float3 refrG = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.g * normal;
         float3 refrB = view - (1.0 - refractionRatio) * viewDotNormal * dispersion.b * normal;
         pixel3 refraction;
-        refraction.r = sampleNearest(envMap, envMapDim*(refrR.xy/length(refrR)+float2(1.0, 1.0))).r*color.r;
-        refraction.g = sampleNearest(envMap, envMapDim*(refrG.xy/length(refrG)+float2(1.0, 1.0))).g*color.g;
-        refraction.b = sampleNearest(envMap, envMapDim*(refrB.xy/length(refrB)+float2(1.0, 1.0))).b*color.b;
+        refraction.r = sampleLinear(envMap, envMapDim*(refrR.xy/length(refrR)+float2(1.0, 1.0))).r*color.r;
+        refraction.g = sampleLinear(envMap, envMapDim*(refrG.xy/length(refrG)+float2(1.0, 1.0))).g*color.g;
+        refraction.b = sampleLinear(envMap, envMapDim*(refrB.xy/length(refrB)+float2(1.0, 1.0))).b*color.b;
         
         
         // blend
