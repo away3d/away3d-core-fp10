@@ -44,8 +44,6 @@
         /** @private */
         arcane var _blendModeDirty:Boolean;
         /** @private */
-        arcane var _color:uint = 0xFFFFFF;
-        /** @private */
 		arcane var _red:Number = 1;
         /** @private */
 		arcane var _green:Number = 1;
