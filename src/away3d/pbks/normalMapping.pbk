@@ -41,6 +41,9 @@ kernel normalMapping
         float4 diffuse = textureColor*(max(mapColor.r*diffuseMatrixR + mapColor.g*diffuseMatrixG + mapColor.b*diffuseMatrixB + diffuseMatrixO, float4(0.0, 0.0, 0.0, 0.0)) + ambientMatrixO);
         float4 specular = mapColor.r*specularMatrixR + mapColor.g*specularMatrixG + mapColor.b*specularMatrixB + specularMatrixO;
         dst = diffuse + clamp(specular, float4(0.0, 0.0, 0.0, 0.0), float4(1.0, 1.0, 1.0, 1.0));
+        
+        // Use alpha from original texture
+        dst.a = textureColor.a;
     }
 }
 
