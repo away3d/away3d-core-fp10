@@ -74,8 +74,8 @@
              			addSegment(_segment);
 					}
 			}else{
-				_segment.v0=new Vertex(p1.x, p1.y, p1.z);
-				_segment.v1=new Vertex(p2.x, p2.y, p2.z);
+				_segment.v0.setValue(p1.x, p1.y, p1.z);
+				_segment.v1.setValue(p2.x, p2.y, p2.z);
 			}
         }
 		
