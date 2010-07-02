@@ -46,10 +46,24 @@ package away3d.core.draw
             screenZ = vz;
             minZ = screenZ;
             maxZ = screenZ;
-            minX = vx + displayRect.left;
-            minY = vy + displayRect.top;
-            maxX = vx + displayRect.right;
-            maxY = vy + displayRect.bottom;
+            
+            //check to see if displayobject is a session container
+            var isContainer:Boolean = false;
+            for each(var s:AbstractRenderSession in session.sessions)
+            	if (s.getContainer(view) == displayobject)
+            		isContainer = true;
+            
+            if (session == view.session || isContainer) {
+            	minX = -Infinity;
+            	minY = -Infinity;
+            	maxX = Infinity;
+            	maxY = Infinity;
+            } else {
+            	minX = vx + displayRect.left;
+            	minY = vy + displayRect.top;
+            	maxX = vx + displayRect.right;
+            	maxY = vy + displayRect.bottom;
+            }
         }
         
 		/**
