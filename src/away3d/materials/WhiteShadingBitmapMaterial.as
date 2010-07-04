@@ -139,5 +139,14 @@ package away3d.materials
             
             shininess = ini.getNumber("shininess", 20);
         }
+        
+        /**
+        * Clear the cached bitmaps used for shading
+        */
+        public function clearCache():void
+        {
+        	CacheStore.whiteShadingCache[_bitmap] = new Dictionary(true);
+			cache = CacheStore.whiteShadingCache[_bitmap];
+        }
     }
 }
