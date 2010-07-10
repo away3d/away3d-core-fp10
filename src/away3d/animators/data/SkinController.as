@@ -1,5 +1,7 @@
 ﻿package away3d.animators.data
 {
+	import away3d.core.base.Geometry;
+	import away3d.core.base.Vertex;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.math.*;
@@ -57,8 +59,10 @@
         			child.controller.update();
         	
 			var skinVertex:SkinVertex;
-        	for each (skinVertex in skinVertices)
+        	for each (skinVertex in skinVertices) {
         		skinVertex.skinnedVertex._positionDirty = true;
+        		skinVertex.skinnedVertex.geometry._dimensionDirty = true;
+			}
         }
         
     }
