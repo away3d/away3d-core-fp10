@@ -35,6 +35,7 @@ package away3d.core.render
 			_i = 0;
 			_orderLength = _order.length;
 			_primitivesLength = _allPrimitives.length;
+
 			while (_i < _orderLength) {
 				_allOrder.push(_order[_orderLength - _i - 1] + _primitivesLength);
 				_allPrimitives.push(_primitives[_i]);
@@ -42,6 +43,8 @@ package away3d.core.render
 			}
 			
 			_primitives.length = 0;
+			_screenZs.length = 0;
+			_order.length = 0;
 			_sorting = false;
         }
         
@@ -81,8 +84,8 @@ package away3d.core.render
 			if ((primitiveSource[priIndex].source as Mesh)._preSorted) {
 				if (_sorting)
 					filterNonBSP();
-				
-            	_allOrder.push(_allPrimitives.length);
+
+				_allOrder.push(_allPrimitives.length);
             	_allPrimitives.push(priIndex);
             }
            	else {
