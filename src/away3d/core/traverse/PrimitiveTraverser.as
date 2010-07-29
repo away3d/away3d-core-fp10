@@ -9,6 +9,7 @@ package away3d.core.traverse
 	import away3d.core.light.*;
 	import away3d.core.math.*;
 	import away3d.core.project.*;
+	import away3d.core.render.*;
 	import away3d.core.utils.*;
 	import away3d.materials.*;
 	
@@ -26,10 +27,9 @@ package away3d.core.traverse
     	private var _viewTransform:MatrixAway3D;
     	private var _cameraVarsStore:CameraVarsStore;
     	private var _nodeClassification:int;
-    	private var _consumer:IPrimitiveConsumer;
+    	private var _consumer:Renderer;
     	private var _mouseEnabled:Boolean;
     	private var _mouseEnableds:Array = new Array();
-    	private var _projectorDictionary:Dictionary = new Dictionary(true);
 		
 		/**
 		 * Defines the view being used.
@@ -44,15 +44,6 @@ package away3d.core.traverse
 			_mouseEnabled = true;
 			_mouseEnableds.length = 0;
 			_cameraVarsStore = _view.cameraVarsStore;
-			
-        	//setup the projector dictionary
-        	_projectorDictionary[ProjectorType.CONVEX_BLOCK] = _view._convexBlockProjector;
-			_projectorDictionary[ProjectorType.DIR_SPRITE] = _view._dirSpriteProjector;
-			_projectorDictionary[ProjectorType.DOF_SPRITE] = _view._dofSpriteProjector;
-			_projectorDictionary[ProjectorType.MESH] = _view._meshProjector;
-			_projectorDictionary[ProjectorType.MOVIE_CLIP_SPRITE] = _view._movieClipSpriteProjector;
-			_projectorDictionary[ProjectorType.OBJECT_CONTAINER] = _view._objectContainerProjector;
-			_projectorDictionary[ProjectorType.SPRITE] = _view._spriteProjector;
 		}
 		    	
 		/**
@@ -96,11 +87,10 @@ package away3d.core.traverse
         {
         	if (node.session.updated) {
 	        	_viewTransform = _cameraVarsStore.viewTransformDictionary[node];
-	        	_consumer = node.session.getConsumer(_view);
+	        	_consumer = node.session.getRenderer(_view);
 	        	
 	        	
-	        	if (node.projectorType)
-	        		(_projectorDictionary[node.projectorType] as IPrimitiveProvider).primitives(node, _viewTransform, _consumer);
+				_view._primitiveProjector.project(node, _viewTransform, _consumer);
 	            
 	            if (node.debugbb && node.debugBoundingBox.visible) {
 	            	node.debugBoundingBox._session = node.session;
@@ -112,7 +102,7 @@ package away3d.core.traverse
 	            		else
 	            			(node.debugBoundingBox.material as WireframeMaterial).wireColor = 0x333333;
 	            	}
-	            	_view._meshProjector.primitives(node.debugBoundingBox, _viewTransform, _consumer);
+	            	_view._primitiveProjector.project(node.debugBoundingBox, _viewTransform, _consumer);
 	            }
 	            
 	            if (node.debugbs && node.debugBoundingSphere.visible) {
@@ -125,7 +115,7 @@ package away3d.core.traverse
 	            		else
 	            			(node.debugBoundingSphere.material as WireframeMaterial).wireColor = 0x00FFFF;
 	            	}
-	            	_view._meshProjector.primitives(node.debugBoundingSphere, _viewTransform, _consumer);
+	            	_view._primitiveProjector.project(node.debugBoundingSphere, _viewTransform, _consumer);
 	            }
 	        }
 	        

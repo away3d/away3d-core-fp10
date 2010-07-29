@@ -31,7 +31,6 @@ package away3d.cameras.lenses
 		arcane function setView(val:View3D):void
 		{
 			_view = val;
-			_drawPrimitiveStore = val.drawPrimitiveStore;
 			_cameraVarsStore = val.cameraVarsStore;
 			_camera = val.camera;
 			_clipping = val.screenClipping;
@@ -77,7 +76,6 @@ package away3d.cameras.lenses
 		protected const toDEGREES:Number = 180/Math.PI;
 		
 		protected var _view:View3D;
-		protected var _drawPrimitiveStore:DrawPrimitiveStore;
 		protected var _cameraVarsStore:CameraVarsStore;
 		protected var _camera:Camera3D;
 		protected var _clipping:Clipping;

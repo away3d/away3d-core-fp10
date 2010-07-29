@@ -1,19 +1,18 @@
 package away3d.materials.shaders
 {
+	import away3d.core.session.AbstractSession;
+	import away3d.core.vos.FaceVO;
 	import away3d.arcane;
 	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.draw.*;
 	import away3d.core.light.*;
 	import away3d.core.math.*;
 	import away3d.core.render.*;
 	import away3d.core.utils.*;
-	import away3d.events.*;
 	import away3d.materials.*;
 	
 	import flash.display.*;
-	import flash.events.*;
 	import flash.geom.*;
 	import flash.utils.*;	
 	
@@ -52,7 +51,7 @@ package away3d.materials.shaders
         /** @private */
 		arcane var _source:Mesh;
         /** @private */
-		arcane var _session:AbstractRenderSession;
+		arcane var _session:AbstractSession;
         /** @private */
 		arcane var _view:View3D;
         /** @private */
@@ -106,26 +105,48 @@ package away3d.materials.shaders
             return true;
         }
         /** @private */
-        arcane override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
+        arcane override function renderLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, layer:Sprite, level:int):int
         {
-        	_source = tri.source as Mesh;
-        	_session = _source.session;
-			_view = tri.view;
-			_faceVO = tri.faceVO;
-			_face = _faceVO.face;
-			_lights = tri.source.lightarray;
+        	layer;
+        	
+        	_source = viewSourceObject.source as Mesh;
+			_session = renderer._session;
+        	_view = renderer._view;
+			
+        	_startIndex = renderer.primitiveProperties[priIndex*9];
+        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
+			_faceVO = renderer.primitiveElements[priIndex];
+			_uvs = renderer.primitiveUVs[priIndex];
+			_generated = renderer.primitiveGenerated[priIndex];
+			
+			_screenVertices = viewSourceObject.screenVertices;
+			_screenIndices = viewSourceObject.screenIndices;
+			
+        	_face = _faceVO.face;
+			_lights = _source.lightarray;
 			
 			return level;
         }
         
 		/** @private */
-        arcane override function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
+        arcane override function renderBitmapLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
         {
-        	_source = tri.source as Mesh;
-        	_session = _source.session;
-			_view = tri.view;
-			_faceVO = tri.faceVO;
-			_face = _faceVO.face;
+        	containerRect;
+        	
+        	_source = viewSourceObject.source as Mesh;
+			_session = renderer._session;
+        	_view = renderer._view;
+			
+        	_startIndex = renderer.primitiveProperties[priIndex*9];
+        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
+			_faceVO = renderer.primitiveElements[priIndex];
+			_uvs = renderer.primitiveUVs[priIndex];
+			_generated = renderer.primitiveGenerated[priIndex];
+			
+			_screenVertices = viewSourceObject.screenVertices;
+			_screenIndices = viewSourceObject.screenIndices;
+        	_face = _faceVO.face;
+        	
 			_parentFaceMaterialVO = parentFaceMaterialVO;
 			
 			_faceMaterialVO = getFaceMaterialVO(_faceVO, _source, _view);
@@ -156,7 +177,7 @@ package away3d.materials.shaders
 				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap;
 				
 				//draw shader
-				renderShader(tri);
+				renderShader(priIndex);
 			}
 			
 			return _faceMaterialVO;
@@ -171,19 +192,26 @@ package away3d.materials.shaders
         	return _faceDictionary[faceVO] = new FaceMaterialVO(source, view);
         }
         
+        protected var _startIndex:uint;
+        protected var _endIndex:uint;
+        protected var _uvs:Array;
+        protected var _generated:Boolean;
+        protected var _screenVertices:Array;
+		protected var _screenIndices:Array;
+		
         /**
         * Renders the shader to the specified face.
         * 
-        * @param	face	The face object being rendered.
+        * @param	priIndex	The index of the primitive being rendered.
         */
-        protected function renderShader(tri:DrawTriangle):void
+        protected function renderShader(priIndex:uint):void
         {
         	throw new Error("Not implemented");
         }
         
-        protected function calcMapping(tri:DrawTriangle, map:Matrix):Matrix
+        protected function calcMapping(priIndex:uint, map:Matrix):Matrix
         {
-        	tri; map;
+        	priIndex; map;
         	
         	map.a = 1;
 			map.b = 0;
@@ -196,9 +224,9 @@ package away3d.materials.shaders
             return map;
         }
         
-        protected function calcUVT(tri:DrawTriangle, uvt:Vector.<Number>):Vector.<Number>
+        protected function calcUVT(priIndex:uint, uvt:Vector.<Number>):Vector.<Number>
         {
-        	tri; uvt;
+        	priIndex; uvt;
         	
 			uvt[0] = 0;
     		uvt[1] = 1;
@@ -216,37 +244,37 @@ package away3d.materials.shaders
         * @param	tri		The data object holding all information about the triangle to be drawn.
         * @return			The required matrix object.
         */
-		protected function getMapping(tri:DrawTriangle):Matrix
+		protected function getMapping(priIndex:uint):Matrix
 		{
-			if (tri.generated)
-				return calcMapping(tri, _map);
+			if (_generated)
+				return calcMapping(priIndex, _map);
 			
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);
+			_faceMaterialVO = getFaceMaterialVO(_faceVO);
 			
 			if (!_faceMaterialVO.invalidated)
 				return _faceMaterialVO.texturemapping;
 			
 			_faceMaterialVO.invalidated = false;
 			
-			return calcMapping(tri, _faceMaterialVO.texturemapping);
+			return calcMapping(priIndex, _faceMaterialVO.texturemapping);
 		}
 		
-		protected function getUVData(tri:DrawTriangle):Vector.<Number>
+		protected function getUVData(priIndex:uint):Vector.<Number>
 		{
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source, tri.view);
+			_faceMaterialVO = getFaceMaterialVO(_faceVO, _source, _view);
 			
 			if (_view.camera.lens is ZoomFocusLens)
-        		_focus = tri.view.camera.focus;
+        		_focus = _view.camera.focus;
         	else
         		_focus = 0;
 			
 			_faceMaterialVO.invalidated = false;
 			//if (tri.generated) {
-				_uvt[2] = 1/(_focus + tri.v0z);
-				_uvt[5] = 1/(_focus + tri.v1z);
-				_uvt[8] = 1/(_focus + tri.v2z);
+				_uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
+				_uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
+				_uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
 				
-	    		return calcUVT(tri, _uvt);
+	    		return calcUVT(priIndex, _uvt);
 			//}
 			/*
 			_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);

@@ -4,6 +4,8 @@ package away3d.materials
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.draw.*;
+	import away3d.core.render.*;
+	import away3d.core.utils.*;
 	import away3d.events.*;
 
 	import flash.events.*;
@@ -30,17 +32,17 @@ package away3d.materials
         	throw new Error("Not implemented");
         }
         /** @private */
-        arcane function renderSegment(seg:DrawSegment):void
+        arcane function renderSegment(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
         	throw new Error("Not implemented");
         }
         /** @private */
-        arcane function renderTriangle(tri:DrawTriangle):void
+        arcane function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
         	throw new Error("Not implemented");
         }
         /** @private */
-        arcane function renderSprite(sprite:DrawSprite):void
+        arcane function renderSprite(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
         	throw new Error("Not implemented");
         }

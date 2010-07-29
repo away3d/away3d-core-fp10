@@ -3,7 +3,7 @@ package away3d.sprites
     import away3d.arcane;
 	import away3d.core.base.*;
     import away3d.core.utils.*;
-    import away3d.events.*;
+	import away3d.core.vos.*;
     import away3d.materials.*;
     
     use namespace arcane;
@@ -30,33 +30,11 @@ package away3d.sprites
 		private var _width:Number;
 		private var _height:Number;
 		private var _rotation:Number;
+		private var _align:String;
 		private var _scaling:Number;
+		private var _distanceScaling:Boolean;
 		
 		public var spriteVO:SpriteVO = new SpriteVO();
-		
-		/**
-		 * Returns an array of vertex objects that are used by the 3d sprite.
-		 */
-        public override function get vertices():Array
-        {
-            return _vertices;
-        }
-        
-		/**
-		 * Returns an array of drawing command strings that are used by the 3d sprite.
-		 */
-        public override function get commands():Array
-        {
-            return _commands;
-        }
-        
-		/**
-		 * Returns the vertex of the 3d sprite.
-		 */
-        public function get vertex():Vertex
-        {
-            return _vertex;
-        }
         
     	/**
     	 * Defines the x coordinate of the 3d sprite relative to the local coordinates of the parent <code>Mesh</code>.
@@ -193,6 +171,26 @@ package away3d.sprites
         }
         
 		/**
+		 * Defines how the 3d sprite is aligned to its vertex
+		 * 
+		 * @see away3d.sprites.SpriteAlign
+		 */
+        public function get align():String
+        {
+            return _align;
+        }
+
+        public function set align(value:String):void
+        {
+            if (_align == value)
+                return;
+			
+            _align = spriteVO.align = value;
+			
+            notifyMappingChange();
+        }
+        
+		/**
 		 * Defines the scaling of the 3d sprite when an <code>BitmapMaterial</code> is used.
 		 */
         public function get scaling():Number
@@ -206,6 +204,24 @@ package away3d.sprites
                 return;
 			
             _scaling = spriteVO.scaling = value;
+			
+            notifyMappingChange();
+        }
+        
+		/**
+		 * Defines if the sprite should scale with distance. Defaults to true
+		 */
+        public function get distanceScaling():Boolean
+        {
+            return _distanceScaling;
+        }
+
+        public function set distanceScaling(value:Boolean):void
+        {
+            if (_distanceScaling == value)
+                return;
+			
+            _distanceScaling = spriteVO.distanceScaling = value;
 			
             notifyMappingChange();
         }
@@ -299,22 +315,23 @@ package away3d.sprites
 		/**
 		 * Creates a new <code>Billboard</code> object.
 		 *
-		 * @param	vertex					The vertex object of the 3d sprite
 		 * @param	material	[optional]	The material used by the 3d sprite to render
 		 */
-        public function Sprite3D(material:Material = null, width:Number = 10, height:Number = 10, rotation:Number = 0, scaling:Number = 1)
+        public function Sprite3D(material:Material = null, width:Number = 10, height:Number = 10, rotation:Number = 0, align:String = "center", scaling:Number = 1, distanceScaling:Boolean = true)
         {
             this.material = material;
             this.width = width;
             this.height = height;
+            this.align = align;
             this.rotation = rotation;
             this.scaling = scaling;
+            this.distanceScaling = distanceScaling;
             
             spriteVO.sprite3d = this;
             
         	//setup the vertex
-            _commands[0] = spriteVO.command = "M";
-            _vertices[0] = _vertex = spriteVO.vertex = new Vertex();
+            _commands = spriteVO.commands = ["M"];
+            _vertex = _vertices[0] = spriteVO.vertices[0] = new Vertex();
 			
 			_vertex.parents.push(this);
   			

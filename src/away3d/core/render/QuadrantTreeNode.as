@@ -1,12 +1,15 @@
-package away3d.core.draw
+package away3d.core.render
 {
+	import away3d.arcane;
     import away3d.core.base.*;
     
+    use namespace arcane;
     /**
     * Quadrant tree node
     */
-    public final class PrimitiveQuadrantTreeNode
+    public final class QuadrantTreeNode
     {
+    	private var render_order:Array;
         private var render_center_length:int = -1;
         private var render_center_index:int = -1;
         private var halfwidth:Number;
@@ -27,29 +30,34 @@ package away3d.core.draw
         }
         
         /**
-        * Array of primitives that lie in the center of the quadrant.
+        * Array of primitives indices that belong to the quadrant.
         */
         public var center:Array = new Array();
         
         /**
+        * Array of primitives screenZs that belong to the quadrant.
+        */
+        public var screenZs:Array = new Array();
+        
+        /**
         * The quadrant tree node for the top left quadrant.
         */
-        public var lefttop:PrimitiveQuadrantTreeNode;
+        public var lefttop:QuadrantTreeNode;
         
         /**
         * The quadrant tree node for the bottom left quadrant.
         */
-        public var leftbottom:PrimitiveQuadrantTreeNode;
+        public var leftbottom:QuadrantTreeNode;
         
         /**
         * The quadrant tree node for the top right quadrant.
         */
-        public var righttop:PrimitiveQuadrantTreeNode;
+        public var righttop:QuadrantTreeNode;
         
         /**
         * The quadrant tree node for the bottom right quadrant.
         */
-        public var rightbottom:PrimitiveQuadrantTreeNode;
+        public var rightbottom:QuadrantTreeNode;
         
         /**
         * Determines if the bounds of the top left quadrant need re-calculating.
@@ -92,15 +100,14 @@ package away3d.core.draw
         public var ydiv:Number;
 		
 		/**
+		 * The quadrant renderer.
+		 */
+        public var renderer:QuadrantRenderer;
+        		
+		/**
 		 * The quadrant parent.
 		 */
-        public var parent:PrimitiveQuadrantTreeNode;
-		
-        /**
-        * Placeholder function for creating new quadrant node from a cache of objects.
-        * Saves recreating objects and GC problems.
-        */
-		public var create:Function;
+        public var parent:QuadrantTreeNode;
 		
 		/**
 		 * Creates a new <code>PrimitiveQuadrantTreeNode</code> object.
@@ -112,87 +119,84 @@ package away3d.core.draw
 		 * @param	level	The iteration number of the quadrant node.
 		 * @param	parent	The parent quadrant of the quadrant node.
 		 */
-        public function PrimitiveQuadrantTreeNode(xdiv:Number, ydiv:Number, width:Number, height:Number, level:int, parent:PrimitiveQuadrantTreeNode = null)
+        public function QuadrantTreeNode(xdiv:Number, ydiv:Number, width:Number, height:Number, level:int, renderer:QuadrantRenderer, parent:QuadrantTreeNode = null)
         {
             this.level = level;
             this.xdiv = xdiv;
             this.ydiv = ydiv;
             halfwidth = width / 2;
             halfheight = height / 2;
+            this.renderer = renderer;
             this.parent = parent;
         }
 		
 		/**
 		 * Adds a primitive to the quadrant
 		 */
-        public function push(pri:DrawPrimitive):void
+        public function push(renderer:QuadrantRenderer, priIndex:uint):QuadrantTreeNode
         {
             if (onlysourceFlag) {
-	            if (onlysource != null && onlysource != pri.source)
+	            if (onlysource != null && onlysource != renderer.primitiveSource[priIndex].source)
 	            	onlysourceFlag = false;
-                onlysource = pri.source;
+                onlysource = renderer.primitiveSource[priIndex].source;
             }
 			
 			if (level < maxlevel) {
-	            if (pri.maxX <= xdiv)
+	            if (renderer.primitiveProperties[priIndex*9 + 3] <= xdiv)
 	            {
-	                if (pri.maxY <= ydiv)
+	                if (renderer.primitiveProperties[priIndex*9 + 5] <= ydiv)
 	                {
 	                    if (lefttop == null) {
 	                    	lefttopFlag = true;
-	                        lefttop = new PrimitiveQuadrantTreeNode(xdiv - halfwidth/2, ydiv - halfheight/2, halfwidth, halfheight, level+1, this);
+	                        lefttop = new QuadrantTreeNode(xdiv - halfwidth/2, ydiv - halfheight/2, halfwidth, halfheight, level+1, renderer, this);
 	                    } else if (!lefttopFlag) {
 	                    	lefttopFlag = true;
 	                    	lefttop.reset(xdiv - halfwidth/2, ydiv - halfheight/2, halfwidth, halfheight);
 	                    }
-	                    lefttop.push(pri);
-	                    return;
+	                    return lefttop.push(renderer, priIndex);
 	                }
-	                else if (pri.minY >= ydiv)
+	                else if (renderer.primitiveProperties[priIndex*9 + 4] >= ydiv)
 	                {
 	                	if (leftbottom == null) {
 	                    	leftbottomFlag = true;
-	                        leftbottom = new PrimitiveQuadrantTreeNode(xdiv - halfwidth/2, ydiv + halfheight/2, halfwidth, halfheight, level+1, this);
+	                        leftbottom = new QuadrantTreeNode(xdiv - halfwidth/2, ydiv + halfheight/2, halfwidth, halfheight, level+1, renderer, this);
 	                    } else if (!leftbottomFlag) {
 	                    	leftbottomFlag = true;
 	                    	leftbottom.reset(xdiv - halfwidth/2, ydiv + halfheight/2, halfwidth, halfheight);
 	                    }
-	                    leftbottom.push(pri);
-	                    return;
+	                    return leftbottom.push(renderer, priIndex);
 	                }
 	            }
-	            else if (pri.minX >= xdiv)
+	            else if (renderer.primitiveProperties[priIndex*9 + 2] >= xdiv)
 	            {
-	                if (pri.maxY <= ydiv)
+	                if (renderer.primitiveProperties[priIndex*9 + 5] <= ydiv)
 	                {
 	                	if (righttop == null) {
 	                    	righttopFlag = true;
-	                        righttop = new PrimitiveQuadrantTreeNode(xdiv + halfwidth/2, ydiv - halfheight/2, halfwidth, halfheight, level+1, this);
+	                        righttop = new QuadrantTreeNode(xdiv + halfwidth/2, ydiv - halfheight/2, halfwidth, halfheight, level+1, renderer, this);
 	                    } else if (!righttopFlag) {
 	                    	righttopFlag = true;
 	                    	righttop.reset(xdiv + halfwidth/2, ydiv - halfheight/2, halfwidth, halfheight);
 	                    }
-	                    righttop.push(pri);
-	                    return;
+	                    return righttop.push(renderer, priIndex);
 	                }
-	                else if (pri.minY >= ydiv)
+	                else if (renderer.primitiveProperties[priIndex*9 + 4] >= ydiv)
 	                {
 	                	if (rightbottom == null) {
 	                    	rightbottomFlag = true;
-	                        rightbottom = new PrimitiveQuadrantTreeNode(xdiv + halfwidth/2, ydiv + halfheight/2, halfwidth, halfheight, level+1, this);
+	                        rightbottom = new QuadrantTreeNode(xdiv + halfwidth/2, ydiv + halfheight/2, halfwidth, halfheight, level+1, renderer, this);
 	                    } else if (!rightbottomFlag) {
 	                    	rightbottomFlag = true;
 	                    	rightbottom.reset(xdiv + halfwidth/2, ydiv + halfheight/2, halfwidth, halfheight);
 	                    }
-	                    rightbottom.push(pri);
-	                    return;
+	                    return rightbottom.push(renderer, priIndex);
 	                }
 	            }
 			}
 			
-			//no quadrant, store in center array
-            center.push(pri);
-            pri.quadrant = this;
+			//no quadrant, store in primitives array
+			center.push(priIndex);
+			return this;
         }
         
         /**
@@ -227,22 +231,28 @@ package away3d.core.draw
             if (render_center_length == -1) {
                 render_center_length = center.length;
                 if (render_center_length) {
-                    if (render_center_length > 1)
-                        center.sortOn("screenZ", Array.DESCENDING | Array.NUMERIC);
-                }
+                	render_center_index = 0;
+                	screenZs.length = 0;
+                	
+                	while (render_center_index < render_center_length)
+                		screenZs.push(renderer.primitiveScreenZ[center[render_center_index++]]);
+                	
+                    render_order = screenZs.sort(Array.DESCENDING | Array.NUMERIC | Array.RETURNINDEXEDARRAY);
+				}
                 render_center_index = 0;
             }
-
+			
             while (render_center_index < render_center_length)
             {
-                var pri:DrawPrimitive = center[render_center_index];
-
-                if (pri.screenZ < limit)
+            	var screenIndex:uint = render_order[render_center_index];
+                var screenZ:Number = screenZs[screenIndex];
+				
+                if (screenZ < limit)
                     break;
-
-                render_other(pri.screenZ);
-
-                pri.render();
+				
+                render_other(screenZ);
+				
+                renderer.renderPrimitive(center[screenIndex]);
 
                 render_center_index++;
             }

@@ -114,10 +114,7 @@ package away3d.core.traverse
         }
         
         public override function apply(node:Object3D):void
-        {
-            if (node.projectorType == ProjectorType.CONVEX_BLOCK)
-                _view.blockers[node] = node;
-            
+        { 
         	//add to scene meshes dictionary
             if ((_mesh = node as Mesh)) {
             	if (!_view.scene.meshes[node])

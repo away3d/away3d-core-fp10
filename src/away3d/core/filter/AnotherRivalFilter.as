@@ -1,10 +1,12 @@
 package away3d.core.filter
 {
+	import away3d.core.project.PrimitiveType;
     import away3d.cameras.*;
     import away3d.containers.*;
     import away3d.core.clip.*;
     import away3d.core.draw.*;
     import away3d.core.render.*;
+	import away3d.core.utils.*;
     
     import flash.utils.*;
 
@@ -15,23 +17,19 @@ package away3d.core.filter
     {
         private var maxdelay:int;
     	
+    	private var renderer:QuadrantRenderer;
     	private var start:int;
         private var check:int;
     
         private var primitives:Array;
-        private var pri:DrawPrimitive;
         private var turn:int;
-        private var leftover:Array;
         
         private var maxZ:Number;
         private var minZ:Number;
         private var maxdeltaZ:Number;
         
         private var rivals:Array;
-        private var rival:DrawPrimitive;
-        
         private var parts:Array;
-        private var part:DrawPrimitive;
         
         private var ZOrderDeeper:int = 1;
         private var ZOrderIrrelevant:int = 0;
@@ -44,11 +42,6 @@ package away3d.core.filter
         private var q1y:Number;
         private var q2x:Number;
         private var q2y:Number;
-    
-        private var r0x:Number;
-        private var r0y:Number;
-        private var r1x:Number;
-        private var r1y:Number;
     
         private var ql01a:Number;
         private var ql01b:Number;
@@ -178,117 +171,135 @@ package away3d.core.filter
         private var q12w20d:Number;
         private var q20w20d:Number;
         
-        private function zconflict(q:DrawPrimitive, w:DrawPrimitive):int
+        private var _viewSourceObjectQ:ViewSourceObject;
+        private var _viewSourceObjectW:ViewSourceObject;
+        private var _startIndex:uint;
+        private var _minX:Number;
+        private var _maxX:Number;
+        private var _minY:Number;
+        private var _maxY:Number;
+        private var _index:uint;
+        
+        private function zconflict(q:uint, w:uint):int
         {
-            if (q is DrawTriangle)
-            { 
-                if (w is DrawTriangle)
-                    return zconflictTT(q as DrawTriangle, w as DrawTriangle);
-                if (w is DrawSegment)
-                    return zconflictTS(q as DrawTriangle, w as DrawSegment);
-                if (q is DrawScaledBitmap)
-                    return zconflictTB(q as DrawTriangle, w as DrawScaledBitmap);
-            }
-            else
-            if (q is DrawSegment)
-            {
-                if (w is DrawTriangle)
-                    return -zconflictTS(w as DrawTriangle, q as DrawSegment);
-            }
-            else
-            if (q is DrawScaledBitmap)
-            {
-                if (w is DrawTriangle)
-                    return -zconflictTB(w as DrawTriangle, q as DrawScaledBitmap);
-                if (w is DrawScaledBitmap)
-                    return zconflictBB(q as DrawScaledBitmap, w as DrawScaledBitmap);
+			if (renderer.primitiveType[q] == PrimitiveType.FACE) { 
+                if (renderer.primitiveType[w] == PrimitiveType.FACE)
+                    return zconflictTT(q, w);
+                if (renderer.primitiveType[w] == PrimitiveType.SEGMENT)
+                    return zconflictTS(q, w);
+                if (renderer.primitiveType[w] == PrimitiveType.SPRITE3D)
+                    return zconflictTB(q, w);
+            } else if (renderer.primitiveType[q] == PrimitiveType.SEGMENT) {
+                if (renderer.primitiveType[w] == PrimitiveType.FACE)
+                    return -zconflictTS(w, q);
+            } else if (renderer.primitiveType[q] == PrimitiveType.SPRITE3D) {
+				if (renderer.primitiveType[w] == PrimitiveType.FACE)
+                    return -zconflictTB(w, q);
+                if (renderer.primitiveType[w] == PrimitiveType.SPRITE3D)
+                    return zconflictBB(q, w);
             }
             return ZOrderIrrelevant;
         }
     
-        private function zconflictBB(q:DrawScaledBitmap, r:DrawScaledBitmap):int
+        private function zconflictBB(q:uint, w:uint):int
         {
-            if (q.screenZ > r.screenZ)
+            if (renderer.primitiveScreenZ[q] > renderer.primitiveScreenZ[w])
                 return ZOrderDeeper;
-            if (q.screenZ < r.screenZ)
+            if (renderer.primitiveScreenZ[q] < renderer.primitiveScreenZ[w])
                 return ZOrderHigher;
     
             return ZOrderSame;
         }
 
-        private function zconflictTB(q:DrawTriangle, r:DrawScaledBitmap):int
+        private function zconflictTB(q:uint, w:uint):int
         {
-            if (q.contains(r.vx, r.vy))
-                return zcompare(q, r, r.vx, r.vy);
+        	_viewSourceObjectQ = renderer.primitiveSource[q];
+        	_viewSourceObjectW = renderer.primitiveSource[w];
+        	_minX = renderer.primitiveProperties[w*9 + 2];
+        	_maxX = renderer.primitiveProperties[w*9 + 3];
+        	_minY = renderer.primitiveProperties[w*9 + 4];
+        	_maxY = renderer.primitiveProperties[w*9 + 5];
+        	
+        	_index = _viewSourceObjectW.screenIndices[renderer.primitiveProperties[w*9]]*3;
+        	w0x = _viewSourceObjectW.screenVertices[_index];
+        	w0y = _viewSourceObjectW.screenVertices[_index + 1];
+        	
+			if (_viewSourceObjectQ.contains(q, renderer, w0x, w0y))
+                return zcompare(q, w, w0x, w0y);
             else
-            if (q.contains(r.minX, r.minY))
-                return zcompare(q, r, r.minX, r.minY);
+            if (_viewSourceObjectQ.contains(q, renderer, _minX, _minY))
+                return zcompare(q, w, _minX, _minY);
             else
-            if (q.contains(r.minX, r.maxY))
-                return zcompare(q, r, r.minX, r.maxY);
+            if (_viewSourceObjectQ.contains(q, renderer, _minX, _maxY))
+                return zcompare(q, w, _minX, _maxY);
             else
-            if (q.contains(r.maxX, r.minY))
-                return zcompare(q, r, r.maxX, r.minY);
+            if (_viewSourceObjectQ.contains(q, renderer, _maxX, _minY))
+                return zcompare(q, w, _maxX, _minY);
             else
-            if (q.contains(r.maxX, r.maxY))
-                return zcompare(q, r, r.maxX, r.maxY);
+            if (_viewSourceObjectQ.contains(q, renderer, _maxX, _maxY))
+                return zcompare(q, w, _maxX, _maxY);
             else
                 return ZOrderIrrelevant;
         }
         
-        private function zconflictTS(q:DrawTriangle, r:DrawSegment):int
+        private function zconflictTS(q:uint, w:uint):int
         {
-        /*
-            if (q == null)
-                return ZOrderIrrelevant;
-            if (r == null)
-                return ZOrderIrrelevant;
-        */
-            q0x = q.v0x;
-            q0y = q.v0y;
-            q1x = q.v1x;
-            q1y = q.v1y;
-            q2x = q.v2x;
-            q2y = q.v2y;
-    
-            r0x = r.v0x;
-            r0y = r.v0y;
-            r1x = r.v1x;
-            r1y = r.v1y;
+        	_viewSourceObjectQ = renderer.primitiveSource[q];
+        	_startIndex = renderer.primitiveProperties[q*9];
+        	
+        	_index = _viewSourceObjectQ.screenIndices[_startIndex]*3;
+			q0x = _viewSourceObjectQ.screenVertices[_index];
+            q0y = _viewSourceObjectQ.screenVertices[_index + 1];
+            _index = _viewSourceObjectQ.screenIndices[_startIndex + 1]*3;
+            q1x = _viewSourceObjectQ.screenVertices[_index];
+            q1y = _viewSourceObjectQ.screenVertices[_index + 1];
+            _index = _viewSourceObjectQ.screenIndices[_startIndex + 2]*3;
+            q2x = _viewSourceObjectQ.screenVertices[_index];
+            q2y = _viewSourceObjectQ.screenVertices[_index + 1];
+    		
+        	_viewSourceObjectW = renderer.primitiveSource[w];
+        	_startIndex = renderer.primitiveProperties[w*9];
+        	
+    		_index = _viewSourceObjectW.screenIndices[_startIndex]*3;
+            w0x = _viewSourceObjectW.screenVertices[_index];
+            w0y = _viewSourceObjectW.screenVertices[_index + 1];
+            _index = _viewSourceObjectW.screenIndices[_startIndex + 1]*3;
+            w1x = _viewSourceObjectW.screenVertices[_index];
+            w1y = _viewSourceObjectW.screenVertices[_index + 1];
     
             ql01a = q1y - q0y;
             ql01b = q0x - q1x;
             ql01c = -(ql01b*q0y + ql01a*q0x);
             ql01s = ql01a*q2x + ql01b*q2y + ql01c;
-            ql01r0 = (ql01a*r0x + ql01b*r0y + ql01c) * ql01s;
-            ql01r1 = (ql01a*r1x + ql01b*r1y + ql01c) * ql01s;
+            ql01r0 = (ql01a*w0x + ql01b*w0y + ql01c) * ql01s;
+            ql01r1 = (ql01a*w1x + ql01b*w1y + ql01c) * ql01s;
     
             if ((ql01r0 <= 0.0001) && (ql01r1 <= 0.0001))
                 return ZOrderIrrelevant;
-    
+    		
             ql12a = q2y - q1y;
             ql12b = q1x - q2x;
             ql12c = -(ql12b*q1y + ql12a*q1x);
             ql12s = ql12a*q0x + ql12b*q0y + ql12c;
-            ql12r0 = (ql12a*r0x + ql12b*r0y + ql12c) * ql12s;
-            ql12r1 = (ql12a*r1x + ql12b*r1y + ql12c) * ql12s;
-    
+            ql12r0 = (ql12a*w0x + ql12b*w0y + ql12c) * ql12s;
+            ql12r1 = (ql12a*w1x + ql12b*w1y + ql12c) * ql12s;
+    		
             if ((ql12r0 <= 0.0001) && (ql12r1 <= 0.0001))
                 return ZOrderIrrelevant;
-    
+    		
             ql20a = q0y - q2y;
             ql20b = q2x - q0x;
             ql20c = -(ql20b*q2y + ql20a*q2x);
             ql20s = ql20a*q1x + ql20b*q1y + ql20c;
-            ql20r0 = (ql20a*r0x + ql20b*r0y + ql20c) * ql20s;
-            ql20r1 = (ql20a*r1x + ql20b*r1y + ql20c) * ql20s;
+            ql20r0 = (ql20a*w0x + ql20b*w0y + ql20c) * ql20s;
+            ql20r1 = (ql20a*w1x + ql20b*w1y + ql20c) * ql20s;
     
             if ((ql20r0 <= 0.0001) && (ql20r1 <= 0.0001))
                 return ZOrderIrrelevant;
     
-            rla = r1y - r0y;
-            rlb = r0x - r1x;
-            rlc = -(rlb*r0y + rla*r0x);
+            rla = w1y - w0y;
+            rlb = w0x - w1x;
+            rlc = -(rlb*w0y + rla*w0x);
             rlq0 = (rla*q0x + rlb*q0y + rlc);
             rlq1 = (rla*q1x + rlb*q1y + rlc);
             rlq2 = (rla*q2x + rlb*q2y + rlc);
@@ -299,7 +310,7 @@ package away3d.core.filter
             if (((ql01r0 > -0.0001) && (ql12r0 > -0.0001) && (ql20r0 > -0.0001))
              && ((ql01r1 > -0.0001) && (ql12r1 > -0.0001) && (ql20r1 > -0.0001)))
             {
-                return zcompare(q, r, (r0x+r1x)/2, (r0y+r1y)/2);
+                return zcompare(q, w, (w0x+w1x)/2, (w0y+w1y)/2);
             }
     
             q01r = ((rlq0*rlq1 < 0.0001) && (ql01r0*ql01r1 < 0.0001));
@@ -312,15 +323,15 @@ package away3d.core.filter
     
             if ((ql01r0 > 0.0001) && (ql12r0 > 0.0001) && (ql20r0 > 0.0001))
             {
-                cx += r0x;
-                cy += r0y;
+                cx += w0x;
+                cy += w0y;
                 count += 1;
             }
     
             if ((ql01r1 > 0.0001) && (ql12r1 > 0.0001) && (ql20r1 > 0.0001))
             {
-                cx += r1x;
-                cy += r1y;
+                cx += w1x;
+                cy += w1y;
                 count += 1;
             }
     
@@ -363,26 +374,38 @@ package away3d.core.filter
                 }
             }
     
-            return zcompare(q, r, cx / count, cy / count);
+            return zcompare(q, w, cx / count, cy / count);
         }
     
 
         
-        private function zconflictTT(q:DrawTriangle, w:DrawTriangle):int
+        private function zconflictTT(q:uint, w:uint):int
         {
-            q0x = q.v0x;
-            q0y = q.v0y;
-            q1x = q.v1x;
-            q1y = q.v1y;
-            q2x = q.v2x;
-            q2y = q.v2y;
-    
-            w0x = w.v0x;
-            w0y = w.v0y;
-            w1x = w.v1x;
-            w1y = w.v1y;
-            w2x = w.v2x;
-            w2y = w.v2y;
+        	_viewSourceObjectQ = renderer.primitiveSource[q];
+        	_startIndex = renderer.primitiveProperties[q*9];
+        	
+        	_index = _viewSourceObjectQ.screenIndices[_startIndex]*3;
+			q0x = _viewSourceObjectQ.screenVertices[_index];
+            q0y = _viewSourceObjectQ.screenVertices[_index + 1];
+            _index = _viewSourceObjectQ.screenIndices[_startIndex + 1]*3;
+            q1x = _viewSourceObjectQ.screenVertices[_index];
+            q1y = _viewSourceObjectQ.screenVertices[_index + 1];
+            _index = _viewSourceObjectQ.screenIndices[_startIndex + 2]*3;
+            q2x = _viewSourceObjectQ.screenVertices[_index];
+            q2y = _viewSourceObjectQ.screenVertices[_index + 1];
+    		
+        	_viewSourceObjectW = renderer.primitiveSource[w];
+    		_startIndex = renderer.primitiveProperties[w*9];
+    		
+    		_index = _viewSourceObjectW.screenIndices[_startIndex]*3;
+            w0x = _viewSourceObjectW.screenVertices[_index];
+            w0y = _viewSourceObjectW.screenVertices[_index + 1];
+            _index = _viewSourceObjectW.screenIndices[_startIndex + 1]*3;
+            w1x = _viewSourceObjectW.screenVertices[_index];
+            w1y = _viewSourceObjectW.screenVertices[_index + 1];
+            _index = _viewSourceObjectW.screenIndices[_startIndex + 2]*3;
+            w2x = _viewSourceObjectW.screenVertices[_index];
+            w2y = _viewSourceObjectW.screenVertices[_index + 1];
     
             ql01a = q1y - q0y;
             ql01b = q0x - q1x;
@@ -640,17 +663,17 @@ package away3d.core.filter
             return zcompare(q, w, cx / count, cy / count);
         }
     	
-    	private var az:Number;
-    	private var bz:Number;
+    	private var qz:Number;
+    	private var wz:Number;
     	
-        private function zcompare(a:DrawPrimitive, b:DrawPrimitive, x:Number, y:Number):int
+        private function zcompare(q:uint, w:uint, x:Number, y:Number):int
         {
-            az = a.getZ(x, y);
-            bz = b.getZ(x, y);
+        	qz = _viewSourceObjectQ.getUVT(q, renderer, x, y)[2];
+            wz = _viewSourceObjectW.getUVT(w, renderer, x, y)[2];
     
-            if (az > bz)
+            if (qz > wz)
                 return ZOrderDeeper;
-            if (az < bz)
+            if (qz < wz)
                 return ZOrderHigher;
     
             return ZOrderSame;
@@ -669,19 +692,20 @@ package away3d.core.filter
 		/**
 		 * @inheritDoc
 		 */
-        public function filter(tree:QuadrantRenderer, scene:Scene3D, camera:Camera3D, clip:Clipping):void
+        public function filter(renderer:QuadrantRenderer):void
         {
+        	this.renderer = renderer;
             start = getTimer();
             check = 0;
     
-            primitives = tree.list();
+            primitives = renderer.list();
             turn = 0;
             
             while (primitives.length > 0) {
             	
-                leftover = [];
-                
-                for each (pri in primitives) {
+                var leftover:Array = [];
+                var priIndex:uint;
+                for each (priIndex in primitives) {
                 	
                     ++check;
                     
@@ -691,52 +715,52 @@ package away3d.core.filter
                         else
                             check = 0;
 					
-                    maxZ = pri.maxZ + 1000;
-                    minZ = pri.minZ - 1000;
+                    maxZ = renderer.primitiveProperties[priIndex*9 + 7] + 1000;
+                    minZ = renderer.primitiveProperties[priIndex*9 + 6] - 1000;
                     maxdeltaZ = 0;
                     
-                    rivals = tree.get(pri);
-                    
+                    rivals = renderer.getRivals(priIndex);
+                    var rival:uint;
                     for each (rival in rivals) {
                     	
-                        if (rival == pri)
+                        if (rival == priIndex)
                             continue;
     
-                        switch (zconflict(pri, rival)) {
+                        switch (zconflict(priIndex, rival)) {
                             case ZOrderIrrelevant:
                                 break;
                             case ZOrderDeeper:
-                            	if (minZ < rival.screenZ)
-                            		minZ = rival.screenZ;
+                            	if (minZ < renderer.primitiveScreenZ[rival])
+                            		minZ = renderer.primitiveScreenZ[rival];
                                 break;
                             case ZOrderHigher:
-                            	if (maxZ > rival.screenZ)
-                            		maxZ = rival.screenZ;
+                            	if (maxZ > renderer.primitiveScreenZ[rival])
+                            		maxZ = renderer.primitiveScreenZ[rival];
                                 break;
                         }
                     }
                     
-                    if (maxZ >= pri.screenZ && pri.screenZ >= minZ) {
+                    if (maxZ >= renderer.primitiveScreenZ[priIndex] && renderer.primitiveScreenZ[priIndex] >= minZ) {
                         // screenZ still sits between the maxZ and minZ
                     } else if (maxZ >= minZ) {
                     	//screenZ has to be re-calculated for the new maxZ and minZ
-                        pri.screenZ = (maxZ + minZ) / 2;
+                        renderer.primitiveScreenZ[priIndex] = (maxZ + minZ) / 2;
                     } else {
                     	//there is no value for screenZ, triangle is flagged for tesselation
                         if (turn % 3 == 2) {
-                            parts = pri.quarter(camera.focus);
+                            parts = renderer.primitiveSource[priIndex].quarter(priIndex, renderer);
                             
                             if (parts == null)
                             	continue;
                             	
-                            tree.remove(pri);
-                            
+                            renderer.remove(priIndex);
+                            var part:uint;
                             for each (part in parts)
-                                if (tree.primitive(part))
+                                if (renderer.primitive(part))
                                     leftover.push(part);
                         }
                         else
-                            leftover.push(pri);
+                            leftover.push(priIndex);
                     }
                 }
                 

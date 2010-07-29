@@ -1,11 +1,11 @@
 package away3d.materials
 {
-	import away3d.events.MaterialEvent;
 	import away3d.arcane;
     import away3d.containers.*;
     import away3d.core.base.*;
-    import away3d.core.draw.*;
+	import away3d.core.render.*;
     import away3d.core.utils.*;
+	import away3d.events.*;
 	
 	use namespace arcane;
 	
@@ -32,26 +32,35 @@ package away3d.materials
     	/** @private */
         arcane override function updateMaterial(source:Object3D, view:View3D):void
         {
+        	source; view;
+        	
         	if (_materialDirty)
         		notifyMaterialUpdate();
         }
         /** @private */
-        arcane override function renderSegment(seg:DrawSegment):void
+        arcane override function renderSegment(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
             if (wireAlpha <= 0)
                 return;
 			
-			seg.source.session.renderTriangleLine(_thickness, _wireColor, _wireAlpha, seg.screenVertices, seg.screenCommands, seg.screenIndices, seg.startIndex, seg.endIndex);
+			renderer._session.renderTriangleLine(_thickness, _wireColor, _wireAlpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[priIndex*9], renderer.primitiveProperties[priIndex*9 + 1]);
         }
         /** @private */
-        arcane override function renderTriangle(tri:DrawTriangle):void
+        arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
             if (wireAlpha <= 0)
                 return;
 
-            tri.source.session.renderTriangleLine(_thickness, _wireColor, _wireAlpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+            renderer._session.renderTriangleLine(_thickness, _wireColor, _wireAlpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[priIndex*9], renderer.primitiveProperties[priIndex*9+1]);
         }
-        
+        /** @private */
+        arcane override function renderSprite(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
+        {
+            if (wireAlpha <= 0)
+                return;
+
+            renderer._session.renderSpriteLine(_thickness, _wireColor, _wireAlpha, priIndex, viewSourceObject, renderer);
+        }
         private var _materialupdated:MaterialEvent;
         
         /**

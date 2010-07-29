@@ -3,11 +3,10 @@
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.draw.*;
 	import away3d.core.light.*;
 	import away3d.core.math.*;
+	import away3d.core.render.*;
 	import away3d.core.utils.*;
-	import away3d.materials.*;
 	
 	import flash.display.*;
 	import flash.geom.*;
@@ -42,9 +41,9 @@
         	}
         }
 		/** @private */
-		arcane override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
+		arcane override function renderLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, layer:Sprite, level:int):int
         {
-        	super.renderLayer(tri, layer, level);
+        	super.renderLayer(priIndex, viewSourceObject, renderer, layer, level);
         	
         	var _lights_directionals:Array = _lights.directionals;
 			var directional:DirectionalLight;
@@ -55,19 +54,17 @@
         		_shape.blendMode = blendMode;
         		_graphics = _shape.graphics;
         		
-				_source.session.renderTriangleBitmap(_bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, false, _graphics);
+				_source.session.renderTriangleBitmap(_bitmap, getUVData(priIndex), _screenVertices, _screenIndices, _startIndex, _endIndex, smooth, false, _graphics);
         	}
 			
 			if (debug)
-                _source.session.renderTriangleLine(0, 0x0000FF, 1, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+                _source.session.renderTriangleLine(0, 0x0000FF, 1, _screenVertices, renderer.primitiveCommands[priIndex], _screenIndices, _startIndex, _endIndex);
             
             return level;
         }
         
         private var _zeroPoint:Point = new Point(0, 0);
         private var _bitmap:BitmapData;
-        private var _sourceDictionary:Dictionary = new Dictionary(true);
-        private var _sourceBitmap:BitmapData;
         private var _normalDictionary:Dictionary = new Dictionary(true);
         private var _normalBitmap:BitmapData;
         private var _shininess:Number;
@@ -81,17 +78,19 @@
 		private var _normal2z:Number;
 		private var _bitmapDirty:Boolean;
 		
-		protected override function calcUVT(tri:DrawTriangle, uvt:Vector.<Number>):Vector.<Number>
+		protected override function calcUVT(priIndex:uint, uvt:Vector.<Number>):Vector.<Number>
 		{
-			uvt[2] = 1/(_focus + tri.v0z);
-			uvt[5] = 1/(_focus + tri.v1z);
-			uvt[8] = 1/(_focus + tri.v2z);
-			uvt[0] = tri.uv0.u;
-    		uvt[1] = 1 - tri.uv0.v;
-    		uvt[3] = tri.uv1.u;
-    		uvt[4] = 1 - tri.uv1.v;
-    		uvt[6] = tri.uv2.u;
-    		uvt[7] = 1 - tri.uv2.v;
+			priIndex;
+			
+			uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
+			uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
+			uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+			uvt[0] = _uvs[0].u;
+    		uvt[1] = 1 - _uvs[0].v;
+    		uvt[3] = _uvs[1].u;
+    		uvt[4] = 1 - _uvs[1].v;
+    		uvt[6] = _uvs[2].u;
+    		uvt[7] = 1 - _uvs[2].v;
     		
     		return uvt;
 		}
@@ -125,19 +124,14 @@
 		/**
 		 * @inheritDoc
 		 */
-        protected override function renderShader(tri:DrawTriangle):void
+        protected override function renderShader(priIndex:uint):void
         {
-			//check to see if sourceDictionary exists
-			_sourceBitmap = _sourceDictionary[tri];
-			if (!_sourceBitmap || _faceMaterialVO.resized) {
-				_sourceBitmap = _sourceDictionary[tri] = _parentFaceMaterialVO.bitmap.clone();
-				_sourceBitmap.lock();
-			}
-			
+        	priIndex;
+        	
 			//check to see if normalDictionary exists
-			_normalBitmap = _normalDictionary[tri];
+			_normalBitmap = _normalDictionary[_faceVO];
 			if (!_normalBitmap || _faceMaterialVO.resized) {
-				_normalBitmap = _normalDictionary[tri] = _parentFaceMaterialVO.bitmap.clone();
+				_normalBitmap = _normalDictionary[_faceVO] = _parentFaceMaterialVO.bitmap.clone();
 				_normalBitmap.lock();
 			}
 			

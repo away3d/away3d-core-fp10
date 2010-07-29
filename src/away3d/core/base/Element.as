@@ -110,7 +110,7 @@ package away3d.core.base
 		 */
         public function get vertices():Array
         {
-            throw new Error("Not implemented");
+            return _vertices;
         }
         
 		/**
@@ -118,16 +118,16 @@ package away3d.core.base
 		 */
         public function get commands():Array
         {
-            throw new Error("Not implemented");
+            return _commands;
         }
-        
+                
         /**
 		 * Returns an array of drawing command objects that are used by the face.
 		 */
         public function get pathCommands():Array
         {
-            throw new Error("Not implemented");
-        }
+			return _pathCommands;
+		}
         
 		/**
 		 * Determines whether the 3d element is visible in the scene.

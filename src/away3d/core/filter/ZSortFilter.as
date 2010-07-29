@@ -1,9 +1,10 @@
 package away3d.core.filter
 {
-	import away3d.cameras.*;
-    import away3d.containers.*;
-    import away3d.core.clip.*;
-
+	import away3d.arcane;
+	import away3d.core.render.*;
+	
+	use namespace arcane;
+	
     /**
     * Sorts drawing primitives by z coordinate.
     */
@@ -13,10 +14,9 @@ package away3d.core.filter
 		/**
 		 * @inheritDoc
 		 */
-        public function filter(primitives:Array, scene:Scene3D, camera:Camera3D, clip:Clipping):Array
+        public function filter(renderer:Renderer):void
         {
-            primitives.sortOn("screenZ", Array.DESCENDING | Array.NUMERIC);
-            return primitives;
+        	renderer._order = renderer._screenZs.sort(Array.NUMERIC | Array.RETURNINDEXEDARRAY);
         }
 		
 		/**

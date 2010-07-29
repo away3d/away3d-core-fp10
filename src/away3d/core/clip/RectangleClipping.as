@@ -1,7 +1,6 @@
 package away3d.core.clip
 {
-    import away3d.core.draw.*;
-    import away3d.core.utils.*;
+	import away3d.core.render.*;
 
     /**
     * Rectangle clipping
@@ -18,15 +17,17 @@ package away3d.core.clip
 		/**
 		 * @inheritDoc
 		 */
-        public override function checkPrimitive(pri:DrawPrimitive):Boolean
+        public override function checkPrimitive(renderer:Renderer, priIndex:uint):Boolean
         {
-            if (pri.maxX < minX)
+        	var primitiveProperties:Array = renderer.primitiveProperties;
+        	var index:uint = priIndex*9;
+            if (primitiveProperties[index + 3] < minX)
                 return false;
-            if (pri.minX > maxX)
+            if (primitiveProperties[index + 2] > maxX)
                 return false;
-            if (pri.maxY < minY)
+            if (primitiveProperties[index + 5] < minY)
                 return false;
-            if (pri.minY > maxY)
+            if (primitiveProperties[index + 4] > maxY)
                 return false;
 			
             return true;

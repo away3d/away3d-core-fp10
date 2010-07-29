@@ -1,5 +1,7 @@
 ﻿package away3d.materials
 {
+	import away3d.core.session.AbstractSession;
+	import away3d.core.vos.FaceVO;
     import away3d.arcane;
     import away3d.cameras.lenses.*;
     import away3d.containers.*;
@@ -65,8 +67,20 @@
 		arcane var _bitmapRect:Rectangle;
         /** @private */
 		arcane var _sourceVO:FaceMaterialVO;
+		/** @private */
+        protected var _generated:Boolean;
         /** @private */
-        arcane var _session:AbstractRenderSession;
+        protected var _session:AbstractSession;
+        /** @private */
+        protected var _startIndex:Number;
+        /** @private */
+        protected var _endIndex:Number;
+        /** @private */
+        protected var _source:Object3D;
+        /** @private */
+        protected var _faceVO:FaceVO;
+        /** @private */
+        protected var _uvs:Array;
 		/** @private */
         arcane override function updateMaterial(source:Object3D, view:View3D):void
         {
@@ -84,26 +98,35 @@
         	_blendModeDirty = false;
         }
         /** @private */
-        arcane override function renderTriangle(tri:DrawTriangle):void
+        arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
-			_session = tri.source.session;
-			_screenCommands = tri.screenCommands;
-			_screenVertices = tri.screenVertices;
-			_screenIndices = tri.screenIndices;
-        	_view = tri.view;
-        	_near = _view.screenClipping.minZ;
-			_uvtData = getUVData(tri);
+			_source = viewSourceObject.source;
+			_session = renderer._session;
+        	_view = renderer._view;
+			
+        	_startIndex = renderer.primitiveProperties[priIndex*9];
+        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
+			_faceVO = renderer.primitiveElements[priIndex];
+			_uvs = renderer.primitiveUVs[priIndex];
+			_generated = renderer.primitiveGenerated[priIndex];
+			
+			_screenVertices = viewSourceObject.screenVertices;
+			_screenIndices = viewSourceObject.screenIndices;
+			_uvtData = getUVData(priIndex, viewSourceObject, renderer);
         	
-			_session.renderTriangleBitmap(_renderBitmap, _uvtData, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);
+			_session.renderTriangleBitmap(_renderBitmap, _uvtData, _screenVertices, _screenIndices, _startIndex, _endIndex, smooth, repeat, _graphics);
             if (debug)
-                _session.renderTriangleLine(thickness, wireColor, wireAlpha, _screenVertices, _screenCommands, _screenIndices, tri.startIndex, tri.endIndex);
+                _session.renderTriangleLine(thickness, wireColor, wireAlpha, _screenVertices, renderer.primitiveCommands[priIndex], _screenIndices, _startIndex, _endIndex);
 				
 			if(showNormals){
 				
-				_nn.rotate(tri.faceVO.face.normal, tri.view.cameraVarsStore.viewTransformDictionary[tri.source]);
-				 
-				_sv0x = (tri.v0x + tri.v1x + tri.v2x) / 3;
-				_sv0y = (tri.v0y + tri.v1y + tri.v2y) / 3;
+				_nn.rotate(_faceVO.face.normal, _view.cameraVarsStore.viewTransformDictionary[_source]);
+				
+				var index0:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9]];
+				var index1:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9] + 1];
+				var index2:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9] + 2];
+				_sv0x = (viewSourceObject.screenVertices[index0*3] + viewSourceObject.screenVertices[index1*3] + viewSourceObject.screenVertices[index2*3]) / 3;
+				_sv0y = (viewSourceObject.screenVertices[index0*3 + 1] + viewSourceObject.screenVertices[index1*3 + 1] + viewSourceObject.screenVertices[index2*3 + 1]) / 3;
 				 
 				_sv1x = (_sv0x - (30*_nn.x));
 				_sv1y = (_sv0y - (30*_nn.y));
@@ -112,17 +135,17 @@
 			}
         }
 		/** @private */
-        arcane override function renderSprite(bill:DrawSprite):void
+        arcane override function renderSprite(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
-            bill.source.session.renderSpriteBitmap(_renderBitmap, bill, smooth);
+            renderer._session.renderSpriteBitmap(_renderBitmap, smooth, priIndex, viewSourceObject, renderer);
         }
 		/** @private */
-        arcane override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
+        arcane override function renderLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, layer:Sprite, level:int):int
         {
         	if (blendMode == BlendMode.NORMAL) {
         		_graphics = layer.graphics;
         	} else {
-        		_session = tri.source.session;
+        		_session = renderer._session;
         		
         		_shape = _session.getShape(this, level++, layer);
 	    		
@@ -132,18 +155,20 @@
         	}
     		
     		
-    		renderTriangle(tri);
+    		renderTriangle(priIndex, viewSourceObject, renderer);
     		
     		return level;
         }
 		/** @private */
-        arcane override function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
+        arcane override function renderBitmapLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
 		{
 			//draw the bitmap once
-			renderSource(tri.source, containerRect, new Matrix());
+			renderSource(viewSourceObject.source, containerRect, new Matrix());
+			
+			_faceVO = renderer.primitiveElements[priIndex];
 			
 			//get the correct faceMaterialVO
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO.face.faceVO);
+			_faceMaterialVO = getFaceMaterialVO(_faceVO.face.faceVO);
 			
 			//pass on resize value
 			if (parentFaceMaterialVO.resized) {
@@ -167,7 +192,7 @@
 				_faceMaterialVO.bitmap = parentFaceMaterialVO.bitmap.clone();
 				
 				//draw into faceBitmap
-				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, tri.faceVO.face.bitmapRect, _zeroPoint, null, null, true);
+				_faceMaterialVO.bitmap.copyPixels(_sourceVO.bitmap, _faceVO.face.bitmapRect, _zeroPoint, null, null, true);
 			}
 			
 			return _faceMaterialVO;
@@ -175,6 +200,8 @@
 		/** @private */
         arcane function getFaceMaterialVO(faceVO:FaceVO, source:Object3D = null, view:View3D = null):FaceMaterialVO
         {
+        	source; view;
+        	
         	//check to see if faceMaterialVO exists
         	if ((_faceMaterialVO = _faceDictionary[faceVO]))
         		return _faceMaterialVO;
@@ -184,9 +211,8 @@
         
 		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);
 		protected var _screenVertices:Array;
-		protected var _screenCommands:Array;
+		protected var _screenUVs:Array;
 		protected var _screenIndices:Array;
-		private var _near:Number;
 		private var _smooth:Boolean;
 		private var _repeat:Boolean;
     	private var _shape:Shape;
@@ -235,6 +261,8 @@
 		
         protected function updateFaces(source:Object3D = null, view:View3D = null):void
         {
+        	source; view;
+        	
         	notifyMaterialUpdate();
         	
         	for each (_faceMaterialVO in _faceDictionary)
@@ -244,6 +272,8 @@
         
         protected function invalidateFaces(source:Object3D = null, view:View3D = null):void
         {
+        	source; view;
+        	
         	_materialDirty = true;
         	
         	for each (_faceMaterialVO in _faceDictionary)
@@ -309,44 +339,46 @@
 	        invalidateFaces();
         }
 		
-		protected function getUVData(tri:DrawTriangle):Vector.<Number>
+		protected function getUVData(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):Vector.<Number>
 		{
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO, tri.source, tri.view);
+			priIndex; viewSourceObject; renderer;
+			
+			_faceMaterialVO = getFaceMaterialVO(_faceVO, _source, _view);
 			
 			if (_view.camera.lens is ZoomFocusLens)
-        		_focus = tri.view.camera.focus;
+        		_focus = _view.camera.focus;
         	else
         		_focus = 0;
 			
-			if (tri.generated) {
-				_uvt[2] = 1/(_focus + tri.v0z);
-				_uvt[5] = 1/(_focus + tri.v1z);
-				_uvt[8] = 1/(_focus + tri.v2z);
-				_uvt[0] = tri.uv0.u;
-	    		_uvt[1] = 1 - tri.uv0.v;
-	    		_uvt[3] = tri.uv1.u;
-	    		_uvt[4] = 1 - tri.uv1.v;
-	    		_uvt[6] = tri.uv2.u;
-	    		_uvt[7] = 1 - tri.uv2.v;
+			if (_generated) {
+				_uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
+				_uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
+				_uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+				_uvt[0] = _uvs[0].u;
+	    		_uvt[1] = 1 - _uvs[0].v;
+	    		_uvt[3] = _uvs[1].u;
+	    		_uvt[4] = 1 - _uvs[1].v;
+	    		_uvt[6] = _uvs[2].u;
+	    		_uvt[7] = 1 - _uvs[2].v;
 	    		
 	    		return _uvt;
 			}
 			
-			_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);
-			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);
-			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);
+			_faceMaterialVO.uvtData[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
+			_faceMaterialVO.uvtData[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
+			_faceMaterialVO.uvtData[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
 			
 			if (!_faceMaterialVO.invalidated)
 				return _faceMaterialVO.uvtData;
 			
 			_faceMaterialVO.invalidated = false;
         	
-        	_faceMaterialVO.uvtData[0] = tri.uv0.u;
-    		_faceMaterialVO.uvtData[1] = 1 - tri.uv0.v;
-    		_faceMaterialVO.uvtData[3] = tri.uv1.u;
-    		_faceMaterialVO.uvtData[4] = 1 - tri.uv1.v;
-    		_faceMaterialVO.uvtData[6] = tri.uv2.u;
-    		_faceMaterialVO.uvtData[7] = 1 - tri.uv2.v;
+        	_faceMaterialVO.uvtData[0] = _uvs[0].u;
+    		_faceMaterialVO.uvtData[1] = 1 - _uvs[0].v;
+    		_faceMaterialVO.uvtData[3] = _uvs[1].u;
+    		_faceMaterialVO.uvtData[4] = 1 - _uvs[1].v;
+    		_faceMaterialVO.uvtData[6] = _uvs[2].u;
+    		_faceMaterialVO.uvtData[7] = 1 - _uvs[2].v;
         	
 			return _faceMaterialVO.uvtData;
 		}

@@ -1,10 +1,11 @@
 package away3d.materials
 {
+	import away3d.core.vos.FaceVO;
 	import away3d.arcane;
 	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.draw.*;
+	import away3d.core.render.*;
 	import away3d.core.utils.*;
 	import away3d.events.*;
 	
@@ -24,7 +25,16 @@ package away3d.materials
 	public class CompositeMaterial extends BitmapMaterial
 	{
 		/** @private */
-        arcane var _source:Object3D;
+        arcane function getContainerVO(faceVO:FaceVO, source:Object3D = null, view:View3D = null):FaceMaterialVO
+        {
+        	source; view;
+        	
+        	//check to see if faceMaterialVO exists
+			if ((_containerVO = _containerDictionary[faceVO]))
+        		return _containerVO;
+        	
+        	return _containerDictionary[faceVO] = new FaceMaterialVO();
+        }
         /** @private */
         arcane override function updateMaterial(source:Object3D, view:View3D):void
         {
@@ -43,13 +53,20 @@ package away3d.materials
         	_blendModeDirty = false;
         }
         /** @private */
-        arcane override function renderTriangle(tri:DrawTriangle):void
+        arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
         	if (_surfaceCache) {
-        		super.renderTriangle(tri);
+        		super.renderTriangle(priIndex, viewSourceObject, renderer);
         	} else {
-	        	_source = tri.source;
-	        	_session = _source.session;
+	        	_source = viewSourceObject.source;
+	        	_session = renderer._session;
+	        	_faceVO = renderer.primitiveElements[priIndex];
+	        	
+				_generated = renderer.primitiveGenerated[priIndex];
+				
+				_startIndex = renderer.primitiveProperties[priIndex*9];
+				_screenVertices = viewSourceObject.screenVertices;
+				
 	    		var level:int = 0;
 	    		
 	    		var _sprite:Sprite = _session.layer as Sprite;
@@ -66,19 +83,19 @@ package away3d.materials
 		        
 	    		//call renderLayer on each material
 	    		for each (var _material:LayerMaterial in materials)
-	        		level = _material.renderLayer(tri, _sprite, level);
+	        		level = _material.renderLayer(priIndex, viewSourceObject, renderer, _sprite, level);
         	}
         }
         
 		/** @private */
-        arcane override function renderLayer(tri:DrawTriangle, layer:Sprite, level:int):int
+        arcane override function renderLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, layer:Sprite, level:int):int
         {
         	var _sprite:Sprite;
         	if (!_colorTransform && blendMode == BlendMode.NORMAL) {
         		_sprite = layer;
         	} else {
-        		_source = tri.source;
-        		_session = _source.session;
+        		_source = viewSourceObject.source;
+        		_session = renderer._session;
         		
         		_sprite = _session.getSprite(this, level++, layer);
 	        	
@@ -92,23 +109,23 @@ package away3d.materials
     		
 	    	//call renderLayer on each material
     		for each (var _material:LayerMaterial in materials)
-        		level = _material.renderLayer(tri, _sprite, level);
+        		level = _material.renderLayer(priIndex, viewSourceObject, renderer, _sprite, level);
         	
         	return level;
         }
         
 		/** @private */
-        arcane override function renderBitmapLayer(tri:DrawTriangle, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
+        arcane override function renderBitmapLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
 		{
-			_faceMaterialVO = getFaceMaterialVO(tri.faceVO);
+			_faceVO = renderer.primitiveElements[priIndex];
+			_faceMaterialVO = getFaceMaterialVO(_faceVO, viewSourceObject.source, renderer._view);
 			
 			//get width and height values
-			_faceWidth = tri.faceVO.face.bitmapRect.width;
-    		_faceHeight = tri.faceVO.face.bitmapRect.height;
+			_faceWidth = _faceVO.face.bitmapRect.width;
+    		_faceHeight = _faceVO.face.bitmapRect.height;
 
 			//check to see if bitmapContainer exists
-			if (!(_containerVO = _containerDictionary[tri]))
-				_containerVO = _containerDictionary[tri] = new FaceMaterialVO();
+			_containerVO = getContainerVO(_faceVO, viewSourceObject.source, renderer._view);
 			
 			//resize container
 			if (parentFaceMaterialVO.resized) {
@@ -121,7 +138,7 @@ package away3d.materials
 			
 			//call renderFace on each material
     		for each (var _material:LayerMaterial in materials)
-        		_containerVO = _material.renderBitmapLayer(tri, containerRect, _containerVO);
+        		_containerVO = _material.renderBitmapLayer(priIndex, viewSourceObject, renderer, containerRect, _containerVO);
 			
 			//check to see if face update can be skipped
 			if (parentFaceMaterialVO.updated || _containerVO.updated) {
@@ -161,8 +178,15 @@ package away3d.materials
 		private var _faceY:int;
 		private var _faceWidth:int;
 		private var _faceHeight:int;
-		private var _faceVO:FaceVO;
         private var _bRect:Rectangle;
+        private var _minU:Number;
+        private var _maxU:Number;
+        private var _minV:Number;
+        private var _maxV:Number;
+        private var _index:Number;
+        private var _uv:UV;
+        private var _u:Number;
+        private var _v:Number;
         private var _u0:Number;
         private var _u1:Number;
         private var _u2:Number;
@@ -179,15 +203,15 @@ package away3d.materials
         private function transformUV(faceVO:FaceVO):Matrix
         {
             
-            if (faceVO.uv0 == null || faceVO.uv1 == null || faceVO.uv2 == null)
+            if (faceVO.uvs[0] == null || faceVO.uvs[1] == null || faceVO.uvs[2] == null)
                 return null;
 
-            _u0 = _width * faceVO.uv0._u;
-            _u1 = _width * faceVO.uv1._u;
-            _u2 = _width * faceVO.uv2._u;
-            _v0 = _height * (1 - faceVO.uv0._v);
-            _v1 = _height * (1 - faceVO.uv1._v);
-            _v2 = _height * (1 - faceVO.uv2._v);
+            _u0 = _width * faceVO.uvs[0]._u;
+            _u1 = _width * faceVO.uvs[1]._u;
+            _u2 = _width * faceVO.uvs[2]._u;
+            _v0 = _height * (1 - faceVO.uvs[0]._v);
+            _v1 = _height * (1 - faceVO.uvs[1]._v);
+            _v2 = _height * (1 - faceVO.uvs[2]._v);
       
             // Fix perpendicular projections
             if ((_u0 == _u1 && _v0 == _v1) || (_u0 == _u2 && _v0 == _v2)) {
@@ -244,16 +268,14 @@ package away3d.materials
 		/**
 		 * @inheritDoc
 		 */
-		protected override function getUVData(tri:DrawTriangle):Vector.<Number>
+		protected override function getUVData(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):Vector.<Number>
 		{
-			_faceVO = tri.faceVO.face.faceVO;
-			
 			if (_view.camera.lens is ZoomFocusLens)
-        		_focus = tri.view.camera.focus;
+        		_focus = _view.camera.focus;
         	else
         		_focus = 0;
 			
-			_faceMaterialVO = getFaceMaterialVO(_faceVO, tri.source, tri.view);
+			_faceMaterialVO = getFaceMaterialVO(_faceVO, _source, _view);
 			
     		if (_faceMaterialVO.invalidated || _faceMaterialVO.updated) {
 	    		_faceMaterialVO.updated = true;
@@ -263,16 +285,38 @@ package away3d.materials
 	        	if (_faceMaterialVO.invalidated) {
 	        		_faceMaterialVO.invalidated = false;
 	        		
+	        		//calculate max/min U/V
+	        		_minU = Infinity;
+	            	_maxU = -Infinity;
+	            	_minV = Infinity;
+	            	_maxV = -Infinity;
+	            	_index = _faceVO.uvs.length;
+	            	
+	            	while (_index--) {
+	            		_uv = _faceVO.uvs[_index];
+		            	//calculate bounding box
+		            	_u = _uv._u;
+		            	_v = _uv._v;
+	            		if (_minU > _u)
+	            			_minU = _u;
+	            		if (_maxU < _u)
+	            			_maxU = _u;
+	            		if (_minV > _v)
+	            			_minV = _v;
+	            		if (_maxV < _v)
+	            			_maxV = _v;
+	            	}
+            	
 	        		//update face bitmapRect
-	        		_faceVO.face.bitmapRect = new Rectangle(_faceX = int(_width*_faceVO.minU), _faceY = int(_height*(1 - _faceVO.maxV)), _faceWidth = int(_width*(_faceVO.maxU-_faceVO.minU)+2), _faceHeight = int(_height*(_faceVO.maxV-_faceVO.minV)+2));
+	        		_faceVO.face.bitmapRect = new Rectangle(_faceX = int(_width*_minU), _faceY = int(_height*(1 - _maxV)), _faceWidth = int(_width*(_maxU-_minU)+2), _faceHeight = int(_height*(_maxV-_minV)+2));
 	        		
 	        		//update texturemapping
-	        		_faceMaterialVO.uvtData[0] = (_faceVO.uv0.u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[1] = ((1 - _faceVO.uv0.v)*_height - _faceY)/_faceHeight;
-					_faceMaterialVO.uvtData[3] = (_faceVO.uv1.u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[4] = ((1 - _faceVO.uv1.v)*_height - _faceY)/_faceHeight;
-		    		_faceMaterialVO.uvtData[6] = (_faceVO.uv2.u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[7] = ((1 - _faceVO.uv2.v)*_height - _faceY)/_faceHeight;
+	        		_faceMaterialVO.uvtData[0] = (_faceVO.uvs[0].u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[1] = ((1 - _faceVO.uvs[0].v)*_height - _faceY)/_faceHeight;
+					_faceMaterialVO.uvtData[3] = (_faceVO.uvs[1].u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[4] = ((1 - _faceVO.uvs[1].v)*_height - _faceY)/_faceHeight;
+		    		_faceMaterialVO.uvtData[6] = (_faceVO.uvs[2].u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[7] = ((1 - _faceVO.uvs[2].v)*_height - _faceY)/_faceHeight;
 	        		_faceMaterialVO.invtexturemapping = transformUV(_faceVO).clone();
 	        		_faceMaterialVO.texturemapping = _faceMaterialVO.invtexturemapping.clone();
 	        		_faceMaterialVO.texturemapping.invert();
@@ -284,7 +328,7 @@ package away3d.materials
         		
 	    		//call renderFace on each material
 	    		for each (var _material:LayerMaterial in materials)
-	        		_fMaterialVO = _material.renderBitmapLayer(tri, _bitmapRect, _fMaterialVO);
+	        		_fMaterialVO = _material.renderBitmapLayer(priIndex, viewSourceObject, renderer, _bitmapRect, _fMaterialVO);
         		
         		_cacheDictionary[_faceVO] = _fMaterialVO.bitmap;
 	        	
@@ -294,7 +338,7 @@ package away3d.materials
         	_renderBitmap = _cacheDictionary[_faceVO];
         	
         	//check to see if tri is generated
-        	if (tri.generated) {
+        	if (_generated) {
         		_bRect = _faceVO.face.bitmapRect;
         		_faceX = _bRect.x;
         		_faceY = _bRect.y;
@@ -302,22 +346,22 @@ package away3d.materials
         		_faceHeight = _bRect.height;
         		
         		//update texturemapping
-        		_uvt[2] = 1/(_focus + tri.v0z);
-				_uvt[5] = 1/(_focus + tri.v1z);
-				_uvt[8] = 1/(_focus + tri.v2z);
-        		_uvt[0] = (tri.uv0.u*_width - _faceX)/_faceWidth;
-	    		_uvt[1] = ((1 - tri.uv0.v)*_height - _faceY)/_faceHeight;
-				_uvt[3] = (tri.uv1.u*_width - _faceX)/_faceWidth;
-	    		_uvt[4] = ((1 - tri.uv1.v)*_height - _faceY)/_faceHeight;
-	    		_uvt[6] = (tri.uv2.u*_width - _faceX)/_faceWidth;
-	    		_uvt[7] = ((1 - tri.uv2.v)*_height - _faceY)/_faceHeight;
+        		_uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
+				_uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
+				_uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+        		_uvt[0] = (_uvs[0].u*_width - _faceX)/_faceWidth;
+	    		_uvt[1] = ((1 - _uvs[0].v)*_height - _faceY)/_faceHeight;
+				_uvt[3] = (_uvs[1].u*_width - _faceX)/_faceWidth;
+	    		_uvt[4] = ((1 - _uvs[1].v)*_height - _faceY)/_faceHeight;
+	    		_uvt[6] = (_uvs[2].u*_width - _faceX)/_faceWidth;
+	    		_uvt[7] = ((1 - _uvs[2].v)*_height - _faceY)/_faceHeight;
 	    		
 	    		return _uvt;
         	}
         	
-	        _faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);
-			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);
-			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);
+	        _faceMaterialVO.uvtData[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
+			_faceMaterialVO.uvtData[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
+			_faceMaterialVO.uvtData[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
 			
     		return _faceMaterialVO.uvtData;
         }

@@ -1,5 +1,6 @@
-package away3d.core.render
+package away3d.core.session
 {
+	
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.clip.*;
@@ -13,7 +14,7 @@ package away3d.core.render
     /**
     * Drawing session object that renders all drawing primitives into a <code>Sprite</code> container.
     */
-	public class SpriteRenderSession extends AbstractRenderSession
+	public class SpriteSession extends AbstractSession
 	{
         private var _container:Sprite;
         private var _clip:Clipping;
@@ -30,7 +31,7 @@ package away3d.core.render
 		/**
 		 * Creates a new <code>SpriteRenderSession</code> object.
 		 */
-		public function SpriteRenderSession():void
+		public function SpriteSession():void
 		{
 		}
         
@@ -152,9 +153,9 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-        public override function clone():AbstractRenderSession
+        public override function clone():AbstractSession
         {
-        	return new SpriteRenderSession();
+        	return new SpriteSession();
         }
 	}
 }

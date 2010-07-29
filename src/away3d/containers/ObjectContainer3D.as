@@ -2,12 +2,12 @@
 {
     
     import away3d.arcane;
-	import away3d.animators.data.SkinController;
+	import away3d.animators.data.*;
     import away3d.core.base.*;
     import away3d.core.math.*;
     import away3d.core.project.*;
     import away3d.core.traverse.*;
-    import away3d.core.utils.Debug;
+    import away3d.core.utils.*;
     import away3d.events.*;
 	import away3d.lights.*;
     import away3d.loaders.data.*;
@@ -187,8 +187,6 @@
             		init = object;
             
             super(init);
-            
-            projectorType = ProjectorType.OBJECT_CONTAINER;
             
             for each (var child:Object3D in childarray)
                 addChild(child);

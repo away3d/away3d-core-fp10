@@ -1,9 +1,9 @@
 package away3d.materials
 {
-	import away3d.arcane;	import away3d.containers.*;
-	import away3d.core.base.*;
-	import away3d.core.draw.*;
+	import away3d.arcane;
+	import away3d.containers.*;	import away3d.core.base.*;
 	import away3d.core.light.*;
+	import away3d.core.render.*;
 	import away3d.core.utils.*;
 	
 	import flash.display.*;
@@ -48,24 +48,34 @@ package away3d.materials
         	super.updateMaterial(source, view);
         }
     	/** @private */
-        arcane override function renderTriangle(tri:DrawTriangle):void
+        arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
-        	var shade:FaceNormalShaderVO = shader.getTriangleShade(tri, shininess);
-            br = (shade.kar + shade.kag + shade.kab + shade.kdr + shade.kdg + shade.kdb + shade.ksr + shade.ksg + shade.ksb)/3;
+        	_source = viewSourceObject.source;
+			_session = renderer._session;
+            _view = renderer._view;
+        	
+        	_startIndex = renderer.primitiveProperties[priIndex*9];
+        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
+        	_faceVO = renderer.primitiveElements[priIndex];
+			_uvs = renderer.primitiveUVs[priIndex];
+			_generated = renderer.primitiveGenerated[priIndex];
+        	
+        	_screenVertices = viewSourceObject.screenVertices;
+			_screenIndices = viewSourceObject.screenIndices;
 			
-            _view = tri.view;
-			_session = tri.source.session;
+        	var shade:FaceNormalShaderVO = shader.getTriangleShade(priIndex, viewSourceObject, renderer, shininess);
+            br = (shade.kar + shade.kag + shade.kab + shade.kdr + shade.kdg + shade.kdb + shade.ksr + shade.ksg + shade.ksb)/3;
 			
 			if ((br < 1) && (blackrender || ((step < 16) && (!_bitmap.transparent))))
             {
-            	_session.renderTriangleBitmap(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
-                _session.renderTriangleColor(0x000000, 1 - br, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+            	_session.renderTriangleBitmap(bitmap, getUVData(priIndex, viewSourceObject, renderer), viewSourceObject.screenVertices, viewSourceObject.screenIndices, _startIndex, _endIndex, smooth, repeat);
+                _session.renderTriangleColor(0x000000, 1 - br, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, _startIndex, _endIndex);
             }
             else
             if ((br > 1) && (whiterender))
             {
-            	_session.renderTriangleBitmap(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
-                _session.renderTriangleColor(0xFFFFFF, (br - 1)*whitek, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+            	_session.renderTriangleBitmap(bitmap, getUVData(priIndex, viewSourceObject, renderer), viewSourceObject.screenVertices, viewSourceObject.screenIndices, _startIndex, _endIndex, smooth, repeat);
+                _session.renderTriangleColor(0xFFFFFF, (br - 1)*whitek, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, _startIndex, _endIndex);
             }
             else
             {
@@ -81,7 +91,7 @@ package away3d.materials
                 	bitmap.applyFilter(_bitmap, bitmap.rect, bitmapPoint, colorMatrix);
                     cache[brightness] = bitmap;
                 }
-                _session.renderTriangleBitmap(bitmap, getUVData(tri), tri.screenVertices, tri.screenIndices, tri.startIndex, tri.endIndex, smooth, repeat);
+                _session.renderTriangleBitmap(bitmap, getUVData(priIndex, viewSourceObject, renderer), viewSourceObject.screenVertices, viewSourceObject.screenIndices, _startIndex, _endIndex, smooth, repeat);
             }
         }
         

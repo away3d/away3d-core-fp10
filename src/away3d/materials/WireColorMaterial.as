@@ -1,7 +1,7 @@
 package away3d.materials
 {
 	import away3d.arcane;
-    import away3d.core.draw.*;
+	import away3d.core.render.*;
     import away3d.core.utils.*;
 	
 	use namespace arcane;
@@ -12,9 +12,9 @@ package away3d.materials
     public class WireColorMaterial extends WireframeMaterial
     {
 		/** @private */
-        arcane override function renderTriangle(tri:DrawTriangle):void
+        arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
-			tri.source.session.renderTriangleLineFill(_thickness, _color, _alpha, _wireColor, _wireAlpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+			renderer._session.renderTriangleLineFill(_thickness, _color, _alpha, _wireColor, _wireAlpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[priIndex*9], renderer.primitiveProperties[priIndex*9+1]);
         }
         
         protected var _alpha:Number;

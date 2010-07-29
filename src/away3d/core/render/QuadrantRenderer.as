@@ -1,18 +1,22 @@
 package away3d.core.render
 {
+	import away3d.arcane;
 	import away3d.cameras.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
-	import away3d.core.draw.*;
 	import away3d.core.filter.*;
     
-
-    /** Renderer that uses quadrant tree for storing and operating drawing primitives. Quadrant tree speeds up all proximity based calculations. */
-    public class QuadrantRenderer implements IPrimitiveConsumer, IRenderer
+	use namespace arcane;
+	
+    /**
+     * Renderer that uses quadrant tree for storing and operating drawing primitives. Quadrant tree speeds up all proximity based calculations.
+     */
+    public class QuadrantRenderer extends Renderer
     {
         private var _qdrntfilters:Array;
-        private var _root:PrimitiveQuadrantTreeNode;
+        private var _root:QuadrantTreeNode;
+        private var _quadrant:QuadrantTreeNode;
 		private var _center:Array;
 		private var _result:Array = new Array();
 		private var _list:Array = new Array();
@@ -21,15 +25,15 @@ package away3d.core.render
 		private var _minY:Number;
 		private var _maxX:Number;
 		private var _maxY:Number;
-		private var _child:DrawPrimitive;
+		private var _child:uint;
 		private var _children:Array;
 		private var i:int;
-		private var _primitives:Array = new Array();
         private var _scene:Scene3D;
         private var _camera:Camera3D;
         private var _screenClipping:Clipping;
+		private var _priQuadrants:Array = new Array();
 		
-		private function getList(node:PrimitiveQuadrantTreeNode, result:Array):void
+		private function getList(node:QuadrantTreeNode, result:Array):void
         {
             if (node.onlysourceFlag && _except == node.onlysource)
                 return;
@@ -59,13 +63,13 @@ package away3d.core.render
                 while (i--)
                 {
                 	_child = _children[i];
-                    if ((_except == null || _child.source != _except) && _child.maxX > _minX && _child.minX < _maxX && _child.maxY > _minY && _child.minY < _maxY)
+                    if ((_except == null || primitiveSource[_child].source != _except) && primitiveProperties[_child*9 + 3] > _minX && primitiveProperties[_child*9 + 2] < _maxX && primitiveProperties[_child*9 + 5] > _minY && primitiveProperties[_child*9 + 4] < _maxY)
                         result.push(_child);
                 }
             }
         }
         
-        private function getParent(node:PrimitiveQuadrantTreeNode, result:Array):void
+        private function getParent(node:QuadrantTreeNode, result:Array):void
         {
         	node = node.parent;
         	
@@ -78,7 +82,7 @@ package away3d.core.render
                 while (i--)
                 {
                 	_child = _children[i];
-                    if ((_except == null || _child.source != _except) && _child.maxX > _minX && _child.minX < _maxX && _child.maxY > _minY && _child.minY < _maxY)
+                    if ((_except == null || primitiveSource[_child].source != _except) && primitiveProperties[_child*9 + 3] > _minX && primitiveProperties[_child*9 + 2] < _maxX && primitiveProperties[_child*9 + 5] > _minY && primitiveProperties[_child*9 + 4] < _maxY)
                         result.push(_child);
                 }
             }
@@ -111,12 +115,12 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-        public function primitive(pri:DrawPrimitive):Boolean
+        public override function primitive(priIndex:uint):Boolean
         {
-        	if (!_screenClipping.checkPrimitive(pri))
+        	if (!_screenClipping.checkPrimitive(this, priIndex))
         		return false;
 			
-            _root.push(pri);
+			_priQuadrants[priIndex] = _root.push(this, priIndex);
             
             return true;
         }
@@ -126,10 +130,11 @@ package away3d.core.render
         * 
         * @param	pri	The drawing primitive to remove.
         */
-        public function remove(pri:DrawPrimitive):void
+        public function remove(priIndex:uint):void
         {
-        	_center = pri.quadrant.center;
-        	_center.splice(_center.indexOf(pri), 1);
+        	_quadrant = _priQuadrants[priIndex];
+			_center = _quadrant.center;
+        	_center.splice(_center.indexOf(priIndex), 1);
         }
 		
 		/**
@@ -139,18 +144,18 @@ package away3d.core.render
 		 * @param	ex		[optional]	Excludes primitives that are children of the 3d object.
 		 * @return						An array of drawing primitives.
 		 */
-        public function get(pri:DrawPrimitive, ex:Object3D = null):Array
+        public function getRivals(priIndex:uint, ex:Object3D = null):Array
         {
         	_result.length = 0;
                     
-			_minX = pri.minX;
-			_minY = pri.minY;
-			_maxX = pri.maxX;
-			_maxY = pri.maxY;
+			_minX = primitiveProperties[priIndex*9 + 2];
+			_maxX = primitiveProperties[priIndex*9 + 3];
+			_minY = primitiveProperties[priIndex*9 + 4];
+			_maxY = primitiveProperties[priIndex*9 + 5];
 			_except = ex;
 			
-            getList(pri.quadrant, _result);
-            getParent(pri.quadrant, _result);
+            getList(_priQuadrants[priIndex], _result);
+            getParent(_priQuadrants[priIndex], _result);
             return _result;
         }
         
@@ -159,9 +164,10 @@ package away3d.core.render
 		 * 
 		 * @return	An array containing the primitives to be rendered.
 		 */
-        public function list():Array
+        public override function list():Array
         {
-            _list.length = 0;
+        	//list and result on separate arrays so that no conflicts occur
+        	_list.length = 0;
                     
 			_minX = -1000000;
 			_minY = -1000000;
@@ -174,25 +180,27 @@ package away3d.core.render
             return _list;
         }
         
-        public function clear(view:View3D):void
+        public override function clear():void
         {
-        	_primitives.length = 0;
-			_scene = view.scene;
-			_camera = view.camera;
-			_screenClipping = view.screenClipping;
+        	super.clear();
+        	
+        	_priQuadrants.length = 0;
+			_scene = _view.scene;
+			_camera = _view.camera;
+			_screenClipping = _view.screenClipping;
 			
 			if (!_root)
-				_root = new PrimitiveQuadrantTreeNode((_screenClipping.minX + _screenClipping.maxX)/2, (_screenClipping.minY + _screenClipping.maxY)/2, _screenClipping.maxX - _screenClipping.minX, _screenClipping.maxY - _screenClipping.minY, 0);
+				_root = new QuadrantTreeNode((_screenClipping.minX + _screenClipping.maxX)/2, (_screenClipping.minY + _screenClipping.maxY)/2, _screenClipping.maxX - _screenClipping.minX, _screenClipping.maxY - _screenClipping.minY, 0, this);
 			else
 				_root.reset((_screenClipping.minX + _screenClipping.maxX)/2, (_screenClipping.minY + _screenClipping.maxY)/2, _screenClipping.maxX - _screenClipping.minX, _screenClipping.maxY - _screenClipping.minY);	
         }
         
-        public function render(view:View3D):void
+        public override function render():void
         {
 			
         	//filter primitives array
 			for each (var _filter:IPrimitiveQuadrantFilter in _qdrntfilters)
-        		_filter.filter(this, _scene, _camera, _screenClipping);
+        		_filter.filter(this);
         	
     		// render all primitives
             _root.render(-Infinity);
@@ -201,12 +209,12 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-        public function toString():String
+        public override function toString():String
         {
             return "Quadrant ["+ _qdrntfilters.join("+") + "]";
         }
         
-        public function clone():IPrimitiveConsumer
+        public override function clone():Renderer
         {
         	var renderer:QuadrantRenderer = new QuadrantRenderer();
         	renderer.filters = filters;

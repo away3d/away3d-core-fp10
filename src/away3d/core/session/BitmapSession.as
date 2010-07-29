@@ -1,5 +1,6 @@
-package away3d.core.render
+package away3d.core.session
 {
+	
 	import away3d.arcane;
 	import away3d.containers.View3D;
 	
@@ -12,7 +13,7 @@ package away3d.core.render
     /**
     * Drawing session object that renders all drawing primitives into a <code>Bitmap</code> container.
     */
-	public class BitmapRenderSession extends AbstractRenderSession
+	public class BitmapSession extends AbstractSession
 	{
 		private var _container:Sprite;
 		private var _bitmapContainer:Bitmap;
@@ -33,7 +34,7 @@ package away3d.core.render
 		 *
 		 * @param	scale	[optional]	Defines the scale of the pixel resolution in base pixels. Default value is 2.
 		 */
-		public function BitmapRenderSession(scale:Number = 2)
+		public function BitmapSession(scale:Number = 2)
 		{
 			if (_scale <= 0)
 				throw new Error("scale cannot be negative or zero");
@@ -196,9 +197,9 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-        public override function clone():AbstractRenderSession
+        public override function clone():AbstractSession
         {
-        	return new BitmapRenderSession(_scale);
+        	return new BitmapSession(_scale);
         }
                 
 	}

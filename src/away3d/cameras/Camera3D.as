@@ -45,7 +45,6 @@ package away3d.cameras
         private var _clipRight:Number;
     	private var _viewMatrix:MatrixAway3D = new MatrixAway3D();
     	private var _view:View3D;
-    	private var _drawPrimitiveStore:DrawPrimitiveStore;
     	private var _cameraVarsStore:CameraVarsStore;
     	private var _vertices:Array = new Array();
     	private var _screenVertices:Array = new Array();
@@ -209,7 +208,6 @@ package away3d.cameras
         		return;
         	
         	_view = val;
-        	_drawPrimitiveStore = val.drawPrimitiveStore;
         	_cameraVarsStore = val.cameraVarsStore;
         }
         

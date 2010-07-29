@@ -107,8 +107,8 @@ package away3d.cameras.lenses
 	            
 	            if (_sz < _near && _clipping is RectangleClipping) {
 	            	screenVertices[_length] = null;
-	            	screenVertices[_length+1] = null;
-	            	screenVertices[_length+2] = null;
+	            	screenVertices[int(_length+1)] = null;
+	            	screenVertices[int(_length+2)] = null;
 	            	_length += 3;
 	            	continue;
 	            }
@@ -116,8 +116,8 @@ package away3d.cameras.lenses
 	         	_persp = _camera.zoom / (1 + _sz / _camera.focus);
 				
 	            screenVertices[_length] = (_vx * viewTransform.sxx + _vy * viewTransform.sxy + _vz * viewTransform.sxz + viewTransform.tx) * _persp;
-	            screenVertices[_length+1] = (_vx * viewTransform.syx + _vy * viewTransform.syy + _vz * viewTransform.syz + viewTransform.ty) * _persp;
-	            screenVertices[_length+2] = _sz;
+	            screenVertices[int(_length+1)] = (_vx * viewTransform.syx + _vy * viewTransform.syy + _vz * viewTransform.syz + viewTransform.ty) * _persp;
+	            screenVertices[int(_length+2)] = _sz;
 	            _length += 3;
          	}
         }

@@ -1,11 +1,12 @@
 package away3d.core.clip
 {
+	import away3d.core.utils.ViewSourceObject;
+	import away3d.core.session.AbstractSession;
 	import away3d.arcane;
 	import away3d.core.base.*;
-	import away3d.core.draw.*;
 	import away3d.core.geom.*;
 	import away3d.core.render.*;
-	import away3d.core.utils.*;
+	import away3d.core.vos.FaceVO;
 	
 	import flash.utils.*;
 	
@@ -31,7 +32,7 @@ package away3d.core.clip
     	private var _v1w:Number;
     	private var _v2w:Number;
     	private var _d:Number;
-    	private var _session:AbstractRenderSession;
+    	private var _session:AbstractSession;
     	private var _frustum:Frustum;
     	private var _processed:Dictionary;
     	private var _pass:Boolean;
@@ -67,22 +68,24 @@ package away3d.core.clip
 		/**
 		 * @inheritDoc
 		 */
-        public override function checkPrimitive(pri:DrawPrimitive):Boolean
+        public override function checkPrimitive(renderer:Renderer, priIndex:uint):Boolean
         {
-            if (pri.maxX < minX)
+        	var primitiveProperties:Array = renderer.primitiveProperties;
+        	var index:uint = priIndex*9;
+        	
+            if (primitiveProperties[index + 3] < minX)
                 return false;
-            if (pri.minX > maxX)
+            if (primitiveProperties[index + 2] > maxX)
                 return false;
-            if (pri.maxY < minY)
+            if (primitiveProperties[index + 5] < minY)
                 return false;
-            if (pri.minY > maxY)
+            if (primitiveProperties[index + 4] > maxY)
                 return false;
-            
+			
             return true;
         }
         
-        		
-		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedBillboards:Array, clippedVertices:Array, clippedCommands:Array, clippedIndices:Array, startIndices:Array):void
+		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedIndices:Array, startIndices:Array):void
 		{
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];
@@ -101,10 +104,13 @@ package away3d.core.clip
 			for each (_faceVO in _faceVOs) {
 				
 				_pass = true;
-				
-				_v0C = _cameraVarsStore.createVertexClassification(_faceVO.v0);
-				_v1C = _cameraVarsStore.createVertexClassification(_faceVO.v1);
-				_v2C = _cameraVarsStore.createVertexClassification(_faceVO.v2);
+				_v0 = _faceVO.vertices[0];
+	    		_v1 = _faceVO.vertices[1];
+	    		_v2 = _faceVO.vertices[2];
+	    		
+				_v0C = _cameraVarsStore.createVertexClassification(_v0);
+				_v1C = _cameraVarsStore.createVertexClassification(_v1);
+				_v2C = _cameraVarsStore.createVertexClassification(_v2);
 				
 				if (_v0C.plane || _v1C.plane || _v2C.plane) {
 					if ((_plane = _v0C.plane)) {
@@ -139,23 +145,23 @@ package away3d.core.clip
 					
 					startIndices[startIndices.length] = clippedIndices.length;
 	        		
-					if (!_processed[_faceVO.v0]) {
-                        clippedVertices[clippedVertices.length] = _faceVO.v0;
-                        clippedIndices[clippedIndices.length] = (_processed[_faceVO.v0] = clippedVertices.length) - 1;
+					if (!_processed[_v0]) {
+                        clippedVertices[clippedVertices.length] = _v0;
+                        clippedIndices[clippedIndices.length] = (_processed[_v0] = clippedVertices.length) - 1;
                     } else {
-                    	clippedIndices[clippedIndices.length] = _processed[_faceVO.v0] - 1;
+                    	clippedIndices[clippedIndices.length] = _processed[_v0] - 1;
                     }
-                    if (!_processed[_faceVO.v1]) {
-                        clippedVertices[clippedVertices.length] = _faceVO.v1;
-                        clippedIndices[clippedIndices.length] = (_processed[_faceVO.v1] = clippedVertices.length) - 1;
+                    if (!_processed[_v1]) {
+                        clippedVertices[clippedVertices.length] = _v1;
+                        clippedIndices[clippedIndices.length] = (_processed[_v1] = clippedVertices.length) - 1;
                     } else {
-                    	clippedIndices[clippedIndices.length] = _processed[_faceVO.v1] - 1;
+                    	clippedIndices[clippedIndices.length] = _processed[_v1] - 1;
                     }
-                    if (!_processed[_faceVO.v2]) {
-                        clippedVertices[clippedVertices.length] = _faceVO.v2;
-                        clippedIndices[clippedIndices.length] = (_processed[_faceVO.v2] = clippedVertices.length) - 1;
+                    if (!_processed[_v2]) {
+                        clippedVertices[clippedVertices.length] = _v2;
+                        clippedIndices[clippedIndices.length] = (_processed[_v2] = clippedVertices.length) - 1;
                     } else {
-                    	clippedIndices[clippedIndices.length] = _processed[_faceVO.v2] - 1;
+                    	clippedIndices[clippedIndices.length] = _processed[_v2] - 1;
                     }
                     
 					continue;
@@ -165,32 +171,32 @@ package away3d.core.clip
 					_v0w = _v0d;
 					_v1w = _v1d;
 					_v2w = _v2d;
-					_v0 = _faceVO.v0;
-	    			_v1 = _faceVO.v1;
-	    			_v2 = _faceVO.v2;
-	    			_uv0 = _faceVO.uv0;
-	    			_uv1 = _faceVO.uv1;
-	    			_uv2 = _faceVO.uv2;
+					_v0 = _faceVO.vertices[0];
+	    			_v1 = _faceVO.vertices[1];
+	    			_v2 = _faceVO.vertices[2];
+	    			_uv0 = _faceVO.uvs[0];
+	    			_uv1 = _faceVO.uvs[1];
+	    			_uv2 = _faceVO.uvs[2];
 				} else if (_v1d >= 0 && _v2d < 0) {
 					_v0w = _v1d;
 					_v1w = _v2d;
 					_v2w = _v0d;
-					_v0 = _faceVO.v1;
-	    			_v1 = _faceVO.v2;
-	    			_v2 = _faceVO.v0;
-	    			_uv0 = _faceVO.uv1;
-	    			_uv1 = _faceVO.uv2;
-	    			_uv2 = _faceVO.uv0;
+					_v0 = _faceVO.vertices[1];
+	    			_v1 = _faceVO.vertices[2];
+	    			_v2 = _faceVO.vertices[0];
+	    			_uv0 = _faceVO.uvs[1];
+	    			_uv1 = _faceVO.uvs[2];
+	    			_uv2 = _faceVO.uvs[0];
 				} else if (_v2d >= 0 && _v0d < 0) {
 					_v0w = _v2d;
 					_v1w = _v0d;
 					_v2w = _v1d;
-	    			_v0 = _faceVO.v2;
-	    			_v1 = _faceVO.v0;
-	    			_v2 = _faceVO.v1;
-	    			_uv0 = _faceVO.uv2;
-	    			_uv1 = _faceVO.uv0;
-	    			_uv2 = _faceVO.uv1;
+	    			_v0 = _faceVO.vertices[2];
+	    			_v1 = _faceVO.vertices[0];
+	    			_v2 = _faceVO.vertices[1];
+	    			_uv0 = _faceVO.uvs[2];
+	    			_uv1 = _faceVO.uvs[0];
+	    			_uv2 = _faceVO.uvs[1];
 				}
 	    		
 	        	_d = (_v0w - _v1w);
@@ -207,10 +213,13 @@ package away3d.core.clip
 	        		
 	        		_uv20 = _uv0? _cameraVarsStore.createUV((_uv2.u*_v0w - _uv0.u*_v2w)/_d, (_uv2.v*_v0w - _uv0.v*_v2w)/_d, _session) : null;
 	        		
-	        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back,  _uv0, _uv01, _uv20);
-	        		_newFaceVO.vertices[0] = _newFaceVO.v0 = _v0;
-	        		_newFaceVO.vertices[1] = _newFaceVO.v1 = _v01;
-	        		_newFaceVO.vertices[2] = _newFaceVO.v2 = _v20;
+	        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
+	        		_newFaceVO.vertices[0] = _v0;
+	        		_newFaceVO.vertices[1] = _v01;
+	        		_newFaceVO.vertices[2] = _v20;
+	        		_newFaceVO.uvs[0] = _uv0;
+	        		_newFaceVO.uvs[1] = _uv01;
+	        		_newFaceVO.uvs[2] = _uv20;
 	        	} else {
 	        		_d = (_v2w - _v1w);
 	        		
@@ -218,15 +227,21 @@ package away3d.core.clip
 	        		
 	        		_uv12 = _uv0? _cameraVarsStore.createUV((_uv1.u*_v2w - _uv2.u*_v1w)/_d, (_uv1.v*_v2w - _uv2.v*_v1w)/_d, _session) : null;
 	        		
-	        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back, _uv0, _uv01, _uv2);
-	        		_newFaceVO.vertices[0] = _newFaceVO.v0 = _v0;
-	        		_newFaceVO.vertices[1] = _newFaceVO.v1 = _v01;
-	        		_newFaceVO.vertices[2] = _newFaceVO.v2 = _v2;
+	        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
+	        		_newFaceVO.vertices[0] = _v0;
+	        		_newFaceVO.vertices[1] = _v01;
+	        		_newFaceVO.vertices[2] = _v2;
+	        		_newFaceVO.uvs[0] = _uv0;
+	        		_newFaceVO.uvs[1] = _uv01;
+	        		_newFaceVO.uvs[2] = _uv2;
 	        		
-	        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back, _uv01, _uv12, _uv2);
-	        		_newFaceVO.vertices[0] = _newFaceVO.v0 = _v01;
-	        		_newFaceVO.vertices[1] = _newFaceVO.v1 = _v12;
-	        		_newFaceVO.vertices[2] = _newFaceVO.v2 = _v2;
+	        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
+	        		_newFaceVO.vertices[0] = _v01;
+	        		_newFaceVO.vertices[1] = _v12;
+	        		_newFaceVO.vertices[2] = _v2;
+	        		_newFaceVO.uvs[0] = _uv01;
+	        		_newFaceVO.uvs[1] = _uv12;
+	        		_newFaceVO.uvs[2] = _uv2;
 	        	}	
 			}
 			

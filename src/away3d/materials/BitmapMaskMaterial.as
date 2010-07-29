@@ -1,7 +1,7 @@
 ﻿package away3d.materials{
-    import away3d.arcane;
-    import away3d.core.draw.*;
-    import away3d.core.math.*;
+    import away3d.arcane;    import away3d.core.math.*;
+	import away3d.core.render.*;
+	import away3d.core.utils.*;
     
     import flash.display.*;
     
@@ -11,7 +11,7 @@
     * Basic bitmap material
     */
     public class BitmapMaskMaterial extends BitmapMaterial
-    {    	/** @private */        arcane override function renderTriangle(tri:DrawTriangle):void        {			_session = tri.source.session;			_screenCommands = tri.screenCommands;			_screenVertices = tri.screenVertices;			_screenIndices = tri.screenIndices;        				_session.renderTriangleBitmapMask(_renderBitmap, _offsetX, _offsetY, _scaling, _screenVertices, _screenIndices, tri.startIndex, tri.endIndex, smooth, repeat, _graphics);            if (debug)                _session.renderTriangleLine(0, 0x0000FF, 1, _screenVertices, _screenCommands, _screenIndices, tri.startIndex, tri.endIndex);							if(showNormals){								_nn.rotate(tri.faceVO.face.normal, tri.view.cameraVarsStore.viewTransformDictionary[tri.source]);				 				_sv0x = (tri.v0x + tri.v1x + tri.v2x) / 3;				_sv0y = (tri.v0y + tri.v1y + tri.v2y) / 3;				 				_sv1x = (_sv0x - (30*_nn.x));				_sv1y = (_sv0y - (30*_nn.y));				 				_session.renderLine(_sv0x, _sv0y, _sv1x, _sv1y, 0, 0xFF00FF, 1);			}        }        
+    {    	/** @private */        arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void        {			_source = viewSourceObject.source;			_session = renderer._session;        	_view = renderer._view;			        	_startIndex = renderer.primitiveProperties[priIndex*9];        	_endIndex = renderer.primitiveProperties[priIndex*9+1];			_faceVO = renderer.primitiveElements[priIndex];			_generated = renderer.primitiveGenerated[priIndex];						_screenVertices = viewSourceObject.screenVertices;			_screenIndices = viewSourceObject.screenIndices;        				_session.renderTriangleBitmapMask(_renderBitmap, _offsetX, _offsetY, _scaling, _screenVertices, _screenIndices, _startIndex, _endIndex, smooth, repeat, _graphics);            if (debug)                _session.renderTriangleLine(thickness, wireColor, wireAlpha, _screenVertices, renderer.primitiveCommands[priIndex], _screenIndices, _startIndex, _endIndex);							if(showNormals){								_nn.rotate(_faceVO.face.normal, _view.cameraVarsStore.viewTransformDictionary[_source]);								var index0:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9]];				var index1:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9] + 1];				var index2:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9] + 2];				_sv0x = (viewSourceObject.screenVertices[index0*3] + viewSourceObject.screenVertices[index1*3] + viewSourceObject.screenVertices[index2*3]) / 3;				_sv0y = (viewSourceObject.screenVertices[index0*3 + 1] + viewSourceObject.screenVertices[index1*3 + 1] + viewSourceObject.screenVertices[index2*3 + 1]) / 3;				 				_sv1x = (_sv0x - (30*_nn.x));				_sv1y = (_sv0y - (30*_nn.y));				 				_session.renderLine(_sv0x, _sv0y, _sv1x, _sv1y, 0, 0xFF00FF, 1);			}        }        
 		private var _offsetX:Number;
 		private var _offsetY:Number;
 		private var _scaling:Number;		private var _nn:Number3D = new Number3D();		private var _sv0x:Number;		private var _sv0y:Number;		private var _sv1x:Number;		private var _sv1y:Number;		

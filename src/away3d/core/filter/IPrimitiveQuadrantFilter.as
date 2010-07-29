@@ -18,6 +18,6 @@ package away3d.core.filter
     	 * @param	camera	The camera being used in the renderer for the quadrant tree
     	 * @param	clip	The clipping object used in the renderer for the quadrant tree's view.
     	 */
-        function filter(pritree:QuadrantRenderer, scene:Scene3D, camera:Camera3D, clip:Clipping):void;
+        function filter(renderer:QuadrantRenderer):void;
     }
 }

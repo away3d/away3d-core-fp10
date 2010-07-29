@@ -3,9 +3,8 @@ package away3d.core.render
 	import away3d.arcane;
 	import away3d.cameras.*;
 	import away3d.containers.*;
-	import away3d.core.block.*;
+	import away3d.core.base.*;
 	import away3d.core.clip.*;
-	import away3d.core.draw.*;
 	import away3d.core.filter.*;
     
     use namespace arcane;
@@ -14,17 +13,37 @@ package away3d.core.render
     * BSP renderer for a view.
     * Should not be used directly, it's used automatically in the BSPTree class
     */
-    public class BSPRenderer implements IRenderer, IPrimitiveConsumer
+    public class BSPRenderer extends Renderer
     {
     	private var _filters:Array;
     	private var _filter:IPrimitiveFilter;
-        private var _primitives:Array = new Array();
-        private var _newPrimitives:Array = new Array();
+    	private var _i:uint;
+    	private var _orderLength:uint;
+    	private var _primitivesLength:uint;
+        private var _allPrimitives:Array = new Array();
+        private var _allOrder:Array = new Array();
         private var _scene:Scene3D;
         private var _camera:Camera3D;
         private var _screenClipping:Clipping;
-        private var _blockers:Array;
         private var _sorting : Boolean;
+        
+        private function filterNonBSP():void
+        {
+			for each(_filter in _filters)
+				_filter.filter(this);
+			
+			_i = 0;
+			_orderLength = _order.length;
+			_primitivesLength = _allPrimitives.length;
+			while (_i < _orderLength) {
+				_allOrder.push(_order[_orderLength - _i - 1] + _primitivesLength);
+				_allPrimitives.push(_primitives[_i]);
+				_i++;
+			}
+			
+			_primitives.length = 0;
+			_sorting = false;
+        }
         
 		/**
 		 * Creates a new <code>BSPRenderer</code> object.
@@ -54,32 +73,22 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-        public function primitive(pri:DrawPrimitive):Boolean
+        public override function primitive(priIndex:uint):Boolean
         {
-        	if (!_screenClipping.checkPrimitive(pri))
+        	if (!_screenClipping.checkPrimitive(this, priIndex))
         		return false;
         	
-           /*  for each (var _blocker:Blocker in _blockers) {
-                if (_blocker.screenZ > pri.minZ)
-                    continue;
-                if (_blocker.block(pri))
-                    return false;
-            } */
-            
-            if (pri.ignoreSort) {
-            	if (_sorting) {
-					for each(_filter in _filters)
-						_newPrimitives = _filter.filter(_newPrimitives, _scene, _camera, _screenClipping);
-					
-					_primitives = _primitives.concat(_newPrimitives);
-					_newPrimitives.length = 0;
-					_sorting = false;
-				}
-            	_primitives.push(pri);
+			if ((primitiveSource[priIndex].source as Mesh)._preSorted) {
+				if (_sorting)
+					filterNonBSP();
+				
+            	_allOrder.push(_allPrimitives.length);
+            	_allPrimitives.push(priIndex);
             }
            	else {
            		_sorting = true;
-           		_newPrimitives.push(pri);
+           		_primitives.push(priIndex);
+           		_screenZs.push(priIndex);
            	}
             
             return true;
@@ -90,59 +99,49 @@ package away3d.core.render
 		 * 
 		 * @return	An array containing the primitives to be rendered.
 		 */
-        public function list():Array
+        public override function list():Array
         {
             return _primitives;
         }
         
-        public function clear(view:View3D):void
+        public override function clear():void
         {
+        	super.clear();
+        	
         	_primitives.length = 0;
-			_scene = view.scene;
-        	_camera = view.camera;
-        	_screenClipping = view.screenClipping;
-        	_blockers = view.blockerarray.list();
+        	_screenZs.length = 0;
+        	_allPrimitives.length = 0;
+        	_allOrder.length = 0;
+			_scene = _view.scene;
+        	_camera = _view.camera;
+        	_screenClipping = _view.screenClipping;
         }
         
-        public function render(view:View3D):void
+        public override function render():void
         {
-        	var i : int;
-        	var len : int;
-        	
-            if (_sorting) {
-				for each(_filter in _filters)
-					_newPrimitives = _filter.filter(_newPrimitives, _scene, _camera, _screenClipping);
-				
-//				i = -1;
-//				len = _newPrimitives.length;
-//				while (++i < len)
-//					DrawPrimitive(_newPrimitives[i]).render();
-
-				_primitives = _primitives.concat(_newPrimitives);
-
-				_newPrimitives.length = 0;
-			}
-			_sorting = false;
-
-			i = -1;
-			len = _primitives.length;
+            if (_sorting)
+				filterNonBSP();
 
 			// render all primitives
-            while (++i < len)
-                DrawPrimitive(_primitives[i]).render();
+    		_i = 0;
+			_orderLength = _allOrder.length;
+			while(_i < _orderLength)
+    			renderPrimitive(_allPrimitives[_allOrder[_i++]]);
         }
         
 		/**
 		 * @inheritDoc
 		 */
-        public function toString():String
+        public override function toString():String
         {
             return "BSPRenderer";
         }
         
-        public function clone():IPrimitiveConsumer
+        public override function clone():Renderer
         {
-        	return new BSPRenderer();
+        	var renderer:BSPRenderer = new BSPRenderer();
+        	renderer.filters = filters;
+        	return renderer;
 		}
 	}
 }

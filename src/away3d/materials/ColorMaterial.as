@@ -1,7 +1,8 @@
 package away3d.materials
 {
     import away3d.arcane;
-    import away3d.core.draw.*;
+	import away3d.core.render.*;
+	import away3d.core.utils.*;
 	
 	use namespace arcane;
 	
@@ -11,24 +12,24 @@ package away3d.materials
     public class ColorMaterial extends WireColorMaterial
     {
 		/** @private */
-        arcane override function renderTriangle(tri:DrawTriangle):void
+        arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
         	if (debug)
-				tri.source.session.renderTriangleLineFill(_thickness, _color, _alpha, _wireColor, _wireAlpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+				renderer._session.renderTriangleLineFill(_thickness, _color, _alpha, _wireColor, _wireAlpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[priIndex*9], renderer.primitiveProperties[priIndex*9+1]);
         	else
-        		tri.source.session.renderTriangleColor(_color, _alpha, tri.screenVertices, tri.screenCommands, tri.screenIndices, tri.startIndex, tri.endIndex);
+        		renderer._session.renderTriangleColor(_color, _alpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[priIndex*9], renderer.primitiveProperties[priIndex*9+1]);
         }
         
 		/** @private */
-        arcane override function renderSprite(bill:DrawSprite):void
+        arcane override function renderSprite(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
-            bill.source.session.renderSpriteColor(_color, _alpha, bill);
+            renderer._session.renderSpriteColor(_color, _alpha, priIndex, viewSourceObject, renderer);
         }
         
 		/** @private */
-        arcane function renderFog(fog:DrawFog):void
+        arcane function renderFog(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
-            fog.source.session.renderFogColor(fog.clip, _color, _alpha);
+            renderer._session.renderFogColor(_color, _alpha, renderer.primitiveProperties[priIndex*9 + 2], renderer.primitiveProperties[priIndex*9 + 3], renderer.primitiveProperties[priIndex*9 + 4], renderer.primitiveProperties[priIndex*9 + 5]);
         }
         
         protected var _debug:Boolean;

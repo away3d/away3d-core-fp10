@@ -1,7 +1,5 @@
 package away3d.core.light
 {
-	import away3d.core.draw.ScreenVertex;
-	import away3d.lights.PointLight3D;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.math.*;
