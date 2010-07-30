@@ -132,6 +132,7 @@ package away3d.core.utils
         	
         	_faceVO.face = face;
         	_faceVO.material = material;
+        	_faceVO.commands = ["M", "L", "L"];
         	_faceVO.back = back;
         	_faceVO.generated = true;
         	
@@ -145,6 +146,8 @@ package away3d.core.utils
         	else
         		_sActive.push(_segmentVO = new SegmentVO());
         	
+        	_segmentVO.material = material;
+        	_segmentVO.commands = ["M", "L"];
         	_segmentVO.generated = true;
         	
         	return _segmentVO;

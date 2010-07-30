@@ -77,7 +77,12 @@ package away3d.core.project
         private var _screenZ:Number;
 		private var _i:int;
 		private var _depthPoint:Number3D = new Number3D();
-        
+        private var _sIndex:uint;
+		private var _eIndex:uint;
+		private var _pushfront:Boolean;
+		private var _pushback:Boolean;
+		
+		
         public function getScreenVertices(source:Object3D):Array
 		{
 			return _screenVerticesStore[source] || (_screenVerticesStore[source] = []);
@@ -202,43 +207,56 @@ package away3d.core.project
                 if (!_mesh.outline && !_material)
                 	continue;
                 
+                
+                if (_mesh.outline && !_backface) {
+	                _pushfront = _mesh.pushfront;
+	                _pushback = _mesh.pushback;
+            		_mesh.pushback = false;
+            		_mesh.pushfront = true;
+                }
+                
                 //check whether screenClipping removes triangle
                 if (!renderer.primitive(renderer.createDrawTriangle(_faceVO, _faceVO.commands, _faceVO.uvs, _material, _startIndex, _endIndex, _viewSourceObject, _area, _faceVO.generated)))
                 	continue;
 				
             	_face = _faceVO.face;
-            	
+                
                 if (_mesh.outline && !_backface) {
+            		_mesh.pushback = true;
+            		_mesh.pushfront = false;
                     _n01 = _mesh.geometry.neighbour01(_face);
                     if (_n01 == null || _viewSourceObject.getArea(_startIndices[_outlineIndices[_n01.faceVO]]) <= 0) {
                     	_segmentVO = _cameraVarsStore.createSegmentVO(_mesh.outline);
-                    	_startIndex = _screenIndices.length;
+                    	_sIndex = _screenIndices.length;
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex];
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+1];
-                    	_endIndex = _screenIndices.length;
-                    	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _startIndex, _endIndex, _viewSourceObject, true));
+                    	_eIndex = _screenIndices.length;
+                    	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _sIndex, _eIndex, _viewSourceObject, true));
                     }
 					
                     _n12 = _mesh.geometry.neighbour12(_face);
                     if (_n12 == null || _viewSourceObject.getArea(_startIndices[_outlineIndices[_n12.faceVO]]) <= 0) {
                     	_segmentVO = _cameraVarsStore.createSegmentVO(_mesh.outline);
-                    	_startIndex = _screenIndices.length;
+                    	_sIndex = _screenIndices.length;
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+1];
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+2];
-                    	_endIndex = _screenIndices.length;
-                    	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _startIndex, _endIndex, _viewSourceObject, true));
+                    	_eIndex = _screenIndices.length;
+                    	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _sIndex, _eIndex, _viewSourceObject, true));
                     }
                     
                     _n20 = _mesh.geometry.neighbour20(_face);
                     if (_n20 == null || _viewSourceObject.getArea(_startIndices[_outlineIndices[_n20.faceVO]]) <= 0) {
                     	_segmentVO = _cameraVarsStore.createSegmentVO(_mesh.outline);
-                    	_startIndex = _screenIndices.length;
+                    	_sIndex = _screenIndices.length;
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+2];
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex];
-                    	_endIndex = _screenIndices.length;
-                    	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _startIndex, _endIndex, _viewSourceObject, true));
+                    	_eIndex = _screenIndices.length;
+                    	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _sIndex, _eIndex, _viewSourceObject, true));
                     }
+	                _mesh.pushfront = _pushfront;
+	                _mesh.pushback = _pushback;
                 }
+                
             }
             
             for each (_segmentVO in _segmentVOs)
