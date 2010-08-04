@@ -44,7 +44,7 @@ package away3d.core.render
 			
 			_primitives.length = 0;
 			_screenZs.length = 0;
-			_order.length = 0;
+//			_order.length = 0;
 			_sorting = false;
         }
         
@@ -91,7 +91,7 @@ package away3d.core.render
            	else {
            		_sorting = true;
            		_primitives.push(priIndex);
-           		_screenZs.push(priIndex);
+           		_screenZs.push(primitiveScreenZ[priIndex]);
            	}
             
             return true;
