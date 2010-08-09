@@ -61,7 +61,8 @@
 			var skinVertex:SkinVertex;
         	for each (skinVertex in skinVertices) {
         		skinVertex.skinnedVertex._positionDirty = true;
-        		skinVertex.skinnedVertex.geometry._dimensionDirty = true;
+        		if (skinVertex.skinnedVertex.geometry)
+        			skinVertex.skinnedVertex.geometry._dimensionDirty = true;
 			}
         }
         

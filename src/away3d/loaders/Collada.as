@@ -241,6 +241,7 @@
 										}
 				     				}
 									break;
+								case "matrix":
 								case "transform":
 									channel.type = ["transform"];
 									break;
@@ -262,12 +263,27 @@
 			}
 		}
 		
-        private function getArray(spaced:String):Array
+        private function getIntArray(spaced:String):Array
         {
         	spaced = spaced.split("\r\n").join(" ");
+        	spaced = spaced.split("\n").join(" ");
+            var strings:Array = spaced.split(" ");
+            var ints:Array = [];
+            var totalStrings:Number = strings.length;
+			
+            for (var i:Number = 0; i < totalStrings; ++i)
+            	if (strings[i] != "")
+                	ints.push(int(strings[i]));
+
+            return ints;
+        }
+        
+        private function getNumberArray(spaced:String):Array
+        {
+        	spaced = spaced.split("\r\n").join(" ");
+        	spaced = spaced.split("\n").join(" ");
             var strings:Array = spaced.split(" ");
             var numbers:Array = [];
-			
             var totalStrings:Number = strings.length;
 			
             for (var i:Number = 0; i < totalStrings; ++i)
@@ -277,6 +293,15 @@
             return numbers;
         }
 		
+        private function getStringArray(spaced:String):Array
+        {
+        	spaced = spaced.split("\r\n").join(" ");
+        	spaced = spaced.split("\n").join(" ");
+            var strings:Array = spaced.split(" ");
+           	
+           	return strings;
+        }
+        
         private function rotateMatrix(vector:Array):MatrixAway3D
         {
             if (yUp) {
@@ -515,7 +540,7 @@
 			
             for each (var childNode:XML in node.children())
             {
-                arrayChild = getArray(childNode);
+                arrayChild = getNumberArray(childNode);
                 nodeName = String(childNode.name()["localName"]);
 				switch(nodeName)
                 {
@@ -638,8 +663,13 @@
             
             // C4D
             var isC4D:Boolean = (trianglesXMLList.length()==0 && geometryData.geoXML["mesh"].polylist.length()>0);
-            if(isC4D)
-            	trianglesXMLList = geometryData.geoXML["mesh"].polylist;
+            if(!trianglesXMLList.length()) {
+            	if (geometryData.geoXML["mesh"].polylist.length()) {
+            		trianglesXMLList = geometryData.geoXML["mesh"].polylist;
+            	} else if (geometryData.geoXML["mesh"].polygons.length()) {
+            		trianglesXMLList = geometryData.geoXML["mesh"].polygons;
+            	}
+            }
             
             for each (var triangles:XML in trianglesXMLList)
             {
@@ -661,9 +691,18 @@
                 	}
                     field.push(input.@semantic);
                 }
-
-                var data     :Array  = triangles["p"].split(' ');
-                var len      :Number = triangles.@count;
+                
+                var data:Array  = [];
+                var s:String;
+                var arr:Array;
+                var t:int;
+                
+                for each (s in triangles["p"]) {
+                	arr = getNumberArray(s);
+                	for each (t in arr)
+                	data.push(t);
+                }
+                var len:Number = triangles.@count;
                 var symbol :String = triangles.@material;
                 
 				Debug.trace(" + Parse MeshMaterialData");
@@ -673,7 +712,7 @@
 				
 				//if (!materialLibrary[material])
 				//	parseMaterial(material, material);
-					
+				
                 for (var j:Number = 0; j < len; ++j)
                 {
                     var _faceData:FaceData = new FaceData();
@@ -746,13 +785,13 @@
 			//Blender?
 			if (!tmp) tmp = skin["source"].(@id == jointId)["IDREF_array"].toString();
             tmp = tmp.replace(/\n/g, " ");
-            var nameArray:Array = tmp.split(" ");
+            var nameArray:Array = getStringArray(tmp);
             
 			var bind_shape:MatrixAway3D = new MatrixAway3D();
-			bind_shape.array2matrix(getArray(skin["bind_shape_matrix"][0].toString()), yUp, scaling);
+			bind_shape.array2matrix(getNumberArray(skin["bind_shape_matrix"][0].toString()), yUp, scaling);
 			
 			var bindMatrixId:String = getId(skin["joints"].input.(@semantic == "INV_BIND_MATRIX").@source);
-            var float_array:Array = getArray(skin["source"].(@id == bindMatrixId)[0].float_array.toString());
+            var float_array:Array = getNumberArray(skin["source"].(@id == bindMatrixId)[0].float_array.toString());
             
             var v:Array;
             var matrix:MatrixAway3D;
@@ -780,13 +819,13 @@
 			var weightsId:String = getId(skin["vertex_weights"].input.(@semantic == "WEIGHT")[0].@source);
 			
             tmp = skin["source"].(@id == weightsId)["float_array"].toString();
-            var weights:Array = tmp.split(" ");
+            var weights:Array = getNumberArray(tmp);
 			
             tmp = skin["vertex_weights"].vcount.toString();
-            var vcount:Array = tmp.split(" ");
+            var vcount:Array = getIntArray(tmp);
 			
             tmp = skin["vertex_weights"].v.toString();
-            v = tmp.split(" ");
+            v = getIntArray(tmp);
 			
 			var skinVertex	:SkinVertex;
             var c			:int;
@@ -795,7 +834,7 @@
             i=0;
             while (i < geometryData.vertices.length)
             {
-                c = int(vcount[i]);
+                c = vcount[i];
                 skinVertex = new SkinVertex(geometryData.vertices[i]);
                 geometryData.vertices[i].skinVertex = skinVertex;
                 geometryData.skinVertices.push(skinVertex);
@@ -806,9 +845,9 @@
                 j=0;
                 while (j < c)
                 {
-                    skinVertex.controllers.push(geometryData.skinControllers[int(v[count])]);
+                    skinVertex.controllers.push(geometryData.skinControllers[v[count]]);
                     count++;
-                    skinVertex.weights.push(Number(weights[int(v[count])]));
+                    skinVertex.weights.push(weights[v[count]]);
                     count++;
                     ++j;
                 }
@@ -921,6 +960,8 @@
 					return;
             	}
             	
+            } else if (type.split(".")[1] == "ANGLE") {
+            	type = type.split(".")[0];
             } else {
             	type = type.split(".").join("");
             }
@@ -939,7 +980,7 @@
             for each (var input:XML in sampler["input"])
             {
 				var src:XML = node["source"].(@id == getId(input.@source))[0];
-                var list:Array = String(src["float_array"]).split(" ");
+                var list:Array = getNumberArray(String(src["float_array"]));
                 var len:int = int(src["technique_common"].accessor.@count);
                 var stride:int = int(src["technique_common"].accessor.@stride);
                 var semantic:String = input.@semantic;
@@ -953,7 +994,7 @@
                 switch(semantic) {
                     case "INPUT":
                         for each (p in list)
-                            channel.times.push(Number(p));
+                            channel.times.push(p);
                         
                         if (_defaultAnimationClip.start > channel.times[0])
                             _defaultAnimationClip.start = channel.times[0];
@@ -974,7 +1015,7 @@
                             } else {
 	                            j = 0;
 	                            while (j < stride) {
-	                            	channel.param[i].push(Number(list[i*stride + j]));
+	                            	channel.param[i].push(list[i*stride + j]);
 	                            	++j;
 	                            }
                             }
@@ -995,7 +1036,7 @@
                         	channel.inTangent[i] = [];
                         	j = 0;
                             while (j < stride) {
-                                channel.inTangent[i].push(new Number2D(Number(list[stride * i + j]), Number(list[stride * i + j + 1])));
+                                channel.inTangent[i].push(new Number2D(list[stride * i + j], list[stride * i + j + 1]));
                             	++j;
                             }
                             ++i;
@@ -1008,7 +1049,7 @@
                         	channel.outTangent[i] = [];
                         	j = 0;
                             while (j < stride) {
-                                channel.outTangent[i].push(new Number2D(Number(list[stride * i + j]), Number(list[stride * i + j + 1])));
+                                channel.outTangent[i].push(new Number2D(list[stride * i + j], list[stride * i + j + 1]));
                             	++j;
                             }
                             ++i;
@@ -1116,7 +1157,7 @@
                 var floId:String  = acc.@source.split("#")[1];
                 var floXML:XMLList = collada..float_array.(@id == floId);
                 var floStr:String  = floXML.toString();
-                var floats:Array   = getArray(floStr);
+                var floats:Array   = getNumberArray(floStr);
     			var float:Number;
                 // Build params array
                 var params:Array = [];
