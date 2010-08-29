@@ -22,7 +22,7 @@ package away3d.lights
          * 
          * @param	ambient		The coefficient for ambient light intensity.
          */
-		protected override function updateAmbientBitmap():void
+		protected override function updateAmbient():void
         {
         	_ambientBitmap = new BitmapData(256, 256, false, int(_ambient*_red*0xFF << 16) | int(_ambient*_green*0xFF << 8) | int(_ambient*_blue*0xFF));
         	_ambientBitmap.lock();

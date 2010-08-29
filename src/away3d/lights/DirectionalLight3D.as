@@ -37,18 +37,6 @@ package away3d.lights
         
         /**
          * @private
-         * Color transform used in cached shading materials for combined ambient and diffuse color intensities.
-         */
-        arcane var ambientColorTransform:ColorTransform;
-        
-        /**
-         * @private
-         * Color transform used in cached shading materials for ambient intensities.
-         */
-        arcane var diffuseColorTransform:ColorTransform;
-        
-        /**
-         * @private
          * Colormatrix transform used in DOT3 materials for resolving normal values in the normal map.
          */
         arcane var normalMatrixDiffuseTransform:Dictionary = new Dictionary(true);
@@ -213,13 +201,13 @@ package away3d.lights
          * 
          * @param	ambient		The coefficient for ambient light intensity.
          */
-		protected override function updateAmbientBitmap():void
+		protected override function updateAmbient():void
         {
         	_ambientBitmap = new BitmapData(256, 256, false, int(_ambient*_red*0xFF << 16) | int(_ambient*_green*0xFF << 8) | int(_ambient*_blue*0xFF));
         	_ambientBitmap.lock();
         	
         	//update colortransform
-        	ambientColorTransform = new ColorTransform(1, 1, 1, 1, _ambient*_red*0xFF, _ambient*_green*0xFF, _ambient*_blue*0xFF, 0);
+        	_ambientColorTransform = new ColorTransform(1, 1, 1, 1, _ambient*_red*0xFF, _ambient*_green*0xFF, _ambient*_blue*0xFF, 0);
 
 			_ambientDirty = false;
         }
@@ -230,7 +218,7 @@ package away3d.lights
          * 
          * @param	diffuse		The coefficient for diffuse light intensity.
          */
-        protected override function updateDiffuseBitmap():void
+        protected override function updateDiffuse():void
         {
     		_diffuseBitmap = new BitmapData(256, 256, false, 0x000000);
     		_diffuseBitmap.lock();
@@ -257,7 +245,7 @@ package away3d.lights
     		_diffuseBitmap.draw(_shape);
         	
         	//update colortransform
-        	diffuseColorTransform = new ColorTransform(diffbright*_red, diffbright*_green, diffbright*_blue, 1, 0, 0, 0, 0);
+        	_diffuseColorTransform = new ColorTransform(diffbright*_red, diffbright*_green, diffbright*_blue, 1, 0, 0, 0, 0);
 
 			_diffuseDirty = false;
         }
@@ -268,7 +256,7 @@ package away3d.lights
          * @param	ambient		The coefficient for ambient light intensity.
          * @param	diffuse		The coefficient for diffuse light intensity.
          */
-        protected override function updateAmbientDiffuseBitmap():void
+        protected override function updateAmbientDiffuse():void
         {
     		_ambientDiffuseBitmap = new BitmapData(256, 256, false, 0x000000);
     		_ambientDiffuseBitmap.lock();
@@ -303,7 +291,7 @@ package away3d.lights
          * 
          * @param	specular		The coefficient for specular light intensity.
          */
-        protected override function updateSpecularBitmap():void
+        protected override function updateSpecular():void
         {
     		_specularBitmap = new BitmapData(512, 512, false, 0x000000);
     		_specularBitmap.lock();

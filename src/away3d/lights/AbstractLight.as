@@ -1,5 +1,6 @@
 package away3d.lights
 {
+	import flash.geom.ColorTransform;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.utils.*;
@@ -51,6 +52,10 @@ package away3d.lights
 		/** @private */
         protected var _debug:Boolean;
         /** @private */
+        protected var _ambientColorTransform:ColorTransform;
+        /** @private */
+        protected var _diffuseColorTransform:ColorTransform;
+        /** @private */
         protected var _ambientBitmap:BitmapData;
 		/** @private */
         protected var _diffuseBitmap:BitmapData;
@@ -67,22 +72,22 @@ package away3d.lights
     	/** @private */
     	protected var _specularDirty:Boolean;
 		/** @private */
-		protected function updateAmbientBitmap():void
+		protected function updateAmbient():void
 		{
 			throw new Error("Not implemented");
 		}
 		/** @private */
-		protected function updateDiffuseBitmap():void
+		protected function updateDiffuse():void
 		{
 			throw new Error("Not implemented");
 		}
 		/** @private */
-		protected function updateAmbientDiffuseBitmap():void
+		protected function updateAmbientDiffuse():void
 		{
 			throw new Error("Not implemented");
 		}
 		/** @private */
-		protected function updateSpecularBitmap():void
+		protected function updateSpecular():void
 		{
 			throw new Error("Not implemented");
 		}
@@ -103,14 +108,36 @@ package away3d.lights
 		protected function onSceneTransformChange(event:Object3DEvent = null):void
         {
         }
+                
+        /**
+         * Color transform used in cached shading materials for combined ambient and diffuse color intensities.
+         */
+        public function get ambientColorTransform():ColorTransform
+        {
+			if (_ambientDirty)
+				updateAmbient();
+			
+        	return _ambientColorTransform;
+        }
         
+        /**
+         * Color transform used in cached shading materials for ambient intensities.
+         */
+        public function get diffuseColorTransform():ColorTransform
+        {
+			if (_diffuseDirty)
+				updateDiffuse();
+			
+        	return _diffuseColorTransform;
+        }
+         
 		/**
 		 * Lightmap for ambient intensity.
 		 */
         public function get ambientBitmap():BitmapData
         {
 			if (_ambientDirty)
-				updateAmbientBitmap();
+				updateAmbient();
 			
         	return _ambientBitmap;
         }
@@ -121,7 +148,7 @@ package away3d.lights
         public function get diffuseBitmap():BitmapData
         {
 			if (_diffuseDirty)
-				updateDiffuseBitmap();
+				updateDiffuse();
 			
         	return _diffuseBitmap;
         }
@@ -132,7 +159,7 @@ package away3d.lights
         public function get ambientDiffuseBitmap():BitmapData
         {
 			if (_ambientDiffuseDirty)
-				updateAmbientDiffuseBitmap();
+				updateAmbientDiffuse();
 			
         	return _ambientDiffuseBitmap;
         }
@@ -143,7 +170,7 @@ package away3d.lights
     	public function get specularBitmap():BitmapData
         {
 			if (_specularDirty)
-				updateSpecularBitmap();
+				updateSpecular();
 			
         	return _specularBitmap;
         }

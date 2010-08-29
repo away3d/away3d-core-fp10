@@ -120,6 +120,8 @@ package away3d.core.traverse
             	if (!_view.scene.meshes[node])
             		_view.scene.meshes[node] = [];
             	
+            	_mesh.geometry.updateGeometry();
+            	
             	_view.scene.meshes[node].push(_view);
             }
         }
