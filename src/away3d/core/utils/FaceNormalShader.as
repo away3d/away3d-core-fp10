@@ -1,13 +1,13 @@
 package away3d.core.utils 
 {
-	import away3d.core.session.AbstractSession;
-	import away3d.core.vos.FaceVO;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.light.*;
 	import away3d.core.math.*;
 	import away3d.core.render.*;
+	import away3d.core.session.*;
+	import away3d.core.vos.*;
+	import away3d.lights.*;
 	
 	import flash.display.*;
 	
@@ -173,16 +173,16 @@ package away3d.core.utils
             kar = kag = kab = kdr = kdg = kdb = ksr = ksg = ksb = 0;
 
 			
-			var directional:DirectionalLight;
+			var directional:DirectionalLight3D;
 			
-			var _tri_source_lightarray_directionals:Array = _source.lightarray.directionals;
-			for each (directional in _tri_source_lightarray_directionals)
+			var _tri_scene_directionalLights:Array = _source.scene.directionalLights;
+			for each (directional in _tri_scene_directionalLights)
             {
             	_diffuseTransform = directional.diffuseTransform[_source];
             	
-                red = directional.red;
-                green = directional.green;
-                blue = directional.blue;
+                red = directional._red;
+                green = directional._green;
+                blue = directional._blue;
 				
                 dfx = _diffuseTransform.szx;
 				dfy = _diffuseTransform.szy;
@@ -224,14 +224,14 @@ package away3d.core.utils
                 ksb += blue * spec;
             }
             
-            var _tri_source_lightarray_points:Array = _source.lightarray.points;
-			var point:PointLight;
+            var _tri_scene_pointLights:Array = _source.scene.pointLights;
+			var point:PointLight3D;
 			
-            for each (point in _tri_source_lightarray_points)
+            for each (point in _tri_scene_pointLights)
             {
-                red = point.red;
-                green = point.green;
-                blue = point.blue;
+                red = point._red;
+                green = point._green;
+                blue = point._blue;
 				
 				_viewPosition = point.viewPositions[_view];
 				
@@ -255,7 +255,7 @@ package away3d.core.utils
                 if (nf < 0)
                     continue;
 				
-                diff = point.diffuse * fade * nf * 250000;
+                diff = point.diffuse * point.brightness * fade * nf * 250000;
 				
                 kdr += red * diff;
                 kdg += green * diff;
@@ -269,7 +269,7 @@ package away3d.core.utils
                 rfx = dfx - 2*nf*pa;
                 rfy = dfy - 2*nf*pb;
                 
-                spec = point.specular * fade * Math.pow(rfz, shininess) * 250000;
+                spec = point.specular * point.brightness * fade * Math.pow(rfz, shininess) * 250000;
 				
                 ksr += red * spec;
                 ksg += green * spec;
@@ -298,12 +298,12 @@ package away3d.core.utils
 				
                 if (draw_fall || draw_reflect)
                 {
-                    var _tri_source_lightarray_points_new:Array = _source.lightarray.points;
-            		for each (point in _tri_source_lightarray_points_new)
+                    var _tri_source_scene_pointLights_new:Array = _source.scene.pointLights;
+            		for each (point in _tri_source_scene_pointLights_new)
                     {
-                        red = point.red;
-                        green = point.green;
-                        blue = point.blue;
+                        red = point._red;
+                        green = point._green;
+                        blue = point._blue;
                         sum = (red + green + blue) / 0xFF;
                         red /= sum;
                         green /= sum;

@@ -121,8 +121,6 @@ package away3d.core.traverse
             		_view.scene.meshes[node] = [];
             	
             	_view.scene.meshes[node].push(_view);
-            	
-            	_view.scene.geometries[_mesh.geometry] = _mesh.geometry;
             }
         }
         

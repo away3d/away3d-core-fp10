@@ -3,8 +3,8 @@ package away3d.materials
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.light.*;
 	import away3d.core.math.*;
+	import away3d.lights.*;
 	
 	import flash.display.*;
 
@@ -127,19 +127,19 @@ package away3d.materials
 		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
 			var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
-			var point : PointLight;
+			var point : PointLight3D;
 
 			_objectViewPos.transform(view.camera.position, invSceneTransform);
 			_pointLightShader.data.viewPos.value = [ _objectViewPos.x, _objectViewPos.y, _objectViewPos.z ];
 			
 			// use first point light
-			if (source.lightarray.points.length > 0) {
-				point = source.lightarray.points[0];
+			if (source.scene.pointLights.length > 0) {
+				point = source.scene.pointLights[0];
 				_objectLightPos.transform(point.position, invSceneTransform);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
-				_pointLightShader.data.phongComponents.value[0] = _specular*point.specular;
-				_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
+				_pointLightShader.data.phongComponents.value[0] = _specular*point.specular*point.brightness;
+				_pointLightShader.data.specularColor.value = [ point._red, point._green, point._blue ];
 				if (point.fallOff == Number.POSITIVE_INFINITY || point.fallOff == Number.NEGATIVE_INFINITY)
 					_pointLightShader.data.lightRadiusFalloff.value[1] = -1;
 				else

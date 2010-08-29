@@ -1,14 +1,11 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.containers.View3D;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.Object3D;
-	import away3d.core.light.AmbientLight;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.lights.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.BlendMode;
-	import flash.display.Shader;
+	import flash.display.*;
 
 	use namespace arcane;
 	
@@ -81,14 +78,14 @@ package away3d.materials
 			var ar : Number = 0,
 				ag : Number = 0,
 				ab : Number = 0;
-			var ambient : AmbientLight;
+			var ambient : AmbientLight3D;
 			// calculate ambient colour
 			
 			if (_useAmbient) {
-				for each (ambient in source.lightarray.ambients) {
-					ar += ambient.red;
-					ag += ambient.green;
-					ab += ambient.blue;
+				for each (ambient in source.scene.ambientLights) {
+					ar += ambient._red;
+					ag += ambient._green;
+					ab += ambient._blue;
 				}
 				
 				if (ar >= 0xff) ar = 0xff;
@@ -98,8 +95,8 @@ package away3d.materials
 				_ambient = (ar << 16) | (ag << 8) | ab;
 			}
 			
-			_points = source.lightarray.points;
-			_directionals = source.lightarray.directionals;
+			_points = source.scene.pointLights;
+			_directionals = source.scene.directionalLights;
 			
 			_bitmapDirty = true;
 			

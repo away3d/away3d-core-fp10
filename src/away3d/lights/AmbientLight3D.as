@@ -1,11 +1,11 @@
 package away3d.lights
 {
 	import away3d.arcane;
-	import away3d.containers.*;
     import away3d.core.base.*;
-    import away3d.core.light.*;
     import away3d.materials.*;
     import away3d.primitives.*;
+    
+	import flash.display.*;
 	
 	use namespace arcane;
 	
@@ -13,18 +13,22 @@ package away3d.lights
     * Lightsource that colors all shaded materials evenly from any angle
     */
     public class AmbientLight3D extends AbstractLight
-    {
+    {        
         private var _ambient:Number;
-    	private var _ambientDirty:Boolean;
-		private var _ls:AmbientLight = new AmbientLight();
-    	private var _debugPrimitive:Sphere;
-        private var _debugMaterial:ColorMaterial;
         
-		/** @private */
-		protected override function updateParent(val:ObjectContainer3D):void
-		{
-            _parent = val;
-		}
+        /**
+         * @private
+         * Updates the bitmapData object used as the lightmap for ambient light shading.
+         * 
+         * @param	ambient		The coefficient for ambient light intensity.
+         */
+		protected override function updateAmbientBitmap():void
+        {
+        	_ambientBitmap = new BitmapData(256, 256, false, int(_ambient*_red*0xFF << 16) | int(_ambient*_green*0xFF << 8) | int(_ambient*_blue*0xFF));
+        	_ambientBitmap.lock();
+        	
+			_ambientDirty = false;
+        }
 		
 		/**
 		 * Defines a coefficient for the ambient light intensity.
@@ -36,25 +40,12 @@ package away3d.lights
     	
 		public function set ambient(val:Number):void
 		{
+			if (val < 0)
+				val  = 0;
+			
 			_ambient = val;
+			
             _ambientDirty = true;
-		}
-        
-		public function get debugPrimitive():Object3D
-		{
-			if (!_debugPrimitive) {
-				_debugPrimitive = new Sphere();
-				//_scene.clearId(_id);
-			}
-			
-			if (!_debugMaterial) {
-				_debugMaterial = new ColorMaterial();
-				_debugPrimitive.material = _debugMaterial;
-			}
-			
-            _debugMaterial.color = color;
-            
-			return _debugPrimitive;
 		}
 		
 		/**
@@ -66,31 +57,7 @@ package away3d.lights
         {
             super(init);
             
-            color = ini.getColor("color", 0xFFFFFF);
             ambient = ini.getNumber("ambient", 0.5, {min:0, max:1});
-            debug = ini.getBoolean("debug", false);
-        }
-        
-		/**
-		 * @inheritDoc
-		 */
-        public override function light(consumer:ILightConsumer):void
-        {
-           //update color
-			if (_colorDirty) {
-				_ls.red = _red;
-				_ls.green = _green;
-				_ls.blue = _blue;
-	            _colorDirty = false;
-			}
-        	
-        	//update ambient
-            if (_ambientDirty) {
-        		_ambientDirty = false;
-	        	_ls.updateAmbientBitmap(_ambient);
-        	}
-        	
-            consumer.ambientLight(_ls);
         }
 		
 		/**

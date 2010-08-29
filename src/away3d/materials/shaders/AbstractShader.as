@@ -1,15 +1,14 @@
 package away3d.materials.shaders
 {
-	import away3d.core.session.AbstractSession;
-	import away3d.core.vos.FaceVO;
 	import away3d.arcane;
 	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.light.*;
 	import away3d.core.math.*;
 	import away3d.core.render.*;
+	import away3d.core.session.*;
 	import away3d.core.utils.*;
+	import away3d.core.vos.*;
 	import away3d.materials.*;
 	
 	import flash.display.*;
@@ -59,8 +58,6 @@ package away3d.materials.shaders
 		/** @private */
 		arcane var _faceVO:FaceVO;
         /** @private */
-		arcane var _lights:ILightConsumer;
-        /** @private */
 		arcane var _parentFaceMaterialVO:FaceMaterialVO;
         /** @private */
 		arcane var _n0:Number3D;
@@ -70,10 +67,6 @@ package away3d.materials.shaders
 		arcane var _n2:Number3D;
         /** @private */
         arcane var _dict:Dictionary;
-        /** @private */
-		arcane var ambient:AmbientLight;
-        /** @private */
-		arcane var directional:DirectionalLight;
         /** @private */
 		arcane var _faceMaterialVO:FaceMaterialVO;
         /** @private */
@@ -123,7 +116,6 @@ package away3d.materials.shaders
 			_screenIndices = viewSourceObject.screenIndices;
 			
         	_face = _faceVO.face;
-			_lights = _source.lightarray;
 			
 			return level;
         }

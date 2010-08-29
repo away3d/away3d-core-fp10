@@ -1,15 +1,11 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.core.base.Mesh;
-	import away3d.core.light.DirectionalLight;
-	import away3d.core.light.PointLight;
-	import away3d.core.math.MatrixAway3D;
-	import away3d.core.math.Number3D;
+	import away3d.core.base.*;
+	import away3d.core.math.*;
+	import away3d.lights.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.Shader;
-	import flash.display.ShaderJob;
+	import flash.display.*;
 	
 	use namespace arcane;
 	
@@ -55,7 +51,7 @@ package away3d.materials
 	        _pointLightShader.data.objectScale.value = [ _mesh.scaleX, _mesh.scaleY, _mesh.scaleZ ];
 	        
 	        if (_points) {
-	        	var point : PointLight;
+	        	var point : PointLight3D;
 	        	var dist : Number;
 	        	var boundRadius : Number;
 	        	var infinite : Boolean;
@@ -65,8 +61,8 @@ package away3d.materials
 		        boundRadius = _mesh._boundingRadius*_mesh._boundingScale;
 		        
 		        while (--i >= 0) {
-		        	point = PointLight(_points[i]);
-		        	diffuseStr = point.diffuse*.5;
+					point = PointLight3D(_points[i]);
+					diffuseStr = point.diffuse * point.brightness * .5;
 		        	infinite = (point.fallOff == Number.POSITIVE_INFINITY || point.fallOff == Number.NEGATIVE_INFINITY);
 		        	
 		        	if (!infinite) {
@@ -80,7 +76,7 @@ package away3d.materials
 			        	_objectLightPos.transform(point.position, invSceneTransform);
 			        	_objectLightPos.normalize();
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-		        		_pointLightShader.data.diffuseColor.value = [ point.red*diffuseStr, point.green*diffuseStr, point.blue*diffuseStr ];
+		        		_pointLightShader.data.diffuseColor.value = [ point._red*diffuseStr, point._green*diffuseStr, point._blue*diffuseStr ];
 		        		_pointLightShader.data.lightRadius.value = [ point.radius ];
 					
 						_pointLightShader.data.lightFalloff.value[0] = infinite? -1 : point.fallOff - point.radius;
@@ -92,17 +88,17 @@ package away3d.materials
 	        }
 	        
 	        if (_directionals) {
-	        	var directional : DirectionalLight;
+	        	var directional : DirectionalLight3D;
 	        	i = _directionals.length;
 	        	
 	        	while (--i >= 0) {
-	        		directional = DirectionalLight(_directionals[i]);
+	        		directional = DirectionalLight3D(_directionals[i]);
 	        		diffuseStr = directional.diffuse*.5;
 	        		
 					_objectLightPos.rotate(directional.direction, invSceneTransform);
 					_objectLightPos.normalize();
 	        		_directionalLightShader.data.lightDirection.value = [ -_objectLightPos.x, _objectLightPos.y, -_objectLightPos.z ];
-	        		_directionalLightShader.data.diffuseColor.value = [ directional.red*.5, directional.green*.5, directional.blue*.5 ];
+	        		_directionalLightShader.data.diffuseColor.value = [ directional._red*.5, directional._green*.5, directional._blue*.5 ];
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);
 	        	}

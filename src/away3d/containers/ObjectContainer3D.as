@@ -64,7 +64,6 @@
         }
         
         private var _children:Array = [];
-        private var _lights:Array = [];
         private var _polyCount:int;
         
         private function onChildChange(event:Object3DEvent):void
@@ -149,15 +148,7 @@
         {
             return _children;
         }
-        
-        /**
-        * Returns the lights of the container as an array of light objects
-        */
-        public function get lights():Array
-        {
-            return _lights;
-        }
-                
+                        
         /**
          * Returns the number of elements in the container,
          * including elements in child nodes.
@@ -246,8 +237,6 @@
             if (light == null)
                 throw new Error("ObjectContainer3D.addLight(null)");
             
-            _lights.push(light);
-            
             light.parent = this;
         }
         
@@ -261,14 +250,9 @@
         {
             if (light == null)
                 throw new Error("ObjectContainer3D.removeLight(null)");
+            
             if (light.parent != this)
                 return;
-            
-            var index:int = _lights.indexOf(light);
-            if (index == -1)
-                return;
-            
-            _lights.splice(index, 1);
             
             light.parent = null;
         }

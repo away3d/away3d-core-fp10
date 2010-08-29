@@ -3,10 +3,10 @@
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.light.*;
 	import away3d.core.math.*;
 	import away3d.core.render.*;
 	import away3d.core.utils.*;
+	import away3d.lights.*;
 	
 	import flash.display.*;
 	import flash.geom.*;
@@ -27,9 +27,9 @@
         	if (_bitmapDirty)
         		invalidateFaces();
         	
-        	var _source_lightarray_directionals:Array = source.lightarray.directionals;
-			var directional:DirectionalLight;
-        	for each (directional in _source_lightarray_directionals) {
+        	var _source_scene_directionalLights:Array = source.scene.directionalLights;
+			var directional:DirectionalLight3D;
+        	for each (directional in _source_scene_directionalLights) {
         		if (!directional.specularTransform[source])
         			directional.specularTransform[source] = new Dictionary(true);
         		
@@ -45,9 +45,9 @@
         {
         	super.renderLayer(priIndex, viewSourceObject, renderer, layer, level);
         	
-        	var _lights_directionals:Array = _lights.directionals;
-			var directional:DirectionalLight;
-        	for each (directional in _lights_directionals)
+        	var _source_scene_directionalLights:Array = _source.scene.directionalLights;
+			var directional:DirectionalLight3D;
+        	for each (directional in _source_scene_directionalLights)
         	{
 				_shape = _session.getLightShape(this, level++, layer, directional);
         		_shape.filters = [directional.normalMatrixSpecularTransform[_source][_view]];
@@ -139,11 +139,11 @@
 			_n1 = _source.geometry.getVertexNormal(_face.v1);
 			_n2 = _source.geometry.getVertexNormal(_face.v2);
 			
-			var _source_lightarray_directionals:Array = _source.lightarray.directionals;
+			var _source_scene_directionalLights:Array = _source.scene.directionalLights;
 			
-			var directional:DirectionalLight;
+			var directional:DirectionalLight3D;
 			
-			for each (directional in _source_lightarray_directionals)
+			for each (directional in _source_scene_directionalLights)
 	    	{
 				_specularTransform = directional.specularTransform[_source];
 				 

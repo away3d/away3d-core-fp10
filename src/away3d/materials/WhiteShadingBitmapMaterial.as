@@ -2,9 +2,9 @@ package away3d.materials
 {
 	import away3d.arcane;
 	import away3d.containers.*;	import away3d.core.base.*;
-	import away3d.core.light.*;
 	import away3d.core.render.*;
 	import away3d.core.utils.*;
+	import away3d.lights.*;
 	
 	import flash.display.*;
 	import flash.filters.*;
@@ -21,8 +21,8 @@ package away3d.materials
     	/** @private */
         arcane  override function updateMaterial(source:Object3D, view:View3D):void
         {
-        	var _source_lightarray_directionals:Array = source.lightarray.directionals;
-        	for each (var directional:DirectionalLight in _source_lightarray_directionals) {
+        	var _source_scene_directionalLights:Array = source.scene.directionalLights;
+        	for each (var directional:DirectionalLight3D in _source_scene_directionalLights) {
         		if (!directional.diffuseTransform[source] || view.scene.updatedObjects[source]) {
         			directional.setDiffuseTransform(source);
         			_materialDirty = true;
@@ -37,8 +37,8 @@ package away3d.materials
         		}
         	}
         	
-        	var source_lightarray_points:Array = source.lightarray.points;
-        	for each (var point:PointLight in source_lightarray_points) {
+        	var _source_scene_pointLights:Array = source.scene.pointLights;
+        	for each (var point:PointLight3D in _source_scene_pointLights) {
         		if (!point.viewPositions[view] || view.scene.updatedObjects[source] || view.updated) {
         			point.setViewPosition(view);
         			_materialDirty = true;

@@ -3,8 +3,8 @@ package away3d.materials
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.light.*;
 	import away3d.core.math.*;
+	import away3d.lights.*;
 	
 	import flash.display.*;
 	
@@ -180,7 +180,7 @@ package away3d.materials
         	
 	        if (_points) {
 		        var i : int = _points.length;
-		        var point : PointLight;
+		        var point : PointLight3D;
 		        var boundRadius : Number;
 		        var dist : Number;
 		        var infinite : Boolean;
@@ -202,12 +202,12 @@ package away3d.materials
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 			        	_objectLightPos.transform(lightPosition, invSceneTransform);
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
-		        		_pointLightShader.data.specularColor.value = [ point.red, point.green, point.blue ];
+		        		_pointLightShader.data.specularColor.value = [ point._red, point._green, point._blue ];
 		        		
 		        		_pointLightShader.data.lightRadiusFalloff.value[0] = point.radius;
 						_pointLightShader.data.lightRadiusFalloff.value[1] = infinite? -1 : point.fallOff - point.radius;
 						
-						_pointLightShader.data.phongComponents.value[0] = point.specular*_specular;
+						_pointLightShader.data.phongComponents.value[0] = point.specular*point.brightness*_specular;
 		
 			        	shaderJob = new ShaderJob(_pointLightShader, _lightMap);
 			        	shaderJob.start(true);
@@ -216,18 +216,18 @@ package away3d.materials
 	        }
 	        
 	        if (_directionals) {
-	        	var directional : DirectionalLight;
+	        	var directional : DirectionalLight3D;
 	        	i = _directionals.length;
 	        	
 	        	while (--i >= 0) {
-	        		directional = DirectionalLight(_directionals[i]);
+	        		directional = DirectionalLight3D(_directionals[i]);
 					
 					lightDirection = directional.direction;
 	        		_objectLightPos.rotate(lightDirection, invSceneTransform);
 					_objectLightPos.normalize();
 	        		_directionalLightShader.data.lightDirection.value = [ -_objectLightPos.x, _objectLightPos.y, -_objectLightPos.z ];
-	        		_directionalLightShader.data.specularColor.value = [ directional.red, directional.green, directional.blue ];
-	        		_directionalLightShader.data.phongComponents.value[0] = directional.specular*_specular;
+	        		_directionalLightShader.data.specularColor.value = [ directional._red, directional._green, directional._blue ];
+	        		_directionalLightShader.data.phongComponents.value[0] = directional.specular*directional.brightness*_specular;
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);
 	        	}
