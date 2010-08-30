@@ -116,14 +116,8 @@ package away3d.core.traverse
         public override function apply(node:Object3D):void
         { 
         	//add to scene meshes dictionary
-            if ((_mesh = node as Mesh)) {
-            	if (!_view.scene.meshes[node])
-            		_view.scene.meshes[node] = [];
-            	
-            	_mesh.geometry.updateGeometry();
-            	
-            	_view.scene.meshes[node].push(_view);
-            }
+            if ((_mesh = node as Mesh))
+            	_mesh.updateMesh(_view);
         }
         
         public override function leave(node:Object3D):void
