@@ -80,7 +80,7 @@ package away3d.core.utils
         {
             _primitiveType = _renderer.primitiveType[priIndex];
             
-        	if (_primitiveType == PrimitiveType.FOG)
+        	if (_primitiveType == PrimitiveType.FOG || _primitiveType == PrimitiveType.DISPLAY_OBJECT)
         		return;
         	
         	_hitSourceObject = _renderer.primitiveSource[priIndex];
@@ -88,7 +88,6 @@ package away3d.core.utils
         	
             if (!_source || !_source._mouseEnabled)
                 return;
-            
             
             if (_renderer.primitiveProperties[int(priIndex*9 + 2)] > _screenX)
                 return;
@@ -100,8 +99,9 @@ package away3d.core.utils
                 return;
             
             _primitiveElement = _renderer.primitiveElements[priIndex];
-            if (_primitiveType == PrimitiveType.DISPLAY_OBJECT && !(_primitiveElement as SpriteVO).displayObject.hitTestPoint(_hitPointX, _hitPointY, true))
-            	return;
+            
+            //if (_primitiveType == PrimitiveType.DISPLAY_OBJECT && !(_primitiveElement as SpriteVO).displayObject.hitTestPoint(_hitPointX, _hitPointY, true))
+            //	return;
 			
 			if (_hitSourceObject.contains(priIndex, _renderer, _screenX, _screenY)) {
                 var uvt:Array = _hitSourceObject.getUVT(priIndex, _renderer, _screenX, _screenY);
