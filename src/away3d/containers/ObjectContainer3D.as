@@ -25,15 +25,16 @@
         {
             _children.push(child);
 			
-            child.addOnTransformChange(onChildChange);
-            child.addOnDimensionsChange(onChildChange);
+			child.addOnVisibilityUpdate(onSessionUpdate);
+			child.addOnSceneTransformChange(onSessionUpdate);
+            child.addOnPositionChange(onDimensionsChange);
+            child.addOnScaleChange(onDimensionsChange);
+            child.addOnDimensionsChange(onDimensionsChange);
 
             notifyDimensionsChange();
             
-            if (_session && !child.ownCanvas)
-            	session.internalAddOwnSession(child);
-            
-            _sessionDirty = true;
+            if (_session)	
+        		session.updateSession();
         }
 		/** @private */
         arcane function internalRemoveChild(child:Object3D):void
@@ -42,17 +43,18 @@
             if (index == -1)
                 return;
 			
-            child.removeOnTransformChange(onChildChange);
-            child.removeOnDimensionsChange(onChildChange);
+			child.removeOnVisibilityUpdate(onSessionUpdate);
+			child.removeOnSceneTransformChange(onSessionUpdate);
+            child.removeOnPositionChange(onDimensionsChange);
+            child.removeOnScaleChange(onDimensionsChange);
+            child.removeOnDimensionsChange(onDimensionsChange);
 			
             _children.splice(index, 1);
 
             notifyDimensionsChange();
             
-            if (session && !child.ownCanvas)
-            	session.internalRemoveOwnSession(child);
-            
-            _sessionDirty = true;
+            if (_session)	
+        		_session.updateSession();
         }
 		/** @private */
         arcane function incrementPolyCount(delta:int):void
@@ -66,7 +68,13 @@
         private var _children:Array = [];
         private var _polyCount:int;
         
-        private function onChildChange(event:Object3DEvent):void
+        private function onSessionUpdate(event:Object3DEvent):void
+        {
+			if (event.object.ownCanvas && _session)
+        		_session.updateSession();
+        }
+        
+        private function onDimensionsChange(event:Object3DEvent):void
         {
             notifyDimensionsChange();
         }

@@ -1,9 +1,13 @@
-﻿package away3d.primitives {
+﻿package away3d.primitives
+{
+	import away3d.arcane;
 	import away3d.core.base.*;
 	import away3d.core.math.*;
 	import away3d.primitives.data.*;
 
-	public class NURBS extends Mesh
+	use namespace arcane;
+	
+	public class NURBS extends AbstractPrimitive
 	{
 		private var _controlNet:Array;
 		private var _uOrder:Number;
@@ -15,7 +19,6 @@
 		private var _uKnotSequence:Array;
 		private var _vKnotSequence:Array;
 		private var _renderMode:int;
-		private var _nurbsCurveDirty:Boolean;
 		private var _pointCache:Array = [];
 		private var _mbasis:Array = new Array();
 		private var _nbasis:Array = new Array();
@@ -50,7 +53,7 @@
 				return;
 				
 			_controlNet = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -65,7 +68,7 @@
 				return;
 				
 			_uOrder = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -80,7 +83,7 @@
 				return;
 				
 			_vOrder = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -95,7 +98,7 @@
 				return;
 				
 			_numUContolPoints = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -110,7 +113,7 @@
 				return;
 				
 			_numVContolPoints = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -126,7 +129,7 @@
 				return;
 				
 			_uKnotSequence = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -142,7 +145,7 @@
 				return;
 				
 			_vKnotSequence = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -157,7 +160,7 @@
 				return;
 				
 			_uSegments = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 		
 		/**
@@ -172,7 +175,7 @@
 				return;
 				
 			_vSegments = value;
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 		}
 
 		/**
@@ -208,7 +211,7 @@
 			_uRange = (_uKnotSequence[_nplusc] - _uKnotSequence[1]);
 			_vRange = (_vKnotSequence[_mplusc] - _uKnotSequence[1]);
 
-			_nurbsCurveDirty = true;
+			_primitiveDirty = true;
 
 			type = "primitive";
 			type = "NURBS";
@@ -469,8 +472,10 @@
 		/**
 		 *  Rebuild the mesh as there is significant change to the structural parameters
 		 * 
-		 */		
-		public function updateNURBS():void {
+		 */
+    	protected override function buildPrimitive():void
+    	{
+
 			geometry = new Geometry();
 			if (_renderMode == CONTROL_POINT_NET) {
 				buildControlSegments();
@@ -502,19 +507,6 @@
 					nurbPoint(v, v.nurbData["position"].x, v.nurbData["position"].y);
 				}
 			}
-		}
-		
-		/**
-		 * Updates the object as it's physical charactistics ahve changed
-		 * 
-		 */
-		public override function updateObject():void {
-			if (_nurbsCurveDirty) 
-				updateNURBS();
-			
-			_nurbsCurveDirty = false;
-			
-			super.updateObject();
 		}
 	}
 }

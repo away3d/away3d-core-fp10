@@ -10,15 +10,10 @@ package away3d.events
     public class Object3DEvent extends Event
     {
     	/**
-    	 * Defines the value of the type property of a parentUpdated event object.
+    	 * Defines the value of the type property of a visiblityUpdated event object.
     	 */
-    	public static const PARENT_UPDATED:String = "parentUpdated";
-    	
-    	/**
-    	 * Defines the value of the type property of a transformChanged event object.
-    	 */
-    	public static const TRANSFORM_CHANGED:String = "transformChanged";
-    	
+    	public static const VISIBLITY_UPDATED:String = "visiblityUpdated";
+    	    	
     	/**
     	 * Defines the value of the type property of a scenetransformChanged event object.
     	 */
@@ -33,17 +28,22 @@ package away3d.events
     	 * Defines the value of the type property of a sessionChanged event object.
     	 */
     	public static const SESSION_CHANGED:String = "sessionChanged";
-    	
-    	/**
-    	 * Defines the value of the type property of a sessionUpdated event object.
-    	 */
-    	public static const SESSION_UPDATED:String = "sessionUpdated";
-    	
+    	    	
     	/**
     	 * Defines the value of the type property of a dimensionsChanged event object.
     	 */
     	public static const DIMENSIONS_CHANGED:String = "dimensionsChanged";
     	
+    	/**
+    	 * Defines the value of the type property of a positionChanged event object.
+    	 */
+    	public static const POSITION_CHANGED:String = "positionChanged";
+    	
+    	/**
+    	 * Defines the value of the type property of a scaleChanged event object.
+    	 */
+    	public static const SCALE_CHANGED:String = "scaleChanged";
+				    	
     	/**
     	 * A reference to the 3d object that is relevant to the event.
     	 */

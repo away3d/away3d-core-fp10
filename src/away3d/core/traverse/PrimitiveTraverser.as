@@ -122,6 +122,7 @@ package away3d.core.traverse
 		 */
         public override function leave(node:Object3D):void
         {
+        	delete _view._updatedObjects[node];
         	node;//TODO : FDT Warning
         	_mouseEnabled = _mouseEnableds.pop();
         }

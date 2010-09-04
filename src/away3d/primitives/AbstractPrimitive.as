@@ -95,7 +95,7 @@
 		
 		private var _index:int;
      	
-     	protected function updatePrimitive():void
+     	arcane function updatePrimitive():void
      	{
 			buildPrimitive();
     		
@@ -111,7 +111,6 @@
     	protected function buildPrimitive():void
     	{
     		_primitiveDirty = false;
-    		_objectDirty = true;
     		
     		//remove all faces from the mesh
     		_index = faces.length;
@@ -327,14 +326,5 @@
 			
 			_primitiveDirty = true;
 		}
-		
-		public override function updateObject():void
-    	{
-    		//build geometry
-    		if (_primitiveDirty)
-    			updatePrimitive();
-        	
-        	super.updateObject();
-     	}
     }
 }

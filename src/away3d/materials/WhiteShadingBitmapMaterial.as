@@ -23,7 +23,7 @@ package away3d.materials
         {
         	var _source_scene_directionalLights:Array = source.scene.directionalLights;
         	for each (var directional:DirectionalLight3D in _source_scene_directionalLights) {
-        		if (!directional.diffuseTransform[source] || view.scene.updatedObjects[source]) {
+        		if (!directional.diffuseTransform[source] || view._updatedObjects[source]) {
         			directional.setDiffuseTransform(source);
         			_materialDirty = true;
         		}
@@ -31,7 +31,7 @@ package away3d.materials
         		if (!directional.specularTransform[source])
         			directional.specularTransform[source] = new Dictionary(true);
         		
-        		if (!directional.specularTransform[source][view] || view.scene.updatedObjects[source] || view.updated) {
+        		if (!directional.specularTransform[source][view] || view._updatedObjects[source] || view.updated) {
         			directional.setSpecularTransform(source, view);
         			_materialDirty = true;
         		}
@@ -39,7 +39,7 @@ package away3d.materials
         	
         	var _source_scene_pointLights:Array = source.scene.pointLights;
         	for each (var point:PointLight3D in _source_scene_pointLights) {
-        		if (!point.viewPositions[view] || view.scene.updatedObjects[source] || view.updated) {
+        		if (!point.viewPositions[view] || view._updatedObjects[source] || view.updated) {
         			point.setViewPosition(view);
         			_materialDirty = true;
         		}

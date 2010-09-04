@@ -386,8 +386,6 @@
 					}
 				}
 			}
-			_objectDirty = true;
-			updateObject();
 		}
 		
 		// Add connecting faces to the required edge and mirror faces

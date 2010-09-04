@@ -322,7 +322,7 @@ package away3d.primitives
 			this.bothsides = true;
 			
 			//Listens for transform change to update plane data (normal and reflection matrixes) and dummy plane.
-			this.addOnTransformChange(transformChangeHandler);
+			this.addOnSceneTransformChange(transformChangeHandler);
 			this.addOnDimensionsChange(dimensionsChangeHandler);
 		}
 		

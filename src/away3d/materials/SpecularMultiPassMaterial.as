@@ -225,7 +225,7 @@ package away3d.materials
 					lightDirection = directional.direction;
 	        		_objectLightPos.rotate(lightDirection, invSceneTransform);
 					_objectLightPos.normalize();
-	        		_directionalLightShader.data.lightDirection.value = [ -_objectLightPos.x, _objectLightPos.y, -_objectLightPos.z ];
+	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, -_objectLightPos.y, _objectLightPos.z ];
 	        		_directionalLightShader.data.specularColor.value = [ directional._red, directional._green, directional._blue ];
 	        		_directionalLightShader.data.phongComponents.value[0] = directional.specular*directional.brightness*_specular;
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);

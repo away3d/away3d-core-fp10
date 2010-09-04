@@ -97,7 +97,7 @@ package away3d.materials
 	        		
 					_objectLightPos.rotate(directional.direction, invSceneTransform);
 					_objectLightPos.normalize();
-	        		_directionalLightShader.data.lightDirection.value = [ -_objectLightPos.x, _objectLightPos.y, -_objectLightPos.z ];
+	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, -_objectLightPos.y, _objectLightPos.z ];
 	        		_directionalLightShader.data.diffuseColor.value = [ directional._red*.5, directional._green*.5, directional._blue*.5 ];
 	        		shaderJob = new ShaderJob(_directionalLightShader, _lightMap);
 		        	shaderJob.start(true);

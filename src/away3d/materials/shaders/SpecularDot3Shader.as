@@ -33,7 +33,7 @@
         		if (!directional.specularTransform[source])
         			directional.specularTransform[source] = new Dictionary(true);
         		
-        		if (!directional.specularTransform[source][view] || view.scene.updatedObjects[source] || view.updated) {
+        		if (!directional.specularTransform[source][view] || view._updatedObjects[source] || view.updated) {
         			directional.setSpecularTransform(source, view);
         			directional.setNormalMatrixSpecularTransform(source, view, _specular, _shininess);
         			updateFaces(source, view);

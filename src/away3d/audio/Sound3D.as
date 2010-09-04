@@ -62,6 +62,8 @@ package away3d.audio
 			_inv_ref_mtx = new MatrixAway3D;
 			
 			this.addEventListener(Object3DEvent.SCENE_CHANGED, _onSceneChanged);
+			
+			this.addEventListener(Object3DEvent.SCENETRANSFORM_CHANGED, _onSceneTransformChanged);
 		}
 		
 		
@@ -177,27 +179,6 @@ package away3d.audio
 		
 		/**
 		 * @internal
-		 * Calculates the relative vector between the listener/reference object
-		 * and the position of this sound source, and updates the driver to use
-		 * this as the reference vector.
-		*/
-		public override function updateObject():void
-		{
-			// Update only if object has been modified since last
-			// time, i.e. if Object3D._objectDirty == true
-			if (super.arcane::_objectDirty) {
-				_inv_ref_mtx.inverse(_reference.sceneTransform);
-				_refv.rotate(_reference.position, _inv_ref_mtx);
-				_refv.sub(this.scenePosition, _refv);
-				_driver.updateReferenceVector(_refv);
-			}
-			
-			super.updateObject();
-		}
-		
-		
-		/**
-		 * @internal
 		 * When scene changes, mute if object was removed from scene. 
 		*/
 		private function _onSceneChanged(ev : Object3DEvent) : void
@@ -208,6 +189,25 @@ package away3d.audio
 			
 			// Re-update reference vector to force changes to take effect
 			_driver.updateReferenceVector(_refv);
+		}
+		
+		
+		/**
+		 * @internal
+		 * When scene transform changes, calculate the relative vector between the listener/reference object
+		 * and the position of this sound source, and update the driver to use
+		 * this as the reference vector.
+		 */
+		private function _onSceneTransformChanged(ev : Object3DEvent) : void
+		{
+			// Update only if object has been modified since last
+			// time, i.e. if Object3D._objectDirty == true
+			if (super.arcane::_objectDirty) {
+				_inv_ref_mtx.inverse(_reference.sceneTransform);
+				_refv.rotate(_reference.position, _inv_ref_mtx);
+				_refv.sub(this.scenePosition, _refv);
+				_driver.updateReferenceVector(_refv);
+			}
 		}
 	}
 }
