@@ -145,7 +145,13 @@ package away3d.core.utils
 		            var scale:Number = renderer.primitiveProperties[priIndex*9 + 8];
 					var spriteVO:SpriteVO = renderer.primitiveElements[priIndex] as SpriteVO;
 					var pointMapping:Matrix = spriteVO.mapping.clone();
-		            pointMapping.scale(scale, scale);
+					var bMaterial:BitmapMaterial;
+					if ((bMaterial = spriteVO.material as BitmapMaterial)) {
+			            pointMapping.scale(scale*bMaterial.width, scale*bMaterial.height);
+					} else {
+			            pointMapping.scale(scale*spriteVO.width, scale*spriteVO.height);
+					}
+					
 		            pointMapping.translate(screenVertices[screenIndices[_startIndex]*3], screenVertices[screenIndices[_startIndex]*3 + 1]);
 		            pointMapping.invert();
 		            
