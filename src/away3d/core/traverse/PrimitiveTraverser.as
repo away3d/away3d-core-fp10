@@ -80,6 +80,9 @@ package away3d.core.traverse
 		 */
         public override function apply(node:Object3D):void
         {
+        	if (!(node is Mesh))
+        		return;
+        	
         	if (node.session.updated) {
 	        	_viewTransform = _cameraVarsStore.viewTransformDictionary[node];
 	        	_consumer = node.session.getRenderer(_view);
