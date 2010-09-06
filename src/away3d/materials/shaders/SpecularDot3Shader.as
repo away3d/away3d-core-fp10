@@ -30,10 +30,7 @@
         	var _source_scene_directionalLights:Array = source.scene.directionalLights;
 			var directional:DirectionalLight3D;
         	for each (directional in _source_scene_directionalLights) {
-        		if (!directional.specularTransform[source])
-        			directional.specularTransform[source] = new Dictionary(true);
-        		
-        		if (!directional.specularTransform[source][view] || view._updatedObjects[source] || view.updated) {
+        		if (!directional.specularTransform[source] || !directional.specularTransform[source][view] || !directional.normalMatrixSpecularTransform[source] || !directional.normalMatrixSpecularTransform[source][view] || view._updatedObjects[source] || view.updated) {
         			directional.setSpecularTransform(source, view);
         			directional.setNormalMatrixSpecularTransform(source, view, _specular, _shininess);
         			updateFaces(source, view);
