@@ -777,8 +777,8 @@ package away3d.core.math
         */
         public function get forward():Number3D
         {
-        	_forward.x = szx;
-        	_forward.y = szy;
+        	_forward.x = sxz;
+        	_forward.y = syz;
         	_forward.z = szz;
         	return _forward;
         }
@@ -788,8 +788,8 @@ package away3d.core.math
         */
      	public function set forward(n:Number3D):void
      	{
-     		this.szx = n.x;
-     		this.szy = n.y;
+     		this.sxz = n.x;
+     		this.syz = n.y;
      		this.szz = n.z;
      	}   
      	
@@ -798,9 +798,9 @@ package away3d.core.math
         */
         public function get up():Number3D
         {
-        	_up.x = syx;
+        	_up.x = sxy;
         	_up.y = syy;
-        	_up.z = syz;
+        	_up.z = szy;
         	return _up;
         }
         
@@ -809,9 +809,9 @@ package away3d.core.math
         */
      	public function set up(n:Number3D):void
      	{
-     		this.syx = n.x;
+     		this.sxy = n.x;
      		this.syy = n.y;
-     		this.syz = n.z;
+     		this.szy = n.z;
      	}   
      	
      	/**
@@ -820,8 +820,8 @@ package away3d.core.math
         public function get right():Number3D
         {
         	_right.x = sxx;
-        	_right.y = sxy;
-        	_right.z = sxz;
+        	_right.y = syx;
+        	_right.z = szx;
         	return _right;
         }
         
@@ -831,8 +831,8 @@ package away3d.core.math
      	public function set right(n:Number3D):void
      	{
      		this.sxx = n.x;
-     		this.sxy = n.y;
-     		this.sxz = n.z;
+     		this.syx = n.y;
+     		this.szx = n.z;
      	}   
      	
 		public function multiplyVector3x3( v:Number3D ):void
