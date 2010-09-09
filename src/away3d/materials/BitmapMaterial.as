@@ -587,7 +587,6 @@
 			super(ini);
 			
             smooth = ini.getBoolean("smooth", false);
-            debug = ini.getBoolean("debug", false);
             repeat = ini.getBoolean("repeat", false);
             _blendMode = ini.getString("blendMode", BlendMode.NORMAL);
             colorTransform = ini.getObject("colorTransform", ColorTransform) as ColorTransform;
