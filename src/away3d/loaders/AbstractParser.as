@@ -1,11 +1,10 @@
 package away3d.loaders
 {
-	import away3d.animators.data.SkinController;
 	
 	import away3d.arcane;
+	import away3d.animators.data.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	import away3d.events.*;
 	import away3d.loaders.data.*;
@@ -14,6 +13,7 @@ package away3d.loaders
 	
 	import flash.display.*;
 	import flash.events.*;
+	import flash.geom.*;
 	import flash.utils.*;
 	
 	use namespace arcane;
@@ -110,7 +110,7 @@ package away3d.loaders
         private var _materials:Object;
         private var _faceMaterial:Material;
     	private var _face:Face;
-        private var _moveVector:Number3D = new Number3D();
+        private var _moveVector:Vector3D = new Vector3D();
         
         private function update(event:Event):void
         {
@@ -210,7 +210,7 @@ package away3d.loaders
 					if (centerMeshes && objectContainer.children.length) {
 						//center children in container for better bounding radius calulations
 						objectContainer.movePivot(_moveVector.x = (objectContainer.maxX + objectContainer.minX)/2, _moveVector.y = (objectContainer.maxY + objectContainer.minY)/2, _moveVector.z = (objectContainer.maxZ + objectContainer.minZ)/2);
-						_moveVector.transform(_moveVector, _objectData.transform);
+						_moveVector = _objectData.transform.transformVector(_moveVector);
 						objectContainer.moveTo(_moveVector.x, _moveVector.y, _moveVector.z);
 					}
 					
@@ -284,7 +284,7 @@ package away3d.loaders
 			
 			if (centerMeshes) {
 				mesh.movePivot(_moveVector.x = (_geometryData.maxX + _geometryData.minX)/2, _moveVector.y = (_geometryData.maxY + _geometryData.minY)/2, _moveVector.z = (_geometryData.maxZ + _geometryData.minZ)/2);
-				_moveVector.transform(_moveVector, _meshData.transform);
+				_moveVector = _meshData.transform.transformVector(_moveVector);
 				mesh.moveTo(_moveVector.x, _moveVector.y, _moveVector.z);
 			}
 			

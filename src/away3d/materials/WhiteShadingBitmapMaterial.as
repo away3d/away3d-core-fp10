@@ -1,9 +1,10 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.containers.*;	import away3d.core.base.*;
-	import away3d.core.render.*;
+	import away3d.containers.*;
+	import away3d.core.base.*;	import away3d.core.render.*;
 	import away3d.core.utils.*;
+	import away3d.core.vos.*;
 	import away3d.lights.*;
 	
 	import flash.display.*;
@@ -54,14 +55,15 @@ package away3d.materials
 			_session = renderer._session;
             _view = renderer._view;
         	
-        	_startIndex = renderer.primitiveProperties[priIndex*9];
-        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
-        	_faceVO = renderer.primitiveElements[priIndex];
+        	_startIndex = renderer.primitiveProperties[uint(priIndex*9)];
+        	_endIndex = renderer.primitiveProperties[uint(priIndex*9+1)];
+        	_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 			_uvs = renderer.primitiveUVs[priIndex];
 			_generated = renderer.primitiveGenerated[priIndex];
         	
         	_screenVertices = viewSourceObject.screenVertices;
 			_screenIndices = viewSourceObject.screenIndices;
+			_screenUVTs = viewSourceObject.screenUVTs;
 			
         	var shade:FaceNormalShaderVO = shader.getTriangleShade(priIndex, viewSourceObject, renderer, shininess);
             br = (shade.kar + shade.kag + shade.kab + shade.kdr + shade.kdg + shade.kdb + shade.ksr + shade.ksg + shade.ksb)/3;

@@ -142,9 +142,9 @@ package away3d.core.render
             }
 			
 			if (level < maxlevel) {
-	            if (renderer.primitiveProperties[priIndex*9 + 3] <= xdiv)
+	            if (renderer.primitiveProperties[uint(priIndex*9 + 3)] <= xdiv)
 	            {
-	                if (renderer.primitiveProperties[priIndex*9 + 5] <= ydiv)
+	                if (renderer.primitiveProperties[uint(priIndex*9 + 5)] <= ydiv)
 	                {
 	                    if (lefttop == null) {
 	                    	lefttopFlag = true;
@@ -155,7 +155,7 @@ package away3d.core.render
 	                    }
 	                    return lefttop.push(renderer, priIndex);
 	                }
-	                else if (renderer.primitiveProperties[priIndex*9 + 4] >= ydiv)
+	                else if (renderer.primitiveProperties[uint(priIndex*9 + 4)] >= ydiv)
 	                {
 	                	if (leftbottom == null) {
 	                    	leftbottomFlag = true;
@@ -167,9 +167,9 @@ package away3d.core.render
 	                    return leftbottom.push(renderer, priIndex);
 	                }
 	            }
-	            else if (renderer.primitiveProperties[priIndex*9 + 2] >= xdiv)
+	            else if (renderer.primitiveProperties[uint(priIndex*9 + 2)] >= xdiv)
 	            {
-	                if (renderer.primitiveProperties[priIndex*9 + 5] <= ydiv)
+	                if (renderer.primitiveProperties[uint(priIndex*9 + 5)] <= ydiv)
 	                {
 	                	if (righttop == null) {
 	                    	righttopFlag = true;
@@ -180,7 +180,7 @@ package away3d.core.render
 	                    }
 	                    return righttop.push(renderer, priIndex);
 	                }
-	                else if (renderer.primitiveProperties[priIndex*9 + 4] >= ydiv)
+	                else if (renderer.primitiveProperties[uint(priIndex*9 + 4)] >= ydiv)
 	                {
 	                	if (rightbottom == null) {
 	                    	rightbottomFlag = true;

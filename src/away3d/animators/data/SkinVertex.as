@@ -1,12 +1,13 @@
 ﻿package away3d.animators.data
 {
 	import away3d.core.base.*;
-	import away3d.core.math.Number3D;
+	
+	import flash.geom.*;
 	
     public class SkinVertex
     {
     	private var _i:int;
-    	private var _position:Number3D = new Number3D();
+    	private var _position:Vector3D = new Vector3D();
 		public var baseVertex:Vertex;
         public var skinnedVertex:Vertex;
         public var weights:Array = [];
@@ -25,8 +26,8 @@
             
             _i = weights.length;
             while (_i--) {
-				_position.transform(baseVertex.position, (controllers[_i] as SkinController).sceneTransform);
-				_position.scale(_position, weights[_i]);
+				_position = (controllers[_i] as SkinController).sceneTransform.transformVector(baseVertex.position);
+				_position.scaleBy(weights[_i]);
 				skinnedVertex.add(_position);
             }
         }

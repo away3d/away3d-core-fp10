@@ -1,15 +1,12 @@
 package away3d.graphs.bsp
 {
 	import away3d.arcane;
-	import away3d.core.base.Vertex;
-	import away3d.core.geom.NGon;
-	import away3d.core.geom.Plane3D;
-	import away3d.core.math.Number3D;
+	import away3d.core.base.*;
+	import away3d.core.geom.*;
 
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.utils.getTimer;
-	import flash.utils.setTimeout;
+	import flash.events.*;
+	import flash.geom.*;
+	import flash.utils.*;
 
 	use namespace arcane;
 	
@@ -111,16 +108,18 @@ package away3d.graphs.bsp
 			var plane : Plane3D = nGon.plane = node._partitionPlane;
 			var dist : Number;
 			var radius : Number;
-			var direction1 : Number3D, direction2 : Number3D;
-			var center : Number3D = new Number3D(	(root._minX+root._maxX)*.5,
+			var distance: Vector3D;
+			var direction1 : Vector3D, direction2 : Vector3D;
+			var center : Vector3D = new Vector3D(	(root._minX+root._maxX)*.5,
 													(root._minY+root._maxY)*.5,
 													(root._minZ+root._maxZ)*.5 );
-			var normal : Number3D = new Number3D(plane.a, plane.b, plane.c);
+			var normal : Vector3D = new Vector3D(plane.a, plane.b, plane.c);
 			var vertLen : int = 0;
 			
 			sourceNode = node;
 			
-			radius = center.distance(bounds[0]);
+			distance = center.subtract(bounds[0]);
+			radius = distance.length;
 			radius = Math.sqrt(radius*radius + radius*radius);
 			
 			// calculate projection of aabb's center on plane
@@ -134,8 +133,8 @@ package away3d.graphs.bsp
 			direction1.normalize();
 			
 			// perpendicular to plane normal & direction1, parallel to plane
-			direction2 = new Number3D();
-			direction2.cross(normal, direction1);
+			direction2 = new Vector3D();
+			direction2 = direction1.crossProduct(normal);
 			direction2.normalize();
 			
 			// form very course bounds of bound projection on plane
@@ -147,8 +146,10 @@ package away3d.graphs.bsp
 													center.z + direction2.z*radius);
 			
 			// invert direction
-			direction1.normalize(-1);
-			direction2.normalize(-1);
+			direction1.scaleBy(-1);
+			direction1.normalize();
+			direction2.scaleBy(-1);
+			direction2.normalize();
 			
 			nGon.vertices[vertLen++] = new Vertex( 	center.x + direction1.x*radius,
 													center.y + direction1.y*radius,
@@ -213,12 +214,14 @@ package away3d.graphs.bsp
 		/**
 		 * Generates a perpendicular vector for the initial portal
 		 */
-		private function getPerpendicular(normal : Number3D) : Number3D
+		private function getPerpendicular(normal : Vector3D) : Vector3D
 		{
-			var p : Number3D = new Number3D();
-			p.cross(new Number3D(1, 1, 0), normal);
-			if (p.modulo <= BSPTree.EPSILON) {
-				p.cross(new Number3D(0, 1, 1), normal);
+			var p : Vector3D;
+			var q : Vector3D = new Vector3D(1, 1, 0);
+			var r : Vector3D = new Vector3D(0, 1, 1);
+			p = normal.crossProduct(q);
+			if (p.length <= BSPTree.EPSILON) {
+				p = normal.crossProduct(r);
 			}
 			return p;
 		}

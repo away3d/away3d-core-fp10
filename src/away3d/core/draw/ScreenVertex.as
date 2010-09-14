@@ -1,11 +1,12 @@
 package away3d.core.draw
 {
+    import flash.geom.Vector3D;
     import away3d.core.geom.*;
 
     /**
     * representation of a 3d vertex resolved to the view.
     */
-    public final class ScreenVertex
+    public final class ScreenVertex extends Vector3D
     {
 		private var persp:Number;
 		private var faz:Number;
@@ -27,21 +28,6 @@ package away3d.core.draw
     	 * The view y position of the vertex in the view.
     	 */
         public var vy:Number;
-		
-    	/**
-    	 * The screen x position of the vertex in the view.
-    	 */
-        public var x:Number;
-        
-    	/**
-    	 * The screen y position of the vertex in the view.
-    	 */
-        public var y:Number;
-        
-    	/**
-    	 * The screen z position of the vertex in the view.
-    	 */
-        public var z:Number;
         
         /**
         * Indicates whether the vertex is visible after projection.
@@ -71,7 +57,7 @@ package away3d.core.draw
 		 * 
 		 * @return A string representation of the vertex object.
 		 */
-        public function toString(): String
+        public override function toString(): String
         {
             return "new ScreenVertex("+x+', '+y+', '+z+")";
         }
@@ -174,27 +160,27 @@ package away3d.core.draw
 		 * @param	screenIndices		The Array of screen indices to use for the calculation.
 		 * @param	focus				The focus value used for the median calulations.
 		 */
-        public static function median(aindex:Number, bindex:Number, screenVertices:Array, screenIndices:Array, focus:Number):void
+        public static function median(aindex:uint, bindex:uint, screenVertices:Vector.<Number>, screenIndices:Vector.<int>, uvts:Vector.<Number>):void
         {
-        	var avertex:int = screenIndices[aindex]*3;
+        	var avertex:int = screenIndices[aindex]*2;
         	var ax:Number = screenVertices[avertex];
-        	var ay:Number = screenVertices[avertex+1];
-        	var az:Number = screenVertices[avertex+2];
+        	var ay:Number = screenVertices[uint(avertex+1)];
+        	var az:Number = uvts[uint(screenIndices[aindex]*3+2)];
         	
-        	var bvertex:int = screenIndices[bindex]*3;
+        	var bvertex:int = screenIndices[bindex]*2;
         	var bx:Number = screenVertices[bvertex];
-        	var by:Number = screenVertices[bvertex+1];
-        	var bz:Number = screenVertices[bvertex+2];
+        	var by:Number = screenVertices[uint(bvertex+1)];
+        	var bz:Number = uvts[uint(screenIndices[bindex]*3+2)];
         	
-            var mz:Number = (az + bz) / 2;
+            var mz:Number = (1/az + 1/bz) / 2;
 			
-            var faz:Number = focus + az;
-            var fbz:Number = focus + bz;
-            var ifmz:Number = 1 / (focus + mz) / 2;
+            var faz:Number = 1/az;
+            var fbz:Number = 1/bz;
+            var ifmz:Number = 1 / mz / 2;
 			
 			screenVertices[screenVertices.length] = (ax*faz + bx*fbz)*ifmz;
 			screenVertices[screenVertices.length] = (ay*faz + by*fbz)*ifmz;
-			screenVertices[screenVertices.length] = mz;
+			uvts.push(0, 0, 1/mz);
         }
     }
 }

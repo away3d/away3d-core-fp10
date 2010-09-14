@@ -2,10 +2,10 @@ package away3d.materials
 {
 	import away3d.arcane;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.lights.*;
 	
 	import flash.display.*;
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -20,8 +20,8 @@ package away3d.materials
 		[Embed(source="../pbks/LambertMultiPassDirShader.pbj", mimeType="application/octet-stream")]
 		private var NormalKernelDir : Class;
 		
-		private var _objectLightPos : Number3D = new Number3D();
-		private var _objectDirMatrix : MatrixAway3D = new MatrixAway3D();
+		private var _objectLightPos : Vector3D = new Vector3D();
+		private var _objectDirMatrix : Matrix3D = new Matrix3D();
 		
 		/**
 		 * Create a DiffuseMultiPassMaterial
@@ -41,9 +41,9 @@ package away3d.materials
 		 */
 		override protected function renderLightMap():void
         {
-        	var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
-        	var scenePosition : Number3D = _mesh.scenePosition;
-        	var lightPosition : Number3D;
+        	var invSceneTransform : Matrix3D = _mesh.inverseSceneTransform;
+        	var scenePosition : Vector3D = _mesh.scenePosition;
+        	var lightPosition : Vector3D;
         	var shaderJob : ShaderJob;
 	        var i : int;
 	        var diffuseStr : Number;
@@ -73,7 +73,7 @@ package away3d.materials
 			        }
 		        	
 		        	if (infinite || dist < (boundRadius+point.fallOff)*(boundRadius+point.fallOff)) {
-			        	_objectLightPos.transform(point.position, invSceneTransform);
+			        	_objectLightPos = invSceneTransform.transformVector(point.position);
 			        	_objectLightPos.normalize();
 	        			_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 		        		_pointLightShader.data.diffuseColor.value = [ point._red*diffuseStr, point._green*diffuseStr, point._blue*diffuseStr ];
@@ -95,7 +95,7 @@ package away3d.materials
 	        		directional = DirectionalLight3D(_directionals[i]);
 	        		diffuseStr = directional.diffuse*.5;
 	        		
-					_objectLightPos.rotate(directional.direction, invSceneTransform);
+					_objectLightPos = invSceneTransform.deltaTransformVector(directional.direction);
 					_objectLightPos.normalize();
 	        		_directionalLightShader.data.lightDirection.value = [ _objectLightPos.x, -_objectLightPos.y, _objectLightPos.z ];
 	        		_directionalLightShader.data.diffuseColor.value = [ directional._red*.5, directional._green*.5, directional._blue*.5 ];

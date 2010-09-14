@@ -2,10 +2,11 @@ package away3d.extrusions
 {
 	import away3d.core.base.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	import away3d.materials.*;
-
+	
+	import flash.geom.*;
+	
 	public class TextExtrusion extends Mesh
 	{
 		private var _mesh:Mesh;
@@ -81,17 +82,17 @@ package away3d.extrusions
 		
 		private function generatePathCommandExtrusion(drawingCommand:PathCommand, depth:Number, depthOffset:Number):void
 		{
-			var originalStart:Number3D = drawingCommand.pStart || new Number3D();
-			var originalControl:Number3D = drawingCommand.pControl || new Number3D();
-			var originalEnd:Number3D = drawingCommand.pEnd;
+			var originalStart:Vector3D = drawingCommand.pStart || new Vector3D();
+			var originalControl:Vector3D = drawingCommand.pControl || new Vector3D();
+			var originalEnd:Vector3D = drawingCommand.pEnd;
 			
-			var pStart:Number3D = new Number3D(originalStart.x, originalStart.y, originalStart.z + depthOffset);
-			var pControl:Number3D = new Number3D(originalControl.x, originalControl.y, originalControl.z + depthOffset);
-			var pEnd:Number3D = new Number3D(originalEnd.x, originalEnd.y, originalEnd.z + depthOffset);
+			var pStart:Vector3D = new Vector3D(originalStart.x, originalStart.y, originalStart.z + depthOffset);
+			var pControl:Vector3D = new Vector3D(originalControl.x, originalControl.y, originalControl.z + depthOffset);
+			var pEnd:Vector3D = new Vector3D(originalEnd.x, originalEnd.y, originalEnd.z + depthOffset);
 			
-			var pStartOffset:Number3D = new Number3D(pStart.x, pStart.y, pStart.z + depth);
-			var pControlOffset:Number3D = new Number3D(pControl.x, pControl.y, pControl.z + depth);
-			var pEndOffset:Number3D = new Number3D(pEnd.x, pEnd.y, pEnd.z + depth);
+			var pStartOffset:Vector3D = new Vector3D(pStart.x, pStart.y, pStart.z + depth);
+			var pControlOffset:Vector3D = new Vector3D(pControl.x, pControl.y, pControl.z + depth);
+			var pEndOffset:Vector3D = new Vector3D(pEnd.x, pEnd.y, pEnd.z + depth);
 			
 			var face:Face = new Face();
 			face.material = _material;
@@ -107,7 +108,7 @@ package away3d.extrusions
 				
 			face.lineTo(_mesh.x + pEnd.x, _mesh.y + pEnd.y, pEnd.z);
 			
-			var pStartAux:Number3D = new Number3D(originalStart.x, originalStart.y, originalStart.z + depthOffset);
+			var pStartAux:Vector3D = new Vector3D(originalStart.x, originalStart.y, originalStart.z + depthOffset);
 			if(drawingCommand.type == PathCommand.LINE)
 				face.lineTo(_mesh.x + pStartAux.x, _mesh.y + pStartAux.y, pStartAux.z);
 			else if(drawingCommand.type == PathCommand.CURVE)

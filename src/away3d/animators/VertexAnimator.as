@@ -2,8 +2,9 @@ package away3d.animators
 {
 	import away3d.arcane;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.core.utils.*;
+	
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -16,8 +17,8 @@ package away3d.animators
 		private var _cframe:Array;
 		private var _nframe:Array;
 		private var _vertices:Array = new Array();
-		private var _cPosition:Number3D;
-		private var _nPosition:Number3D;
+		private var _cPosition:Vector3D;
+		private var _nPosition:Vector3D;
 		
         protected override function updateTarget():void
         {
@@ -51,13 +52,13 @@ package away3d.animators
         	var i:int = _vertices.length;
 			if (interpolate) {
 	        	while(i--) {
-	        		_cPosition = _cframe[i] as Number3D;
-	        		_nPosition = _nframe[i] as Number3D;
+	        		_cPosition = _cframe[i] as Vector3D;
+	        		_nPosition = _nframe[i] as Vector3D;
 					(_vertices[i] as Vertex).setValue(_cPosition.x*_invFraction + _nPosition.x*_fraction, _cPosition.y*_invFraction + _nPosition.y*_fraction, _cPosition.z*_invFraction + _nPosition.z*_fraction);
 	        	}
 			} else {
 				while(i--) {
-					_cPosition = _cframe[i] as Number3D;
+					_cPosition = _cframe[i] as Vector3D;
 					(_vertices[i] as Vertex).setValue(_cPosition.x, _cPosition.y, _cPosition.z);
 	        	}
         	}

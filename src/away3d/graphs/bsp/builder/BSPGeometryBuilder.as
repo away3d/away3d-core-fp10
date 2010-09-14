@@ -1,18 +1,15 @@
 package away3d.graphs.bsp.builder
 {
-	import away3d.events.BSPBuildEvent;
-	import away3d.graphs.bsp.*;
 	import away3d.arcane;
 	import away3d.core.base.Face;
 	import away3d.core.base.Vertex;
 	import away3d.core.geom.NGon;
-	import away3d.graphs.TreeIterator;
-	import away3d.core.math.Number3D;
-	import away3d.events.BSPBuildEvent;
+	import away3d.events.*;
+	import away3d.graphs.*;
+	import away3d.graphs.bsp.*;
 
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.utils.getTimer;
+	import flash.events.*;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -166,13 +163,13 @@ package away3d.graphs.bsp.builder
 			var ngon : NGon;
 			var len : int = faces.length;
 			var i : int, c : int;
-			var u : Number3D, v : Number3D, cross : Number3D;
+			var u : Vector3D, v : Vector3D, cross : Vector3D;
 			var v1 : Vertex, v2 : Vertex, v3 : Vertex;
 			var face : Face;
 
-			u = new Number3D();
-			v = new Number3D();
-			cross = new Number3D();
+			u = new Vector3D();
+			v = new Vector3D();
+			cross = new Vector3D();
 			                                                           
 			do {
 				face = faces[i];
@@ -187,8 +184,8 @@ package away3d.graphs.bsp.builder
 				v.x = v1.x-v3.x;
 				v.y = v1.y-v3.y;
 				v.z = v1.z-v3.z;
-				cross.cross(u, v);
-				if (cross.modulo > BSPTree.EPSILON) {
+				cross = v.crossProduct(u);
+				if (cross.length > BSPTree.EPSILON) {
 					ngon = new NGon();
 					ngon.fromTriangle(face);
 					polys[c++] = ngon;

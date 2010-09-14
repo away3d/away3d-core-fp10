@@ -6,9 +6,10 @@ package away3d.cameras
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
 	import away3d.core.draw.*;
-	import away3d.core.math.*;
 	import away3d.core.utils.*;
-	import away3d.events.CameraEvent;
+	import away3d.events.*;
+	
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -33,7 +34,7 @@ package away3d.cameras
     	private var _zoomDirty:Boolean;
         private var _aperture:Number = 22;
     	private var _dof:Boolean = false;
-        private var _flipY:MatrixAway3D = new MatrixAway3D();
+        private var _flipY:Matrix3D = new Matrix3D();
         private var _focus:Number;
         private var _zoom:Number = 10;
         private var _lens:AbstractLens;
@@ -43,11 +44,12 @@ package away3d.cameras
         private var _clipBottom:Number;
         private var _clipLeft:Number;
         private var _clipRight:Number;
-    	private var _viewMatrix:MatrixAway3D = new MatrixAway3D();
+    	private var _viewMatrix:Matrix3D = new Matrix3D();
     	private var _view:View3D;
     	private var _cameraVarsStore:CameraVarsStore;
-    	private var _vertices:Array = new Array();
-    	private var _screenVertices:Array = new Array();
+    	private var _verts:Vector.<Number>;
+    	private var _screenVertices:Vector.<Number> = new Vector.<Number>();
+    	private var _screenUVs:Vector.<Number> = new Vector.<Number>();
 		private var _cameraupdated:CameraEvent;
 		
         private function notifyCameraUpdate():void
@@ -64,7 +66,7 @@ package away3d.cameras
         protected const toRADIANS:Number = Math.PI/180;
 		protected const toDEGREES:Number = 180/Math.PI;
 		
-    	public var invViewMatrix:MatrixAway3D = new MatrixAway3D();
+    	public var invViewMatrix:Matrix3D = new Matrix3D();
         
 		public var fixedZoom:Boolean;
 		
@@ -217,10 +219,14 @@ package away3d.cameras
 		 * 
 		 * @see	away3d.core.traverse.ProjectionTraverser
 		 */
-        public function get viewMatrix():MatrixAway3D
+        public function get viewMatrix():Matrix3D
         {
-        	invViewMatrix.multiply(sceneTransform, _flipY);
-        	_viewMatrix.inverse(invViewMatrix);
+        	invViewMatrix.rawData = sceneTransform.rawData;
+        	invViewMatrix.prepend(_flipY);
+        	
+        	_viewMatrix.rawData = invViewMatrix.rawData;
+        	_viewMatrix.invert();
+        	
         	return _viewMatrix;
         }
     	
@@ -243,9 +249,9 @@ package away3d.cameras
 	        doflevels = ini.getNumber("doflevels", 16);
             dof = ini.getBoolean("dof", false);
             
-            var lookat:Number3D = ini.getPosition("lookat");
+            var lookat:Vector3D = ini.getPosition("lookat");
 			
-			_flipY.syy = -1;
+			_flipY.appendScale(1, -1, 1);
 			
             if (lookat)
                 lookAt(lookat);
@@ -290,17 +296,18 @@ package away3d.cameras
         	update();
         	
             if (vertex == null)
-                _vertices = object.center;
+                _verts = Vector.<Number>([0, 0, 0]);
             else
-            	_vertices[0] = vertex;
+            	_verts = Vector.<Number>([vertex.x, vertex.y, vertex.z]);
             
-            _cameraVarsStore.createViewTransform(object).multiply(viewMatrix, object.sceneTransform);
+            _cameraVarsStore.createViewTransform(object).rawData = viewMatrix.rawData;
+            _cameraVarsStore.viewTransformDictionary[object].prepend(object.sceneTransform);
             
-            _screenVertices.length = 0;
-            
-            _lens.project(_cameraVarsStore.viewTransformDictionary[object], _vertices, _screenVertices);
-            
-            return new ScreenVertex(_screenVertices[0], _screenVertices[1], _screenVertices[2]);
+			_screenVertices.length = 0;
+			_screenUVs.length = 0;
+            _lens.project(_cameraVarsStore.viewTransformDictionary[object], _verts, _screenVertices, _screenUVs);
+
+			return new ScreenVertex(_screenVertices[uint(0)], _screenVertices[uint(1)], _lens.getScreenZ(_screenUVs[uint(2)]));
         }
     	        
 		/**
@@ -383,11 +390,11 @@ package away3d.cameras
             return camera;
         }
 		
-		public function unproject(mX:Number, mY:Number):Number3D
+		public function unproject(mX:Number, mY:Number):Vector3D
 		{	
 			var persp:Number = (focus*zoom) / focus;
-			var vector:Number3D = new Number3D(mX/persp, -mY/persp, focus);
-			transform.multiplyVector3x3(vector);
+			var vector:Vector3D = new Vector3D(mX/persp, -mY/persp, focus);
+			vector = transform.deltaTransformVector(vector);
 			return vector;
 		}
 		

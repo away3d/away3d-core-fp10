@@ -1,7 +1,8 @@
 package away3d.core.geom
 {
 	import away3d.core.base.*;
-	import away3d.core.math.*;
+	
+	import flash.geom.*;
 	
 	public class Frustum
 	{
@@ -19,7 +20,7 @@ package away3d.core.geom
 		
 		public var planes:Array;
 		
-		private var _matrix:MatrixAway3D = new MatrixAway3D();
+		private var _matrix:Matrix3D = new Matrix3D();
 		private var _distance:Number;
     	
 		/**
@@ -49,7 +50,7 @@ package away3d.core.geom
 		 * Classify this sphere against this frustum
 		 * @return int Frustum.IN, Frustum.OUT or Frustum.INTERSECT
 		 */
-		public function classifySphere(center:Number3D, radius:Number):int
+		public function classifySphere(center:Vector3D, radius:Number):int
 		{
 			var _plane:Plane3D;
 			for each(_plane in planes) {
@@ -117,14 +118,14 @@ package away3d.core.geom
 		/**
 		 * Extract this frustum's plane from the 4x4 projection matrix m.
 		 */	
-		public function extractFromMatrix(m:MatrixAway3D):void
+		public function extractFromMatrix(m:Matrix3D):void
 		{
 			_matrix = m;
 			
-			var sxx:Number = m.sxx, sxy:Number = m.sxy, sxz:Number = m.sxz, tx:Number = m.tx,
-			    syx:Number = m.syx, syy:Number = m.syy, syz:Number = m.syz, ty:Number = m.ty,
-			    szx:Number = m.szx, szy:Number = m.szy, szz:Number = m.szz, tz:Number = m.tz,
-			    swx:Number = m.swx, swy:Number = m.swy, swz:Number = m.swz, tw:Number = m.tw;
+			var sxx:Number = m.rawData[0], sxy:Number = m.rawData[4], sxz:Number = m.rawData[8], tx:Number = m.rawData[12],
+			    syx:Number = m.rawData[1], syy:Number = m.rawData[5], syz:Number = m.rawData[9], ty:Number = m.rawData[13],
+			    szx:Number = m.rawData[2], szy:Number = m.rawData[6], szz:Number = m.rawData[10], tz:Number = m.rawData[14],
+			    swx:Number = m.rawData[3], swy:Number = m.rawData[7], swz:Number = m.rawData[11], tw:Number = m.rawData[15];
 			
 			
 			var near:Plane3D = Plane3D(planes[NEAR]);

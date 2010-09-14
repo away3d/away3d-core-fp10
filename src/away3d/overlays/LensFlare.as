@@ -1,12 +1,11 @@
 package away3d.overlays
 {
-	import away3d.cameras.Camera3D;
-	import away3d.core.base.Object3D;
-	import away3d.core.draw.ScreenVertex;
-	import away3d.core.math.Number2D;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.draw.*;
 	
-	import flash.display.Sprite;
-	import flash.geom.ColorTransform;
+	import flash.geom.*;
+	import flash.display.*;
 	
 	//import gs.TweenMax;
 	
@@ -36,9 +35,9 @@ package away3d.overlays
 		private var _camera:Camera3D;
 		private var _flares:Array;
 		private var _lightSource:Object3D;
-		private var _sourceProjection:ScreenVertex;
-		private var _projectionVector:Number2D;
-		private var _projectionVersor:Number2D;
+		private var _sourceProjection:Vector3D;
+		private var _projectionVector:Point;
+		private var _projectionVersor:Point;
 		private var _projectionLength:Number;
 		private var _halo:Sprite;
 		private var _burnClip:Sprite;
@@ -94,11 +93,11 @@ package away3d.overlays
 			if(!_sourceProjection)
 				return;
 			
-			_projectionVector = new Number2D(-_sourceProjection.x, -_sourceProjection.y);
-			_projectionLength = _projectionVector.modulo;
+			_projectionVector = new Point(-_sourceProjection.x, -_sourceProjection.y);
+			_projectionLength = _projectionVector.length;
 			
 			_projectionVersor = _projectionVector;
-			_projectionVersor.normalize();
+			_projectionVersor.normalize(1);
 						
 			var ctVal:Number;
 			if(useBurning && _burnClip)

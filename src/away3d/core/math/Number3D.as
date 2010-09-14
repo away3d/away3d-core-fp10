@@ -1,33 +1,20 @@
 ﻿package away3d.core.math
 {
+    import flash.geom.*;
+    
     /**
     * A point in 3D space.
     */
-    public final class Number3D
+    public final class Number3D extends Vector3D
     {
     	private const MathPI:Number = Math.PI;
     	private var mod:Number;
         private var dist:Number;
-        private var num:Number3D;
+        private var num:Vector3D;
         private var vx:Number;
         private var vy:Number;
         private var vz:Number;
-        private var m1:MatrixAway3D;
-        
-        /**
-        * The horizontal coordinate of the 3d number object.
-        */ 
-        public var x:Number;
-    
-        /**
-        * The vertical coordinate of the 3d number object.
-        */ 
-        public var y:Number;
-    
-        /**
-        * The depth coordinate of the 3d number object.
-        */ 
-        public var z:Number;
+        private var m1:Matrix3D;
     	
     	/**
     	 * The modulo of the 3d number object.
@@ -46,7 +33,7 @@
         }
         
 		/**
-		 * Creates a new <code>Number3D</code> object.
+		 * Creates a new <code>Vector3D</code> object.
 		 *
 		 * @param	x	[optional]	A default value for the horizontal coordinate of the 3d number object. Defaults to 0.
 		 * @param	y	[optional]	A default value for the vertical coordinate of the 3d number object. Defaults to 0.
@@ -62,78 +49,13 @@
             if (n)
             	normalize();
         }
-        
-        
-        /**
-         * Compares the 3d number to another and returns a boolean indicating whether
-         * they match or not.
-         * 
-         * @param v The 3d number to compare against.
-         * 
-         * @return Boolean indicating match.
-        */
-        public function equals(v:Number3D) : Boolean
-        {
-        	return (v.x==x && v.y==y && v.z==z);
-        }
-        
-		
-        /**
-         * Duplicates a <code>Number3D</code>'s properties to this <code>Number3D</code>.
-         * @param v Number3D The <code>Number3D</code> whose properties will be cloned.
-         */		
-        public function clone(v:Number3D):void
-        {
-            x = v.x;
-            y = v.y;
-            z = v.z;
-        }
-		
-    	/**
-    	 * Fills the 3d number object with scaled values from the given 3d number.
-    	 * 
-    	 * @param	v	The 3d number object used for the scaling calculation.
-    	 * @param	s	The scaling value.
-    	 */
-        public function scale(v:Number3D, s:Number):void
-        {
-            x = v.x * s;
-            y = v.y * s;
-            z = v.z * s;
-        }  
-		
-    	/**
-    	 * Fills the 3d number object with the result from an addition of two 3d numbers.
-    	 * 
-    	 * @param	v	The first 3d number in the addition.
-    	 * @param	w	The second 3d number in the addition.
-    	 */
-        public function add(v:Number3D, w:Number3D):void
-        {
-            x = v.x + w.x;
-            y = v.y + w.y;
-            z = v.z + w.z;
-        }
-		
-    	/**
-    	 * Fills the 3d number object with the result from a subtraction of two 3d numbers.
-    	 * 
-    	 * @param	v	The starting 3d number in the subtraction.
-    	 * @param	w	The subtracting 3d number in the subtraction.
-    	 */
-        public function sub(v:Number3D, w:Number3D):void
-        {
-            x = v.x - w.x;
-            y = v.y - w.y;
-            z = v.z - w.z;
-        }
     	
     	/**
     	 * Calculates the distance from the 3d number object to the given 3d number.
     	 * 
     	 * @param	w	The 3d number object whose distance is calculated.
     	 */
-        public function distance(w:Number3D):Number
+        public function distance(w:Vector3D):Number
         {
             return Math.sqrt((x - w.x)*(x - w.x) + (y - w.y)*(y - w.y) + (z - w.z)*(z - w.z));
         }
@@ -144,7 +66,7 @@
     	 * @param	w	The 3d number object to use in the calculation.
     	 * @return		The dot product result.
     	 */
-        public function dot(w:Number3D):Number
+        public function dot(w:Vector3D):Number
         {
             return (x * w.x + y * w.y + z * w.z);
         }
@@ -155,7 +77,7 @@
     	 * @param	v	The first 3d number in the cross product calculation.
     	 * @param	w	The second 3d number in the cross product calculation.
     	 */
-        public function cross(v:Number3D, w:Number3D):void
+        public function cross(v:Vector3D, w:Vector3D):void
         {
         	if (this == v || this == w)
         		throw new Error("resultant cross product cannot be the same instance as an input");
@@ -170,44 +92,28 @@
     	 * @param	w	[optional]	The 3d number object to use in the calculation.
     	 * @return					An angle in radians representing the angle between the two 3d number objects. 
     	 */
-        public function getAngle(w:Number3D = null):Number
+        public function getAngle(w:Vector3D = null):Number
         {
             if (w == null)
-            	w = new Number3D();
-            return Math.acos(dot(w)/(modulo*w.modulo));
+            	w = new Vector3D();
+            return Math.acos(dot(w)/(modulo*w.length));
         }
         
-        /**
-        * Normalises the 3d number object.
-        * @param	val	[optional]	A normalisation coefficient representing the length of the resulting 3d number object. Defaults to 1.
-        */
-        public function normalize(val:Number = 1):void
-        {
-            mod = modulo/val;
-    
-            if (mod != 0 && mod != 1)
-            {
-                x /= mod;
-                y /= mod;
-                z /= mod;
-            }
-        }
-    	
     	/**
     	 * Fills the 3d number object with the result of a 3d matrix rotation performed on a 3d number.
     	 * 
     	 * @param	v	The 3d number object to use in the calculation.
     	 * @param	m	The 3d matrix object representing the rotation.
     	 */
-        public function rotate(v:Number3D, m:MatrixAway3D):void
+        public function rotate(v:Number3D, m:Matrix3D):void
         {
         	vx = v.x;
         	vy = v.y;
         	vz = v.z;
         	
-            x = vx * m.sxx + vy * m.sxy + vz * m.sxz;
-            y = vx * m.syx + vy * m.syy + vz * m.syz;
-            z = vx * m.szx + vy * m.szy + vz * m.szz;
+            x = vx * m.rawData[0] + vy * m.rawData[4] + vz * m.rawData[8];
+            y = vx * m.rawData[1] + vy * m.rawData[5] + vz * m.rawData[9];
+            z = vx * m.rawData[2] + vy * m.rawData[6] + vz * m.rawData[10];
         }
     	
     	/**
@@ -216,15 +122,15 @@
     	 * @param	v	The 3d number object to use in the calculation.
     	 * @param	m	The 3d matrix object representing the tranformation.
     	 */
-        public function transform(v:Number3D, m:MatrixAway3D):void
+        public function transform(v:Number3D, m:Matrix3D):void
         {
         	vx = v.x;
         	vy = v.y;
         	vz = v.z;
         	
-            x = vx * m.sxx + vy * m.sxy + vz * m.sxz + m.tx;
-            y = vx * m.syx + vy * m.syy + vz * m.syz + m.ty;
-            z = vx * m.szx + vy * m.szy + vz * m.szz + m.tz;
+            x = vx * m.rawData[0] + vy * m.rawData[4] + vz * m.rawData[8] + m.rawData[12];
+            y = vx * m.rawData[1] + vy * m.rawData[5] + vz * m.rawData[9] + m.rawData[13];
+            z = vx * m.rawData[2] + vy * m.rawData[6] + vz * m.rawData[10] + m.rawData[14];
         }
             	
     	/**
@@ -232,24 +138,23 @@
     	 * 
     	 * @param	m	The 3d matrix object to use in the calculation.
     	 */
-        public function matrix2euler(m:MatrixAway3D):void
+		public function matrix2euler(m1:Matrix3D):void
         {
-            if (!m1)
-            	m1 = new MatrixAway3D();
+            var m2:Matrix3D = new Matrix3D();
             
 		    // Extract the first angle, rotationX
-			x = -Math.atan2(m.szy, m.szz); // rot.x = Math<T>::atan2 (M[1][2], M[2][2]);
+			x = -Math.atan2(m1.rawData[6], m1.rawData[10]); // rot.x = Math<T>::atan2 (M[1][2], M[2][2]);
 			
-			// Remove the rotationX rotation from m1, so that the remaining
+			// Remove the rotationX rotation from m2, so that the remaining
 			// rotation, m2 is only around two axes, and gimbal lock cannot occur.
-			m1.rotationMatrix(1, 0, 0,  x);
-			m1.multiply(m, m1);
+			m2.appendRotation(x*180/MathPI, new Vector3D(1, 0, 0));
+			m2.append(m1);
 			
-			// Extract the other two angles, rot.y and rot.z, from m1.
-			var cy:Number = Math.sqrt(m1.sxx*m1.sxx + m1.syx*m1.syx); // T cy = Math<T>::sqrt (N[0][0]*N[0][0] + N[0][1]*N[0][1]);
+			// Extract the other two angles, rot.y and rot.z, from m2.
+			var cy:Number = Math.sqrt(m2.rawData[0]*m2.rawData[0] + m2.rawData[1]*m2.rawData[1]); // T cy = Math<T>::sqrt (N[0][0]*N[0][0] + N[0][1]*N[0][1]);
 			
-			y = Math.atan2(-m1.szx, cy); // rot.y = Math<T>::atan2 (-N[0][2], cy);
-			z = Math.atan2(-m1.sxy, m1.syy); //rot.z = Math<T>::atan2 (-N[1][0], N[1][1]);
+			y = Math.atan2(-m2.rawData[2], cy); // rot.y = Math<T>::atan2 (-N[0][2], cy);
+			z = Math.atan2(-m2.rawData[4], m2.rawData[5]); //rot.z = Math<T>::atan2 (-N[1][0], N[1][1]);
 			
 			// Fix angles
 			if(Math.round(z/MathPI) == 1) {
@@ -328,17 +233,17 @@
 			y = Math.asin(2*test);
 			z = Math.atan2(2*quarternion.x*quarternion.w-2*quarternion.y*quarternion.z , 1 - 2*sqx - 2*sqz);
 		}
-		
+				
     	/**
     	 * Fill the 3d number object with the scale values represented by the 3x3 matrix.
     	 * 
     	 * @param	m	The 3d matrix object to use in the calculation.
     	 */
-        public function matrix2scale(m:MatrixAway3D):void
+        public function matrix2scale(m:Matrix3D):void
         {
-            x = Math.sqrt(m.sxx*m.sxx + m.syx*m.syx + m.szx*m.szx);
-            y = Math.sqrt(m.sxy*m.sxy + m.syy*m.syy + m.szy*m.szy);
-            z = Math.sqrt(m.sxz*m.sxz + m.syz*m.syz + m.szz*m.szz);
+            x = Math.sqrt(m.rawData[0]*m.rawData[0] + m.rawData[1]*m.rawData[1] + m.rawData[2]*m.rawData[2]);
+            y = Math.sqrt(m.rawData[4]*m.rawData[4] + m.rawData[5]*m.rawData[5] + m.rawData[6]*m.rawData[6]);
+            z = Math.sqrt(m.rawData[8]*m.rawData[8] + m.rawData[9]*m.rawData[9] + m.rawData[10]*m.rawData[10]);
         }
         
         /**
@@ -352,13 +257,12 @@
          * 
          * @see flash.geom.Point.interpolate()
         */
-        public function interpolate(w:Number3D, f:Number):void
+        public function interpolate(w:Vector3D, f:Number):Vector3D
         {
-        	var d:Number3D = new Number3D;
+        	var d:Vector3D = w.subtract(this);
+        	d.scaleBy(f);
         	
-        	d.sub(w, this);
-        	d.scale(d, f);
-        	add(this, d);
+        	return this.add(d);
         }
         
         /**
@@ -373,47 +277,44 @@
          * 
          * @see flash.geom.Point.interpolate()
         */
-        public static function getInterpolated(w:Number3D, v:Number3D, f:Number):Number3D
+        public static function getInterpolated(w:Vector3D, v:Vector3D, f:Number):Vector3D
         {
-        	var d:Number3D = new Number3D;
+        	var d:Vector3D = w.subtract(v);
+        	d.scaleBy(f);
         	
-        	d.sub(w, v);
-        	d.scale(d, f);
-        	d.add(d, v);
-        	
-        	return d;
+        	return d.add(v);
         }
         
         
         /**
         * A 3d number object representing a relative direction forward.
         */
-        public static var FORWARD :Number3D = new Number3D( 0,  0,  1);
+        public static var FORWARD :Vector3D = new Vector3D( 0,  0,  1);
         
         /**
         * A 3d number object representing a relative direction backward.
         */
-        public static var BACKWARD:Number3D = new Number3D( 0,  0, -1);
+        public static var BACKWARD:Vector3D = new Vector3D( 0,  0, -1);
         
         /**
         * A 3d number object representing a relative direction left.
         */
-        public static var LEFT    :Number3D = new Number3D(-1,  0,  0);
+        public static var LEFT    :Vector3D = new Vector3D(-1,  0,  0);
         
         /**
         * A 3d number object representing a relative direction right.
         */
-        public static var RIGHT   :Number3D = new Number3D( 1,  0,  0);
+        public static var RIGHT   :Vector3D = new Vector3D( 1,  0,  0);
         
         /**
         * A 3d number object representing a relative direction up.
         */
-        public static var UP      :Number3D = new Number3D( 0,  1,  0);
+        public static var UP      :Vector3D = new Vector3D( 0,  1,  0);
         
         /**
         * A 3d number object representing a relative direction down.
         */
-        public static var DOWN    :Number3D = new Number3D( 0, -1,  0);
+        public static var DOWN    :Vector3D = new Vector3D( 0, -1,  0);
         
         /**
         * Calculates a 3d number object representing the closest point on a given plane to a given 3d point.
@@ -423,15 +324,14 @@
         * @param	n	The plane normal used in the calculation.
         * @return		The resulting 3d point.
         */
-        public function closestPointOnPlane(p:Number3D, k:Number3D, n:Number3D):Number3D
+        public function closestPointOnPlane(p:Vector3D, k:Vector3D, n:Vector3D):Vector3D
         {
-        	if (!num)
-        		num = new Number3D();
-        	
-        	num.sub(p, k);
-            dist = n.dot(num);
-            num.scale(n, dist);
-            num.sub(p, num);
+        	num = p.subtract(k);
+            dist = n.dotProduct(num);
+            num = n.clone();
+            num.scaleBy(dist);
+            num = p.subtract(num);
+            
             return num;
         }
 		
@@ -440,7 +340,7 @@
 		 * 
 		 * @return A string representation of the 3d number object.
 		 */
-        public function toString(): String
+        public override function toString(): String
         {
             return 'x:' + x + ' y:' + y + ' z:' + z;
         }

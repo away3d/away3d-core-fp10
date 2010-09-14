@@ -60,21 +60,21 @@ package away3d.materials.shaders
         /** @private */
 		arcane var _parentFaceMaterialVO:FaceMaterialVO;
         /** @private */
-		arcane var _n0:Number3D;
+		arcane var _n0:Vector3D;
         /** @private */
-		arcane var _n1:Number3D;
+		arcane var _n1:Vector3D;
         /** @private */
-		arcane var _n2:Number3D;
+		arcane var _n2:Vector3D;
         /** @private */
         arcane var _dict:Dictionary;
         /** @private */
 		arcane var _faceMaterialVO:FaceMaterialVO;
         /** @private */
-		arcane var _normal0:Number3D = new Number3D();
+		arcane var _normal0:Vector3D = new Vector3D();
         /** @private */
-		arcane var _normal1:Number3D = new Number3D();
+		arcane var _normal1:Vector3D = new Vector3D();
         /** @private */
-		arcane var _normal2:Number3D = new Number3D();
+		arcane var _normal2:Vector3D = new Vector3D();
         /** @private */
 		arcane var _map:Matrix = new Matrix();
 		/** @private */
@@ -106,14 +106,15 @@ package away3d.materials.shaders
 			_session = renderer._session;
         	_view = renderer._view;
 			
-        	_startIndex = renderer.primitiveProperties[priIndex*9];
-        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
-			_faceVO = renderer.primitiveElements[priIndex];
+        	_startIndex = renderer.primitiveProperties[uint(priIndex*9)];
+        	_endIndex = renderer.primitiveProperties[uint(priIndex*9 + 1)];
+			_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 			_uvs = renderer.primitiveUVs[priIndex];
 			_generated = renderer.primitiveGenerated[priIndex];
 			
 			_screenVertices = viewSourceObject.screenVertices;
 			_screenIndices = viewSourceObject.screenIndices;
+			_screenUVTs = viewSourceObject.screenUVTs;
 			
         	_face = _faceVO.face;
 			
@@ -129,14 +130,16 @@ package away3d.materials.shaders
 			_session = renderer._session;
         	_view = renderer._view;
 			
-        	_startIndex = renderer.primitiveProperties[priIndex*9];
-        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
-			_faceVO = renderer.primitiveElements[priIndex];
+        	_startIndex = renderer.primitiveProperties[uint(priIndex*9)];
+        	_endIndex = renderer.primitiveProperties[uint(priIndex*9 + 1)];
+			_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 			_uvs = renderer.primitiveUVs[priIndex];
 			_generated = renderer.primitiveGenerated[priIndex];
 			
 			_screenVertices = viewSourceObject.screenVertices;
 			_screenIndices = viewSourceObject.screenIndices;
+			_screenUVTs = viewSourceObject.screenUVTs;
+			
         	_face = _faceVO.face;
         	
 			_parentFaceMaterialVO = parentFaceMaterialVO;
@@ -188,8 +191,9 @@ package away3d.materials.shaders
         protected var _endIndex:uint;
         protected var _uvs:Array;
         protected var _generated:Boolean;
-        protected var _screenVertices:Array;
-		protected var _screenIndices:Array;
+        protected var _screenVertices:Vector.<Number>;
+		protected var _screenIndices:Vector.<int>;
+		protected var _screenUVTs:Vector.<Number>;
 		
         /**
         * Renders the shader to the specified face.
@@ -238,7 +242,7 @@ package away3d.materials.shaders
         */
 		protected function getMapping(priIndex:uint):Matrix
 		{
-			if (_generated)
+			//if (_generated)
 				return calcMapping(priIndex, _map);
 			
 			_faceMaterialVO = getFaceMaterialVO(_faceVO);
@@ -262,16 +266,16 @@ package away3d.materials.shaders
 			
 			_faceMaterialVO.invalidated = false;
 			//if (tri.generated) {
-				_uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-				_uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-				_uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+				_uvt[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+				_uvt[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+				_uvt[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
 				
 	    		return calcUVT(priIndex, _uvt);
 			//}
 			/*
-			_faceMaterialVO.uvtData[2] = 1/(_focus + tri.v0z);
-			_faceMaterialVO.uvtData[5] = 1/(_focus + tri.v1z);
-			_faceMaterialVO.uvtData[8] = 1/(_focus + tri.v2z);
+			_faceMaterialVO.uvtData[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
 			
 			if (!_faceMaterialVO.invalidated)
 				return _faceMaterialVO.uvtData;

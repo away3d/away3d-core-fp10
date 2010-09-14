@@ -1,15 +1,13 @@
 ﻿package away3d.materials
 {
-	import away3d.core.session.AbstractSession;
-	import away3d.core.vos.FaceVO;
     import away3d.arcane;
     import away3d.cameras.lenses.*;
     import away3d.containers.*;
     import away3d.core.base.*;
-    import away3d.core.draw.*;
-    import away3d.core.math.*;
     import away3d.core.render.*;
+	import away3d.core.session.*;
     import away3d.core.utils.*;
+	import away3d.core.vos.*;
     
     import flash.display.*;
     import flash.geom.*;
@@ -104,14 +102,15 @@
 			_session = renderer._session;
         	_view = renderer._view;
 			
-        	_startIndex = renderer.primitiveProperties[priIndex*9];
-        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
-			_faceVO = renderer.primitiveElements[priIndex];
+        	_startIndex = renderer.primitiveProperties[uint(priIndex*9)];
+        	_endIndex = renderer.primitiveProperties[uint(priIndex*9+1)];
+			_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 			_uvs = renderer.primitiveUVs[priIndex];
 			_generated = renderer.primitiveGenerated[priIndex];
 			
 			_screenVertices = viewSourceObject.screenVertices;
 			_screenIndices = viewSourceObject.screenIndices;
+			_screenUVTs = viewSourceObject.screenUVTs; 
 			_uvtData = getUVData(priIndex, viewSourceObject, renderer);
         	
 			_session.renderTriangleBitmap(_renderBitmap, _uvtData, _screenVertices, _screenIndices, _startIndex, _endIndex, smooth, repeat, _graphics);
@@ -120,7 +119,7 @@
 				
 			if(showNormals){
 				
-				_nn.rotate(_faceVO.face.normal, _view.cameraVarsStore.viewTransformDictionary[_source]);
+				_nn = _view.cameraVarsStore.viewTransformDictionary[_source].deltaTransformVector(_faceVO.face.normal);
 				
 				var index0:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9]];
 				var index1:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9] + 1];
@@ -165,7 +164,7 @@
 			//draw the bitmap once
 			renderSource(viewSourceObject.source, containerRect, new Matrix());
 			
-			_faceVO = renderer.primitiveElements[priIndex];
+			_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 			
 			//get the correct faceMaterialVO
 			_faceMaterialVO = getFaceMaterialVO(_faceVO.face.faceVO);
@@ -210,16 +209,16 @@
         }
         
 		private var _uvt:Vector.<Number> = new Vector.<Number>(9, true);
-		protected var _screenVertices:Array;
-		protected var _screenUVs:Array;
-		protected var _screenIndices:Array;
+		protected var _screenVertices:Vector.<Number>;
+		protected var _screenIndices:Vector.<int>;
+		protected var _screenUVTs:Vector.<Number>;
 		private var _smooth:Boolean;
 		private var _repeat:Boolean;
     	private var _shape:Shape;
         private var x:Number;
 		private var y:Number;
 		private var _showNormals:Boolean;
-		private var _nn:Number3D = new Number3D();
+		private var _nn:Vector3D = new Vector3D();
 		private var _sv0x:Number;
 		private var _sv0y:Number;
 		private var _sv1x:Number;
@@ -351,34 +350,34 @@
         		_focus = 0;
 			
 			if (_generated) {
-				_uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-				_uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-				_uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
-				_uvt[0] = _uvs[0].u;
-	    		_uvt[1] = 1 - _uvs[0].v;
-	    		_uvt[3] = _uvs[1].u;
-	    		_uvt[4] = 1 - _uvs[1].v;
-	    		_uvt[6] = _uvs[2].u;
-	    		_uvt[7] = 1 - _uvs[2].v;
+				_uvt[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+				_uvt[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+				_uvt[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
+				_uvt[uint(0)] = _uvs[0].u;
+	    		_uvt[uint(1)] = 1 - _uvs[0].v;
+	    		_uvt[uint(3)] = _uvs[1].u;
+	    		_uvt[uint(4)] = 1 - _uvs[1].v;
+	    		_uvt[uint(6)] = _uvs[2].u;
+	    		_uvt[uint(7)] = 1 - _uvs[2].v;
 	    		
 	    		return _uvt;
 			}
 			
-			_faceMaterialVO.uvtData[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-			_faceMaterialVO.uvtData[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-			_faceMaterialVO.uvtData[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+			_faceMaterialVO.uvtData[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
 			
 			if (!_faceMaterialVO.invalidated)
 				return _faceMaterialVO.uvtData;
 			
 			_faceMaterialVO.invalidated = false;
         	
-        	_faceMaterialVO.uvtData[0] = _uvs[0].u;
-    		_faceMaterialVO.uvtData[1] = 1 - _uvs[0].v;
-    		_faceMaterialVO.uvtData[3] = _uvs[1].u;
-    		_faceMaterialVO.uvtData[4] = 1 - _uvs[1].v;
-    		_faceMaterialVO.uvtData[6] = _uvs[2].u;
-    		_faceMaterialVO.uvtData[7] = 1 - _uvs[2].v;
+        	_faceMaterialVO.uvtData[uint(0)] = _uvs[0].u;
+    		_faceMaterialVO.uvtData[uint(1)] = 1 - _uvs[0].v;
+    		_faceMaterialVO.uvtData[uint(3)] = _uvs[1].u;
+    		_faceMaterialVO.uvtData[uint(4)] = 1 - _uvs[1].v;
+    		_faceMaterialVO.uvtData[uint(6)] = _uvs[2].u;
+    		_faceMaterialVO.uvtData[uint(7)] = 1 - _uvs[2].v;
         	
 			return _faceMaterialVO.uvtData;
 		}

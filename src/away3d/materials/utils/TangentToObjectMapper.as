@@ -1,14 +1,9 @@
 package away3d.materials.utils
 {
-	import away3d.core.base.Face;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.UV;
-	import away3d.core.base.Vertex;
-	import away3d.core.math.Number3D;
+	import away3d.core.base.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.Shader;
-	import flash.display.Sprite;
+	import flash.display.*;
+	import flash.geom.*;
 	
 	/**
 	 * A util class that transforms a tangent space normal map to an object space normal map.
@@ -52,24 +47,24 @@ package away3d.materials.utils
 			var faces : Array = model.geometry.faces;
 			var face : Face;
 			var i : int = faces.length;
-			var tangent : Number3D;
-			var bitangent : Number3D;
-			var edge1 : Number3D = new Number3D();
-			var edge2 : Number3D = new Number3D();
+			var tangent : Vector3D;
+			var bitangent : Vector3D;
+			var edge1 : Vector3D = new Vector3D();
+			var edge2 : Vector3D = new Vector3D();
 			var st1 : UV = new UV();
 			var st2 : UV = new UV();
 			var denom : Number;
 			
 			while (face = Face(faces[--i])) {
-				edge1.sub(face.v1.position, face.v0.position);
-				edge2.sub(face.v2.position, face.v0.position);
+				edge1 = face.v1.position.subtract(face.v0.position);
+				edge2 = face.v2.position.subtract(face.v0.position);
 				st1.u = face.uv1.u - face.uv0.u;
 				st1.v = face.uv1.v - face.uv0.v;
 				st2.u = face.uv2.u - face.uv0.u;
 				st2.v = face.uv2.v - face.uv0.v;
 				denom = 1.0/(st1.u*st2.v-st2.u*st1.v);
-				tangent = new Number3D();
-				bitangent = new Number3D();
+				tangent = new Vector3D();
+				bitangent = new Vector3D();
 				tangent.x = denom*(st2.v*edge1.x - st1.v*edge2.x);
 				tangent.y = denom*(st2.v*edge1.y - st1.v*edge2.y);
 				tangent.z = denom*(st2.v*edge1.z - st1.v*edge2.z);
@@ -93,18 +88,18 @@ package away3d.materials.utils
 			var vertices : Array = model.geometry.vertices;
 			var v : Vertex;
 			var i : int = vertices.length;
-			var tangent : Number3D;
-			var bitangent : Number3D;
-			var normal : Number3D;
+			var tangent : Vector3D;
+			var bitangent : Vector3D;
+			var normal : Vector3D;
 			var len : int;
 			var face : Face;
 			var faces : Array;
 			var j : int;
 
 			while (v = Vertex(vertices[--i])) {
-				tangent = new Number3D();
-				bitangent = new Number3D();
-				normal = new Number3D();
+				tangent = new Vector3D();
+				bitangent = new Vector3D();
+				normal = new Vector3D();
 				faces = v.parents;
 				j = faces.length;
 				
@@ -136,12 +131,12 @@ package away3d.materials.utils
 			var faces : Array = model.geometry.faces;
 			var face : Face;
 			var i : int = faces.length;
-			var normal0 : Number3D;
-			var tangent0 : Number3D;
-			var bitangent0 : Number3D;
-			var normal : Number3D;
-			var tangent : Number3D;
-			var bitangent : Number3D;
+			var normal0 : Vector3D;
+			var tangent0 : Vector3D;
+			var bitangent0 : Vector3D;
+			var normal : Vector3D;
+			var tangent : Vector3D;
+			var bitangent : Vector3D;
 			var uv0 : UV = new UV();
 			var uv1 : UV = new UV();
 			var uv2 : UV = new UV();
@@ -212,9 +207,9 @@ package away3d.materials.utils
 			var faces : Array = model.geometry.faces;
 			var face : Face;
 			var i : int = faces.length;
-			var normal : Number3D = new Number3D();
-			var tangent : Number3D = new Number3D();
-			var bitangent : Number3D = new Number3D();
+			var normal : Vector3D = new Vector3D();
+			var tangent : Vector3D = new Vector3D();
+			var bitangent : Vector3D = new Vector3D();
 			var uv0 : UV = new UV();
 			var uv1 : UV = new UV();
 			var uv2 : UV = new UV();

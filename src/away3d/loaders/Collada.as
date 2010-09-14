@@ -1,16 +1,16 @@
 ﻿package away3d.loaders
 {
-	import away3d.animators.data.*;
 	
 	import away3d.arcane;
 	import away3d.animators.*;
+	import away3d.animators.data.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	import away3d.loaders.data.*;
 	import away3d.loaders.utils.*;
 	
+	import flash.geom.*;
 	import flash.utils.*;
 	
 	use namespace arcane;
@@ -26,9 +26,9 @@
         private var channelLibrary:ChannelLibrary;
         private var yUp:Boolean;
         private var toRADIANS:Number = Math.PI / 180;
-		private var rotationMatrix:MatrixAway3D = new MatrixAway3D();
-    	private var scalingMatrix:MatrixAway3D = new MatrixAway3D();
-    	private var translationMatrix:MatrixAway3D = new MatrixAway3D();
+		private var rotationMatrix:Matrix3D = new Matrix3D();
+    	private var scalingMatrix:Matrix3D = new Matrix3D();
+    	private var translationMatrix:Matrix3D = new Matrix3D();
         private var VALUE_X:String;
         private var VALUE_Y:String;
         private var VALUE_Z:String;
@@ -302,33 +302,38 @@
            	return strings;
         }
         
-        private function rotateMatrix(vector:Array):MatrixAway3D
+        private function rotateMatrix(vector:Array):Matrix3D
         {
-            if (yUp) {
-                	rotationMatrix.rotationMatrix(vector[0], -vector[1], -vector[2], vector[3]*toRADIANS);
-            } else {
-                	rotationMatrix.rotationMatrix(vector[0], vector[2], vector[1], -vector[3]*toRADIANS);
-            }
+        	rotationMatrix.identity();
+        	
+            if (yUp)
+                rotationMatrix.appendRotation(vector[3], new Vector3D(vector[0], -vector[1], -vector[2]));
+            else
+                rotationMatrix.appendRotation(-vector[3], new Vector3D(vector[0], vector[2], vector[1]));
             
             return rotationMatrix;
         }
 
-        private function translateMatrix(vector:Array):MatrixAway3D
+        private function translateMatrix(vector:Array):Matrix3D
         {
+        	translationMatrix.identity();
+        	
             if (yUp)
-                translationMatrix.translationMatrix(-vector[0]*scaling, vector[1]*scaling, vector[2]*scaling);
+                translationMatrix.appendTranslation(-vector[0]*scaling, vector[1]*scaling, vector[2]*scaling);
             else
-                translationMatrix.translationMatrix(vector[0]*scaling, vector[2]*scaling, vector[1]*scaling);
+                translationMatrix.appendTranslation(vector[0]*scaling, vector[2]*scaling, vector[1]*scaling);
 			
             return translationMatrix;
         }
 		
-        private function scaleMatrix(vector:Array):MatrixAway3D
+        private function scaleMatrix(vector:Array):Matrix3D
         {
+        	scalingMatrix.identity();
+        	
             if (yUp)
-                scalingMatrix.scaleMatrix(vector[0], vector[1], vector[2]);
+                scalingMatrix.appendScale(vector[0], vector[1], vector[2]);
             else
-                scalingMatrix.scaleMatrix(vector[0], vector[2], vector[1]);
+                scalingMatrix.appendScale(vector[0], vector[2], vector[1]);
 			
             return scalingMatrix;
         }
@@ -495,7 +500,7 @@
 		 */
         private function parseNode(node:XML, parent:ContainerData):void
         {	
-			var _transform:MatrixAway3D;
+			var _transform:Matrix3D;
 	    	var _objectData:ObjectData;
 	    	
         	if (String(node["instance_light"].@url) != "" || String(node["instance_camera"].@url) != "")
@@ -545,32 +550,31 @@
 				switch(nodeName)
                 {
 					case "translate":
-                        _transform.multiply(_transform, translateMatrix(arrayChild));
+                        _transform.prepend(translateMatrix(arrayChild));
                         
                         break;
 
                     case "rotate":
                     	sid = childNode.@sid;
                         if (_objectData is BoneData && (sid == "rotateX" || sid == "rotateY" || sid == "rotateZ" || sid == "rotX" || sid == "rotY" || sid == "rotZ"))
-							boneData.jointTransform.multiply(boneData.jointTransform, rotateMatrix(arrayChild));
+							boneData.jointTransform.prepend(rotateMatrix(arrayChild));
                         else
-	                        _transform.multiply(_transform, rotateMatrix(arrayChild));
+	                        _transform.prepend(rotateMatrix(arrayChild));
 	                    
                         break;
 						
                     case "scale":
                         if (_objectData is BoneData)
-							boneData.jointTransform.multiply(boneData.jointTransform, scaleMatrix(arrayChild));
+							boneData.jointTransform.prepend(scaleMatrix(arrayChild));
                         else
-	                        _transform.multiply(_transform, scaleMatrix(arrayChild));
+	                        _transform.prepend(scaleMatrix(arrayChild));
 						
                         break;
 						
                     // Baked transform matrix
                     case "matrix":
-                    	var m:MatrixAway3D = new MatrixAway3D();
-                    	m.array2matrix(arrayChild, yUp, scaling);
-                        _transform.multiply(_transform, m);
+                    	var m:Matrix3D = array2matrix(arrayChild, yUp, scaling);
+                        _transform.prepend(m);
 						break;
 						
                     case "node":
@@ -787,14 +791,13 @@
             tmp = tmp.replace(/\n/g, " ");
             var nameArray:Array = getStringArray(tmp);
             
-			var bind_shape:MatrixAway3D = new MatrixAway3D();
-			bind_shape.array2matrix(getNumberArray(skin["bind_shape_matrix"][0].toString()), yUp, scaling);
+			var bind_shape:Matrix3D = array2matrix(getNumberArray(skin["bind_shape_matrix"][0].toString()), yUp, scaling);
 			
 			var bindMatrixId:String = getId(skin["joints"].input.(@semantic == "INV_BIND_MATRIX").@source);
             var float_array:Array = getNumberArray(skin["source"].(@id == bindMatrixId)[0].float_array.toString());
             
             var v:Array;
-            var matrix:MatrixAway3D;
+            var matrix:Matrix3D;
             var name:String;
 			var skinController:SkinController;
             var i:int = 0;
@@ -802,9 +805,8 @@
             while (i < float_array.length)
             {
             	name = nameArray[i / 16];
-				matrix = new MatrixAway3D();
-				matrix.array2matrix(float_array.slice(i, i+16), yUp, scaling);
-				matrix.multiply(matrix, bind_shape);
+				matrix = array2matrix(float_array.slice(i, i+16), yUp, scaling);
+				matrix.prepend(bind_shape);
 				
                 geometryData.skinControllers.push(skinController = new SkinController());
                 skinController.name = name;
@@ -1009,8 +1011,7 @@
                            channel.param[i] = [];
                             
                             if (stride == 16) {
-		                    	var m:MatrixAway3D = new MatrixAway3D();
-		                    	m.array2matrix(list.slice(i*stride, i*stride + 16), yUp, scaling);
+		                    	var m:Matrix3D = array2matrix(list.slice(i*stride, i*stride + 16), yUp, scaling);
 		                    	channel.param[i].push(m);
                             } else {
 	                            j = 0;
@@ -1036,7 +1037,7 @@
                         	channel.inTangent[i] = [];
                         	j = 0;
                             while (j < stride) {
-                                channel.inTangent[i].push(new Number2D(list[stride * i + j], list[stride * i + j + 1]));
+                                channel.inTangent[i].push(new Point(list[stride * i + j], list[stride * i + j + 1]));
                             	++j;
                             }
                             ++i;
@@ -1049,7 +1050,7 @@
                         	channel.outTangent[i] = [];
                         	j = 0;
                             while (j < stride) {
-                                channel.outTangent[i].push(new Number2D(list[stride * i + j], list[stride * i + j + 1]));
+                                channel.outTangent[i].push(new Point(list[stride * i + j], list[stride * i + j + 1]));
                             	++j;
                             }
                             ++i;
@@ -1141,6 +1142,58 @@
 			return int(colorArray[0]*255 << 16) | int(colorArray[1]*255 << 8) | int(colorArray[2]*255);
 		}
 		
+		private function array2matrix(ar:Array, yUp:Boolean, scaling:Number):Matrix3D
+        {
+        	var m:Matrix3D = new Matrix3D();
+        	var rawData:Vector.<Number> = new Vector.<Number>(16, true);
+        	
+            if (ar.length >= 12) {
+            	if (yUp) {
+            		
+	                rawData[0] = ar[0];
+	                rawData[4] = -ar[1];
+	                rawData[8] = -ar[2];
+	                rawData[12] = -ar[3]*scaling;
+	                rawData[1] = -ar[4];
+	                rawData[5] = ar[5];
+	                rawData[9] = ar[6];
+	                rawData[13] = ar[7]*scaling;
+	                rawData[2] = -ar[8];
+	                rawData[6] = ar[9];
+	                rawData[10] = ar[10];
+	                rawData[14] = ar[11]*scaling;
+            	} else {
+            		rawData[0] = ar[0];
+	                rawData[8] = ar[1];
+	                rawData[4] = ar[2];
+	                rawData[12] = ar[3]*scaling;
+	                rawData[2] = ar[4];
+	                rawData[10] = ar[5];
+	                rawData[6] = ar[6];
+	                rawData[14] = ar[7]*scaling;
+	                rawData[1] = ar[8];
+	                rawData[9] = ar[9];
+	                rawData[5] = ar[10];
+	                rawData[13] = ar[11]*scaling;
+            	}
+            }
+            if(ar.length >= 16) {               
+            	rawData[3] = ar[12];
+                rawData[7] = ar[13];
+                rawData[11] = ar[14];
+                rawData[15] =  ar[15];
+            } else {
+            	rawData[3] = 0;
+            	rawData[7] = 0;
+            	rawData[11] = 0;
+            	rawData[15] = 1;
+            }
+
+			m.rawData = rawData;
+			
+			return m;
+        }
+            
 		/**
 		 * Converts a data string to an array of objects. Handles vertex and uv objects
 		 */

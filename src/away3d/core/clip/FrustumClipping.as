@@ -62,7 +62,7 @@ package away3d.core.clip
             objectCulling = ini.getBoolean("objectCulling", true);
         }
         
-		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedIndices:Array, startIndices:Array):void
+		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];
@@ -81,9 +81,9 @@ package away3d.core.clip
 			for each(_faceVO in _faceVOs)
 			{
 				if(true/*_faceVO.vertices.length == 3*/)
-					checkNormalFace(clippedFaceVOs, clippedSegmentVOs, clippedSpriteVOs, clippedVertices, clippedIndices, startIndices);
+					checkNormalFace(clippedFaceVOs, clippedSegmentVOs, clippedSpriteVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
 				else
-					checkIrregularFace(clippedFaceVOs, clippedSegmentVOs, clippedSpriteVOs, clippedVertices, clippedIndices, startIndices);
+					checkIrregularFace(clippedFaceVOs, clippedSegmentVOs, clippedSpriteVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
 	        }
 	        
 	        startIndices[startIndices.length] = clippedIndices.length;
@@ -95,7 +95,7 @@ package away3d.core.clip
 		 */		
 		private var _verticesC:Array;
 		private var _distances:Array;
-		private function checkIrregularFace(clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedBillboards:Array, clippedVertices:Array, clippedIndices:Array, startIndices:Array):void
+		private function checkIrregularFace(clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedBillboards:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_pass = true;
 			
@@ -409,7 +409,7 @@ package away3d.core.clip
     			_newFaceVO.vertices.push(newVertices[i]);
 		}
 		
-		private function checkNormalFace(clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedIndices:Array, startIndices:Array):void
+		private function checkNormalFace(clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_pass = true;
 				
@@ -484,18 +484,21 @@ package away3d.core.clip
         		
 				if(!_processed[_v0]) {
                     clippedVertices[clippedVertices.length] = _v0;
+                    clippedVerts.push(_v0.x, _v0.y, _v0.z);
                     clippedIndices[clippedIndices.length] = (_processed[_v0] = clippedVertices.length) - 1;
                 } else {
                 	clippedIndices[clippedIndices.length] = _processed[_v0] - 1;
                 }
                 if(!_processed[_v1]) {
                     clippedVertices[clippedVertices.length] = _v1;
+                    clippedVerts.push(_v1.x, _v1.y, _v1.z);
                     clippedIndices[clippedIndices.length] = (_processed[_v1] = clippedVertices.length) - 1;
                 } else {
                 	clippedIndices[clippedIndices.length] = _processed[_v1] - 1;
                 }
                 if(!_processed[_v2]) {
                     clippedVertices[clippedVertices.length] = _v2;
+                    clippedVerts.push(_v2.x, _v2.y, _v2.z);
                     clippedIndices[clippedIndices.length] = (_processed[_v2] = clippedVertices.length) - 1;
                 } else {
                 	clippedIndices[clippedIndices.length] = _processed[_v2] - 1;

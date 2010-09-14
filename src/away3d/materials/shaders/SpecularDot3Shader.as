@@ -66,7 +66,7 @@
         private var _normalBitmap:BitmapData;
         private var _shininess:Number;
 		private var _specular:uint;
-		private var _specularTransform:MatrixAway3D;
+		private var _specularTransform:Matrix3D;
 		private var _szx:Number;
 		private var _szy:Number;
 		private var _szz:Number;
@@ -79,15 +79,12 @@
 		{
 			priIndex;
 			
-			uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-			uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-			uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
-			uvt[0] = _uvs[0].u;
-    		uvt[1] = 1 - _uvs[0].v;
-    		uvt[3] = _uvs[1].u;
-    		uvt[4] = 1 - _uvs[1].v;
-    		uvt[6] = _uvs[2].u;
-    		uvt[7] = 1 - _uvs[2].v;
+			uvt[uint(0)] = _uvs[0].u;
+    		uvt[uint(1)] = 1 - _uvs[0].v;
+    		uvt[uint(3)] = _uvs[1].u;
+    		uvt[uint(4)] = 1 - _uvs[1].v;
+    		uvt[uint(6)] = _uvs[2].u;
+    		uvt[uint(7)] = 1 - _uvs[2].v;
     		
     		return uvt;
 		}
@@ -144,9 +141,9 @@
 	    	{
 				_specularTransform = directional.specularTransform[_source];
 				 
-				_szx = _specularTransform.szx;
-				_szy = _specularTransform.szy;
-				_szz = _specularTransform.szz;
+				_szx = _specularTransform.rawData[2];
+				_szy = _specularTransform.rawData[6];
+				_szz = _specularTransform.rawData[10];
 				
 				_normal0z = _n0.x * _szx + _n0.y * _szy + _n0.z * _szz;
 				_normal1z = _n1.x * _szx + _n1.y * _szy + _n1.z * _szz;

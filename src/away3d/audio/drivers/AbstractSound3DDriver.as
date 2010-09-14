@@ -1,12 +1,11 @@
 package away3d.audio.drivers
 {
-	import away3d.core.math.Number3D;
-	
-	import flash.media.Sound;
+	import flash.geom.*;
+	import flash.media.*;
 	
 	public class AbstractSound3DDriver
 	{
-		protected var _ref_v:Number3D;
+		protected var _ref_v:Vector3D;
 		protected var _src:Sound;
 		protected var _volume:Number;
 		protected var _scale : Number;
@@ -73,7 +72,7 @@ package away3d.audio.drivers
 		
 		
 		
-		public function updateReferenceVector(v:Number3D):void
+		public function updateReferenceVector(v:Vector3D):void
 		{
 			this._ref_v = v;
 		}

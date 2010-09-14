@@ -1,16 +1,15 @@
 ﻿package away3d.animators.data
 {
-	import away3d.core.base.Geometry;
-	import away3d.core.base.Vertex;
 	import away3d.arcane;
 	import away3d.containers.*;
-	import away3d.core.math.*;
+	
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
     public class SkinController
     {
-    	private var _sceneTransform:MatrixAway3D = new MatrixAway3D();
+    	private var _sceneTransform:Matrix3D = new Matrix3D();
     	private var _sceneTransformDirty:Boolean;
     	
         /**
@@ -26,25 +25,26 @@
 		/**
 		 * Defines the 3d matrix that transforms the position of the <code>Bone</code> to the position of the <code>SkinVertices</code>.
 		 */
-        public var bindMatrix:MatrixAway3D;
+        public var bindMatrix:Matrix3D;
                 
         /**
          * Store of all <code>SkinVertex</code> objects being controlled
          */
         public var skinVertices:Array =  new Array();
         
-        public function get sceneTransform():MatrixAway3D
+        public function get sceneTransform():Matrix3D
 		{
 			if (_sceneTransformDirty) {
 				_sceneTransformDirty = false;
-	        	sceneTransform.multiply(joint.sceneTransform, bindMatrix);
-	        	sceneTransform.multiply(inverseTransform, sceneTransform);
+				sceneTransform.rawData = joint.sceneTransform.rawData;
+	        	sceneTransform.prepend(bindMatrix);
+	        	sceneTransform.append(inverseTransform);
 			}
 			
 			return _sceneTransform;
 		}
 		
-        public var inverseTransform:MatrixAway3D;
+        public var inverseTransform:Matrix3D;
         
         public function update():void
         {

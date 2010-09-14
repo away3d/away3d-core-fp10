@@ -3,10 +3,10 @@ package away3d.materials
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.lights.*;
 	
 	import flash.display.*;
+	import flash.geom.*;
 
 	use namespace arcane;
 	
@@ -18,7 +18,7 @@ package away3d.materials
 		[Embed(source="../pbks/LambertNormalMapShader.pbj", mimeType="application/octet-stream")]
 		private var Kernel : Class;
 		
-		private var _objectLightPos : Number3D = new Number3D();
+		private var _objectLightPos : Vector3D = new Vector3D();
 		
 		/**
 		 * Creates a new DiffusePBMaterial object.
@@ -35,7 +35,7 @@ package away3d.materials
 		
 		override protected function updatePixelShader(source:Object3D, view:View3D):void
 		{
-			var invSceneTransform : MatrixAway3D = _mesh.inverseSceneTransform;
+			var invSceneTransform : Matrix3D = _mesh.inverseSceneTransform;
 			var point : PointLight3D;
 			var ambient : AmbientLight3D;
 			var diffuseStr : Number;
@@ -63,7 +63,7 @@ package away3d.materials
 			if (source.scene.pointLights.length > 0) {
 				point = source.scene.pointLights[0];
 				diffuseStr = point.diffuse * point.brightness;
-				_objectLightPos.transform(point.position, invSceneTransform);
+				_objectLightPos = invSceneTransform.transformVector(point.position);
 				_pointLightShader.data.lightPosition.value = [ _objectLightPos.x, _objectLightPos.y, _objectLightPos.z ];
 				_pointLightShader.data.lightRadius.value = [ point.radius ];
 				

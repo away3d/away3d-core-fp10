@@ -19,15 +19,15 @@ package away3d.core.clip
 		 */
         public override function checkPrimitive(renderer:Renderer, priIndex:uint):Boolean
         {
-        	var primitiveProperties:Array = renderer.primitiveProperties;
+        	var primitiveProperties:Vector.<Number> = renderer.primitiveProperties;
         	var index:uint = priIndex*9;
-            if (primitiveProperties[index + 3] < minX)
+            if (primitiveProperties[uint(index + 3)] < minX)
                 return false;
-            if (primitiveProperties[index + 2] > maxX)
+            if (primitiveProperties[uint(index + 2)] > maxX)
                 return false;
-            if (primitiveProperties[index + 5] < minY)
+            if (primitiveProperties[uint(index + 5)] < minY)
                 return false;
-            if (primitiveProperties[index + 4] > maxY)
+            if (primitiveProperties[uint(index + 4)] > maxY)
                 return false;
 			
             return true;

@@ -5,10 +5,11 @@ package away3d.core.traverse
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
 	import away3d.core.render.*;
 	import away3d.core.utils.*;
 	import away3d.materials.*;
+    
+    import flash.geom.*;
     
 	use namespace arcane;
 	
@@ -19,7 +20,7 @@ package away3d.core.traverse
     {
     	private var _view:View3D;
     	private var _clipping:Clipping;
-    	private var _viewTransform:MatrixAway3D;
+    	private var _viewTransform:Matrix3D;
     	private var _cameraVarsStore:CameraVarsStore;
     	private var _nodeClassification:int;
     	private var _consumer:Renderer;

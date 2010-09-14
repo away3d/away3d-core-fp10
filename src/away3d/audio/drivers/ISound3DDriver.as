@@ -1,7 +1,7 @@
 package away3d.audio.drivers
 {
-	import flash.media.Sound;
-	import away3d.core.math.Number3D;
+	import flash.media.*;
+	import flash.geom.*;
 	
 	public interface ISound3DDriver
 	{
@@ -69,6 +69,6 @@ package away3d.audio.drivers
 		 * 
 		 * @param v Sound source position vector relative to the listener.
 		*/
-		function updateReferenceVector(v:Number3D) : void;
+		function updateReferenceVector(v:Vector3D) : void;
 	}
 }

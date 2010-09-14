@@ -1,17 +1,16 @@
 ﻿package away3d.containers
 {
-    
     import away3d.arcane;
 	import away3d.animators.data.*;
     import away3d.core.base.*;
-    import away3d.core.math.*;
-    import away3d.core.project.*;
     import away3d.core.traverse.*;
     import away3d.core.utils.*;
     import away3d.events.*;
 	import away3d.lights.*;
     import away3d.loaders.data.*;
     import away3d.loaders.utils.*;
+    
+    import flash.geom.*;
     
     use namespace arcane;
     
@@ -116,11 +115,11 @@
             	
 	        	var mradius:Number = 0;
 	        	var cradius:Number;
-	            var num:Number3D = new Number3D();
+	            var num:Vector3D;
 	            for each (var child:Object3D in children) {
-	            	num.sub(child.position, _pivotPoint);
+	            	num = child.position.subtract(_pivotPoint);
 	            	
-	                cradius = num.modulo + child.parentBoundingRadius;
+	                cradius = num.length + child.parentBoundingRadius;
 	                if (mradius < cradius)
 	                    mradius = cradius;
 	            }
@@ -430,9 +429,9 @@
 				child.moveTo(x - dx, y - dy, z - dz);
 			}
 			
-			var dV:Number3D = new Number3D(dx, dy, dz);
-            dV.rotate(dV, _transform);
-            dV.add(dV, position);
+			var dV:Vector3D = new Vector3D(dx, dy, dz);
+            dV = _transform.deltaTransformVector(dV);
+            dV = dV.add(position);
             moveTo(dV.x, dV.y, dV.z);  
 		}
 		
@@ -536,7 +535,7 @@
 		            //geometry.rootBone = rootBone;
 		            
 		            for each (skinController in skinControllers) {
-		            	//skinController.inverseTransform = new MatrixAway3D();
+		            	//skinController.inverseTransform = new Matrix3D();
 		            	skinController.inverseTransform = child.parent.inverseSceneTransform;
 		            }
 				}

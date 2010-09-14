@@ -70,22 +70,22 @@ package away3d.core.clip
 		 */
         public override function checkPrimitive(renderer:Renderer, priIndex:uint):Boolean
         {
-        	var primitiveProperties:Array = renderer.primitiveProperties;
+        	var primitiveProperties:Vector.<Number> = renderer.primitiveProperties;
         	var index:uint = priIndex*9;
         	
-            if (primitiveProperties[index + 3] < minX)
+            if (primitiveProperties[uint(index + 3)] < minX)
                 return false;
-            if (primitiveProperties[index + 2] > maxX)
+            if (primitiveProperties[uint(index + 2)] > maxX)
                 return false;
-            if (primitiveProperties[index + 5] < minY)
+            if (primitiveProperties[uint(index + 5)] < minY)
                 return false;
-            if (primitiveProperties[index + 4] > maxY)
+            if (primitiveProperties[uint(index + 4)] > maxY)
                 return false;
 			
             return true;
         }
         
-		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedIndices:Array, startIndices:Array):void
+		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];
@@ -147,18 +147,21 @@ package away3d.core.clip
 	        		
 					if (!_processed[_v0]) {
                         clippedVertices[clippedVertices.length] = _v0;
+                        clippedVerts.push(_v0.x, _v0.y, _v0.z);
                         clippedIndices[clippedIndices.length] = (_processed[_v0] = clippedVertices.length) - 1;
                     } else {
                     	clippedIndices[clippedIndices.length] = _processed[_v0] - 1;
                     }
                     if (!_processed[_v1]) {
                         clippedVertices[clippedVertices.length] = _v1;
+                        clippedVerts.push(_v1.x, _v1.y, _v1.z);
                         clippedIndices[clippedIndices.length] = (_processed[_v1] = clippedVertices.length) - 1;
                     } else {
                     	clippedIndices[clippedIndices.length] = _processed[_v1] - 1;
                     }
                     if (!_processed[_v2]) {
                         clippedVertices[clippedVertices.length] = _v2;
+                        clippedVerts.push(_v2.x, _v2.y, _v2.z);
                         clippedIndices[clippedIndices.length] = (_processed[_v2] = clippedVertices.length) - 1;
                     } else {
                     	clippedIndices[clippedIndices.length] = _processed[_v2] - 1;

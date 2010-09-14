@@ -1,6 +1,6 @@
 package away3d.core.geom
 {
-	import away3d.core.math.*;
+	import flash.geom.*;
 	
 	public class PathCommand
 	{
@@ -11,24 +11,24 @@ package away3d.core.geom
 		/**
 		 * 
 		 */
-		public var pStart:Number3D;
+		public var pStart:Vector3D;
 		
 		/**
 		 * 
 		 */
-		public var pControl:Number3D;
+		public var pControl:Vector3D;
 		
 		/**
 		 * 
 		 */
-		public var pEnd:Number3D;
+		public var pEnd:Vector3D;
 		
 		/**
 		 * 
 		 */
 		public var type:String;
 		
-		public function PathCommand(type:String, pStart:Number3D = null, pControl:Number3D = null, pEnd:Number3D = null)
+		public function PathCommand(type:String, pStart:Vector3D = null, pControl:Vector3D = null, pEnd:Vector3D = null)
 		{
 			this.type = type;
 			this.pStart = pStart;

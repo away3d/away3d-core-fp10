@@ -3,10 +3,7 @@ package away3d.lights
 	import away3d.arcane;
 	import away3d.containers.*;
     import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.events.*;
-    import away3d.materials.*;
-    import away3d.primitives.*;
     
 	import flash.display.*;
 	import flash.geom.*;
@@ -56,11 +53,15 @@ package away3d.lights
         arcane function setDiffuseTransform(source:Object3D):void
         {
 			
-        	if (!diffuseTransform[source])
-        		diffuseTransform[source] = new MatrixAway3D();
-        	
-			diffuseTransform[source].multiply3x3(_sceneTransform, source.sceneTransform);
-        	diffuseTransform[source].normalize(diffuseTransform[source]);
+        	if (!(diffTrans = diffuseTransform[source]))
+        		diffTrans = diffuseTransform[source] = new Matrix3D();
+			
+			var v3:Vector.<Vector3D>;
+			diffTrans.identity();
+			v3 = _sceneTransform.decompose(Orientation3D.AXIS_ANGLE);
+			diffTrans.prependRotation(v3[1].w*180/Math.PI, v3[1]);
+			v3 = source.sceneTransform.decompose(Orientation3D.AXIS_ANGLE);
+			diffTrans.prependRotation(v3[1].w*180/Math.PI, v3[1]);
         }
         
         /**
@@ -73,24 +74,26 @@ package away3d.lights
         {
 			//find halfway matrix between camera and direction matricies
 			_cameraTransform = view.camera.transform;
-			_cameraDirection.x = -_cameraTransform.sxz;
-			_cameraDirection.y = -_cameraTransform.syz;
-			_cameraDirection.z = -_cameraTransform.szz;
-			_halfVector.add(_cameraDirection, sceneDirection);
+			_cameraDirection.x = -_cameraTransform.rawData[8];
+			_cameraDirection.y = -_cameraTransform.rawData[9];
+			_cameraDirection.z = -_cameraTransform.rawData[10];
+			_halfVector = _cameraDirection.add(sceneDirection);
 			_halfVector.normalize();
 			_nx = _halfVector.x;
         	_ny = _halfVector.y;
         	_mod = Math.sqrt(_nx*_nx + _ny*_ny);
-        	_halfTransform.rotationMatrix(-_ny/_mod, _nx/_mod, 0, Math.acos(-_halfVector.z));
+        	_halfTransform.identity();
+        	_halfTransform.appendRotation(Math.acos(-_halfVector.z)*180/Math.PI, new Vector3D(-_ny/_mod, _nx/_mod, 0));
         	
 			if (!specularTransform[source])
         		specularTransform[source] = new Dictionary(true);
         	
-			if (!specularTransform[source][view])
-				specularTransform[source][view] = new MatrixAway3D();
+			if (!(specTrans = specularTransform[source][view]))
+				specTrans = specularTransform[source][view] = new Matrix3D();
 			
-        	specularTransform[source][view].multiply3x3(_halfTransform, source.sceneTransform);
-        	specularTransform[source][view].normalize(specularTransform[source][view]);
+			specTrans.rawData = _halfTransform.rawData;
+			var v3:Vector.<Vector3D> = source.sceneTransform.decompose(Orientation3D.AXIS_ANGLE);
+			specTrans.prependRotation(v3[1].w*180/Math.PI, v3[1]);
         }
         
         /**
@@ -105,9 +108,9 @@ package away3d.lights
 			_g = _green*2*_diffuse*_brightness;
 			_b = _blue*2*_diffuse*_brightness;
 			
-        	_szx = diffuseTransform[source].szx;
-			_szy = -diffuseTransform[source].szy;
-			_szz = diffuseTransform[source].szz;
+        	_szx = diffuseTransform[source].rawData[2];
+			_szy = -diffuseTransform[source].rawData[6];
+			_szz = diffuseTransform[source].rawData[10];
 			
         	//multipication of [_szx, 0, 0, 0, 127 - _szx*127, 0, -_szy, 0, 0, 127 + _szy*127, 0, 0, _szz, 0, 127 - _szz*127, 0, 0, 0, 1, 0]*[_red, _red, _red, 0, -381*_red, _green, _green, _green, 0, -381*_green, _blue, _blue, _blue, 0, -381*_blue, 0, 0, 0, 1, 0]
         	_normalMatrix.matrix = [_r*_szx, _r*_szy, _r*_szz, 0, -_r *127*(_szx + _szy + _szz),
@@ -136,9 +139,9 @@ package away3d.lights
 			_g = (_green*2 + shininess)*_sg;
 			_b = (_blue*2 + shininess)*_sb;
 			
-        	_szx = specularTransform[source][view].szx;
-			_szy = -specularTransform[source][view].szy;
-			_szz = specularTransform[source][view].szz;
+        	_szx = specularTransform[source][view].rawData[2];
+			_szy = -specularTransform[source][view].rawData[6];
+			_szz = specularTransform[source][view].rawData[10];
 			
         	//multipication of [_szx, 0, 0, 0, 127 - _szx*127, 0, -_szy, 0, 0, 127 + _szy*127, 0, 0, _szz, 0, 127 - _szz*127, 0, 0, 0, 1, 0]*[_red, _red, _red, 0, -127*shininess-381*_red, _green, _green, _green, 0, -127*shininess-381*_green, _blue, _blue, _blue, 0, -127*shininess-381*_blue, 0, 0, 0, 1, 0];
         	_normalMatrix.matrix = [_r*_szx, _r*_szy, _r*_szz, 0, -_r *127*(_szx + _szy + _szz) -127*shininess*_sr,
@@ -149,24 +152,26 @@ package away3d.lights
         	normalMatrixSpecularTransform[source][view] = _normalMatrix.clone();
         }
         
-    	private var _direction:Number3D = new Number3D();
+    	private var _direction:Vector3D = new Vector3D();
         private var _ambient:Number;
         private var _diffuse:Number;
         private var _specular:Number;
         private var _brightness:Number;
-    	private var _sceneDirection:Number3D = new Number3D();
+    	private var _sceneDirection:Vector3D = new Vector3D();
 		
 		private var _normalMatrix:ColorMatrixFilter = new ColorMatrixFilter();
     	private var _matrix:Matrix = new Matrix();
     	private var _shape:Shape = new Shape();
-    	private var _sceneTransform:MatrixAway3D = new MatrixAway3D();
+    	private var _sceneTransform:Matrix3D = new Matrix3D();
+    	private var diffTrans:Matrix3D;
+    	private var specTrans:Matrix3D;
     	private var _nx:Number;
     	private var _ny:Number;
     	private var _mod:Number;
-        private var _cameraTransform:MatrixAway3D;
-        private var _cameraDirection:Number3D = new Number3D();
-        private var _halfVector:Number3D = new Number3D();
-        private var _halfTransform:MatrixAway3D = new MatrixAway3D();
+        private var _cameraTransform:Matrix3D;
+        private var _cameraDirection:Vector3D = new Vector3D();
+        private var _halfVector:Vector3D = new Vector3D();
+        private var _halfTransform:Matrix3D = new Matrix3D();
         private var _r:Number;
 		private var _g:Number;
 		private var _b:Number;
@@ -179,15 +184,17 @@ package away3d.lights
 		
 		protected override function onSceneTransformChange(event:Object3DEvent = null):void
         {
-        	_sceneDirection.rotate(_direction, _parent.sceneTransform);
+        	_sceneDirection = _parent.sceneTransform.deltaTransformVector(_direction);
         	
         	//update direction vector
-        	_sceneDirection.normalize(-1);
+        	_sceneDirection.scaleBy(-1);
+        	_sceneDirection.normalize();
         	
         	_nx = _sceneDirection.x;
         	_ny = _sceneDirection.y;
         	_mod = Math.sqrt(_nx*_nx + _ny*_ny);
-        	_sceneTransform.rotationMatrix(_ny/_mod, -_nx/_mod, 0, -Math.acos(-_sceneDirection.z));
+        	_sceneTransform.identity();
+        	_sceneTransform.appendRotation(-Math.acos(-_sceneDirection.z)*180/Math.PI, new Vector3D(_ny/_mod, -_nx/_mod, 0));
         	
         	diffuseTransform = new Dictionary(true);
         	specularTransform = new Dictionary(true);
@@ -318,12 +325,12 @@ package away3d.lights
     	/**
     	 * Defines the direction of the light relative to the local coordinates of the parent <code>ObjectContainer3D</code>.
     	 */
-        public function get direction():Number3D
+        public function get direction():Vector3D
         {
             return _direction;
         }
 		
-        public function set direction(value:Number3D):void
+        public function set direction(value:Vector3D):void
         {
             _direction.x = value.x;
             _direction.y = value.y;
@@ -406,7 +413,7 @@ package away3d.lights
             _specularDirty = true;
 		}
 		
-		public function get sceneDirection():Number3D
+		public function get sceneDirection():Vector3D
 		{
 			return _sceneDirection;
 		}
@@ -419,7 +426,7 @@ package away3d.lights
         public function DirectionalLight3D(init:Object = null)
         {
             super(init);
-            direction = ini.getNumber3D("direction") || new Number3D();
+            direction = ini.getVector3D("direction") || new Vector3D();
             ambient = ini.getNumber("ambient", 0.5, {min:0, max:1});
             diffuse = ini.getNumber("diffuse", 0.5, {min:0, max:10});
             specular = ini.getNumber("specular", 1, {min:0, max:1});

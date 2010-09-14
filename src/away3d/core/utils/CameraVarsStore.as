@@ -3,18 +3,18 @@ package away3d.core.utils
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
-	import away3d.core.session.AbstractSession;
+	import away3d.core.session.*;
 	import away3d.core.vos.*;
 	import away3d.materials.*;
 	
+	import flash.geom.*;
 	import flash.utils.*;
 	
 	public class CameraVarsStore
 	{
 		private var _sourceDictionary:Dictionary = new Dictionary(true);
         private var _vertexClassificationDictionary:Dictionary;
-		private var _vt:MatrixAway3D;
+		private var _vt:Matrix3D;
 		private var _frustum:Frustum;
 		private var _vertex:Vertex;
 		private var _uv:UV;
@@ -74,12 +74,12 @@ package away3d.core.utils
 	        return _vc;
   		}
   		
-		public function createViewTransform(node:Object3D):MatrixAway3D
+		public function createViewTransform(node:Object3D):Matrix3D
         {
         	if (_vtStore.length)
         		_vtActive.push(_vt = viewTransformDictionary[node] = _vtStore.pop());
         	else
-        		_vtActive.push(_vt = viewTransformDictionary[node] = new MatrixAway3D());
+        		_vtActive.push(_vt = viewTransformDictionary[node] = new Matrix3D());
         	
         	return _vt;
         }
@@ -178,7 +178,7 @@ package away3d.core.utils
         	for (_object in _uvDictionary) {
 				_session = _object as AbstractSession;
 				if (_session.updated) {
-					_uvArray = _uvDictionary[_session] as Array
+					_uvArray = _uvDictionary[_session] as Array;
 					_uvStore = _uvStore.concat();
 					_uvArray.length = 0;
 				}

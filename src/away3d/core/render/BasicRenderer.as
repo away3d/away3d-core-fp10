@@ -55,9 +55,9 @@ package away3d.core.render
         {
         	if (!_screenClipping.checkPrimitive(this, priIndex))
         		return false;
-        	
-            _primitives.push(priIndex);
-            _screenZs.push(primitiveScreenZ[priIndex]);
+
+			_primitives[_primitives.length] = priIndex;
+			_screenTs[_screenTs.length] = _coeffScreenT/primitiveScreenZ[priIndex];
             
 			return true;
         }
@@ -67,7 +67,7 @@ package away3d.core.render
 		 * 
 		 * @return	An array containing the primitives to be rendered.
 		 */
-        public override function list():Array
+        public override function list():Vector.<uint>
         {
             return _primitives;
         }
@@ -77,21 +77,23 @@ package away3d.core.render
         	super.clear();
         	
         	_primitives.length = 0;
-        	_screenZs.length = 0;
+        	_screenTs.length = 0;
         	_scene = _view.scene;
         	_camera = _view.camera;
         	_screenClipping = _view.screenClipping;
+        	_coeffScreenT = 75000*_camera.zoom;
         }
         
         public override function render():void
         {
+    		_order.length = _screenTs.length;
         	
         	//filter primitives array
 			for each (_filter in _filters)
         		_filter.filter(this);
         	
     		// render all primitives
-    		var i:int = _order.length;
+        	var i:uint = _order.length;
     		while(i--)
     			renderPrimitive(_primitives[_order[i]]);
         }

@@ -7,8 +7,9 @@ package away3d.cameras.lenses
 	import away3d.core.base.Vertex;
 	import away3d.core.clip.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
 	import away3d.core.utils.*;	
+	
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -44,7 +45,7 @@ package away3d.cameras.lenses
         	_far = _clipping.maxZ;
 		}
         /** @private */
-		arcane function getFrustum(node:Object3D, viewTransform:MatrixAway3D):Frustum
+		arcane function getFrustum(node:Object3D, viewTransform:Matrix3D):Frustum
 		{
 			throw new Error("Not implemented");
 		}
@@ -63,11 +64,21 @@ package away3d.cameras.lenses
 		{
 			throw new Error("Not implemented");
 		}
+		/** @private */
+		arcane function getT(screenZ:Number):Number
+		{
+			throw new Error("Not implemented");
+		}
+		/** @private */
+		arcane function getScreenZ(t:Number):Number
+		{
+			throw new Error("Not implemented");
+		}
        /**
         * @private
         * Projects the vertices to the screen space of the view.
         */
-		arcane function project(viewTransform:MatrixAway3D, vertices:Array, screenVertices:Array):void
+		arcane function project(viewTransform:Matrix3D, verts:Vector.<Number>, screenVerts:Vector.<Number>, uvts:Vector.<Number>):void
 		{
 			throw new Error("Not implemented");
 		}
@@ -76,6 +87,7 @@ package away3d.cameras.lenses
 		protected const toDEGREES:Number = 180/Math.PI;
 		
 		protected var _view:View3D;
+		protected var _projectionMatrix:Matrix3D = new Matrix3D();
 		protected var _cameraVarsStore:CameraVarsStore;
 		protected var _camera:Camera3D;
 		protected var _clipping:Clipping;
@@ -104,9 +116,10 @@ package away3d.cameras.lenses
         protected var _scz:Number;
         
         protected var _persp:Number;
-        
+        protected var _screenMatrix:Matrix3D = new Matrix3D();
+        protected var _rawData:Vector.<Number>;
     	protected var classification:int;
-    	protected var viewTransform:MatrixAway3D;
-    	protected var view:MatrixAway3D = new MatrixAway3D();
+    	protected var viewTransform:Matrix3D;
+    	protected var view:Matrix3D = new Matrix3D();
     }
 }

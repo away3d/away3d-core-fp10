@@ -2,7 +2,8 @@ package away3d.cameras
 {
 	import away3d.containers.*;
     import away3d.core.base.*;
-    import away3d.core.math.*;
+    
+    import flash.geom.*;
 	
 	
     /**
@@ -32,7 +33,7 @@ package away3d.cameras
 		/**
 		 * @inheritDoc
 		 */
-        public override function get viewMatrix():MatrixAway3D
+        public override function get viewMatrix():Matrix3D
         {
             if (target != null)
                 lookAt(target.scene ? target.scenePosition : target.position);

@@ -1,14 +1,15 @@
 package away3d.core.utils 
 {
 	import away3d.arcane;
+	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.core.render.*;
 	import away3d.core.session.*;
 	import away3d.core.vos.*;
 	import away3d.lights.*;
 	
+	import flash.geom.*;
 	import flash.display.*;
 	
 	use namespace arcane;
@@ -19,8 +20,6 @@ package away3d.core.utils
 	public class FaceNormalShader 
 	{
 		private var _session:AbstractSession;
-		private var focus:Number;
-        private var zoom:Number;
         private var persp:Number;
         private var v0x:Number;
         private var v0y:Number;
@@ -94,60 +93,62 @@ package away3d.core.utils
         private var draw_fall_k:Number = 1;
         private var draw_reflect:Boolean = false;
         private var draw_reflect_k:Number = 1;
-        private var _diffuseTransform:MatrixAway3D;
-        private var _specularTransform:MatrixAway3D;
-        private var _viewPosition:Number3D;
+        private var _diffuseTransform:Matrix3D;
+        private var _specularTransform:Matrix3D;
+        private var _viewPosition:Vector3D;
         private var _source:Mesh;
         private var _view:View3D;
+        private var _lens:AbstractLens;
         private var _startIndex:uint;
         private var _endIndex:uint;
         private var _faceVO:FaceVO;
-        private var _screenVertices:Array;
-        private var _screenIndices:Array;
+        private var _screenVertices:Vector.<Number>;
+        private var _screenIndices:Vector.<int>;
+        private var _screenUVTs:Vector.<Number>;
         
 		public function getTriangleShade(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, shininess:Number):FaceNormalShaderVO
         {		
 			_source = viewSourceObject.source as Mesh;
 			_view = renderer._view;
+			_lens = _view.camera.lens;
         	_session = renderer._session;
-            focus = _view.camera.focus;
-            zoom = _view.camera.zoom;
             
-            _startIndex = renderer.primitiveProperties[priIndex*9];
-        	_endIndex = renderer.primitiveProperties[priIndex*9+1];
-        	_faceVO = renderer.primitiveElements[priIndex];
+            _startIndex = renderer.primitiveProperties[uint(priIndex*9)];
+        	_endIndex = renderer.primitiveProperties[uint(priIndex*9 + 1)];
+        	_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
         	
 			_screenVertices = viewSourceObject.screenVertices;
 			_screenIndices = viewSourceObject.screenIndices;
+			_screenUVTs = viewSourceObject.screenUVTs;
 			
 			var indexA:uint;
 			var indexB:uint;
 			var indexC:uint;
 			
             if(_endIndex - _startIndex > 10) {
-            	indexA = _screenIndices[_startIndex]*3;
-            	indexB = _screenIndices[_startIndex + 5]*3;
-            	indexC = _screenIndices[_startIndex + 9]*3;
+            	indexA = _screenIndices[_startIndex];
+            	indexB = _screenIndices[uint(_startIndex + 5)];
+            	indexC = _screenIndices[uint(_startIndex + 9)];
             } else {
-	            indexA = _screenIndices[_startIndex]*3;
-            	indexB = _screenIndices[_startIndex + 1]*3;
-            	indexC = _screenIndices[_startIndex + 2]*3;
+	            indexA = _screenIndices[_startIndex];
+            	indexB = _screenIndices[uint(_startIndex + 1)];
+            	indexC = _screenIndices[uint(_startIndex + 2)];
             }
             
-        	v0z = _screenVertices[indexA+2];
-			persp = (1 + v0z / focus)/zoom;
-            v0x = _screenVertices[indexA]*persp;
-            v0y = _screenVertices[indexA+1]*persp;
+        	v0z = _lens.getScreenZ(_screenUVTs[uint(indexA*3+2)]);
+			persp = _lens.getPerspective(v0z);
+            v0x = _screenVertices[uint(indexA*2)]/persp;
+            v0y = _screenVertices[uint(indexA*2+1)]/persp;
 			
-            v1z = _screenVertices[indexB+2];
-			persp = (1 + v1z / focus)/zoom;
-            v1x = _screenVertices[indexB]*persp;
-            v1y = _screenVertices[indexB+1]*persp;
+            v1z = _lens.getScreenZ(_screenUVTs[uint(indexB*3+2)]);
+			persp = _lens.getPerspective(v1z);
+            v1x = _screenVertices[uint(indexB*2)]/persp;
+            v1y = _screenVertices[uint(indexB*2+1)]/persp;
 			
-            v2z = _screenVertices[indexC+2];
-			persp = (1 + v2z / focus)/zoom;
-            v2x = _screenVertices[indexC]*persp;
-            v2y = _screenVertices[indexC+1]*persp;
+            v2z = _lens.getScreenZ(_screenUVTs[uint(indexC*3+2)]);
+			persp = _lens.getPerspective(v2z);
+            v2x = _screenVertices[uint(indexC*2)]/persp;
+            v2y = _screenVertices[uint(indexC*2+1)]/persp;
             
             d1x = v1x - v0x;
             d1y = v1y - v0y;
@@ -184,9 +185,9 @@ package away3d.core.utils
                 green = directional._green;
                 blue = directional._blue;
 				
-                dfx = _diffuseTransform.szx;
-				dfy = _diffuseTransform.szy;
-				dfz = _diffuseTransform.szz;
+                dfx = _diffuseTransform.rawData[2];
+				dfy = _diffuseTransform.rawData[6];
+				dfz = _diffuseTransform.rawData[10];
                 
                 nx = _faceVO.face.normal.x;
                 ny = _faceVO.face.normal.y;
@@ -211,9 +212,9 @@ package away3d.core.utils
                 
                 _specularTransform = directional.specularTransform[_source][_view];
                 
-                rfx = _specularTransform.szx;
-				rfy = _specularTransform.szy;
-				rfz = _specularTransform.szz;
+                rfx = _specularTransform.rawData[2];
+				rfy = _specularTransform.rawData[6];
+				rfz = _specularTransform.rawData[10];
 				
 				rf = rfx*nx + rfy*ny + rfz*nz;
 				
@@ -279,15 +280,15 @@ package away3d.core.utils
             if (draw_fall || draw_reflect || draw_normal)
             {
                 graphics = _session.graphics,
-                cz = c0z,
-                cx = c0x * zoom / (1 + cz / focus),
-                cy = c0y * zoom / (1 + cz / focus);
+                cz = _lens.getPerspective(c0z),
+                cx = c0x * cz,
+                cy = c0y * cz;
                 
                 if (draw_normal)
                 {
-                    ncz = (c0z + 30*pc),
-                    ncx = (c0x + 30*pa) * zoom * focus / (focus + ncz),
-                    ncy = (c0y + 30*pb) * zoom * focus / (focus + ncz);
+                    ncz = _lens.getPerspective(c0z + 30*pc),
+                    ncx = (c0x + 30*pa) * ncz,
+                    ncy = (c0y + 30*pb) * ncz;
 					
                     graphics.lineStyle(1, 0x000000, 1);
                     graphics.moveTo(cx, cy);
@@ -323,13 +324,13 @@ package away3d.core.utils
                 		
                         if (draw_fall)
                         {
-                            ffz = (c0z + 30*dfz*(1-draw_fall_k)),
-                            ffx = (c0x + 30*dfx*(1-draw_fall_k)) * zoom * focus / (focus + ffz),
-                            ffy = (c0y + 30*dfy*(1-draw_fall_k)) * zoom * focus / (focus + ffz),
+                            ffz = _lens.getPerspective(c0z + 30*dfz*(1-draw_fall_k)),
+                            ffx = (c0x + 30*dfx*(1-draw_fall_k)) * ffz,
+                            ffy = (c0y + 30*dfy*(1-draw_fall_k)) * ffz,
 							
-                            fz = (c0z + 30*dfz),
-                            fx = (c0x + 30*dfx) * zoom * focus / (focus + fz),
-                            fy = (c0y + 30*dfy) * zoom * focus / (focus + fz);
+                            fz = _lens.getPerspective(c0z + 30*dfz),
+                            fx = (c0x + 30*dfx) * fz,
+                            fy = (c0y + 30*dfy) * fz;
 							
                             graphics.lineStyle(1, int(red)*0x10000 + int(green)*0x100 + int(blue), 1);
                             graphics.moveTo(ffx, ffy);
@@ -343,9 +344,9 @@ package away3d.core.utils
                             rfy = dfy - 2*nf*pb;
                             rfz = dfz - 2*nf*pc;
                     		
-                            rz = (c0z - 30*rfz*draw_reflect_k),
-                            rx = (c0x - 30*rfx*draw_reflect_k) * zoom * focus / (focus + rz),
-                            ry = (c0y - 30*rfy*draw_reflect_k) * zoom * focus / (focus + rz);
+                            rz = _lens.getPerspective(c0z - 30*rfz*draw_reflect_k),
+                            rx = (c0x - 30*rfx*draw_reflect_k) * rz,
+                            ry = (c0y - 30*rfy*draw_reflect_k) * rz;
                         	
                             graphics.lineStyle(1, int(red*0.5)*0x10000 + int(green*0.5)*0x100 + int(blue*0.5), 1);
                             graphics.moveTo(cx, cy);

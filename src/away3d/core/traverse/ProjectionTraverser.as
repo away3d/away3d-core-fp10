@@ -8,9 +8,9 @@ package away3d.core.traverse
 	import away3d.core.clip.*;
 	import away3d.core.geom.*;
 	import away3d.graphs.bsp.BSPTree;
-	import away3d.core.math.*;
-	import away3d.core.project.*;
 	import away3d.core.utils.*;
+	
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -25,8 +25,8 @@ package away3d.core.traverse
         private var _camera:Camera3D;
         private var _lens:AbstractLens;
         private var _clipping:Clipping;
-        private var _cameraViewMatrix:MatrixAway3D;
-        private var _viewTransform:MatrixAway3D;
+        private var _cameraViewMatrix:Matrix3D;
+        private var _viewTransform:Matrix3D;
         private var _nodeClassification:int;
         private var _mesh:Mesh;
 		
@@ -67,7 +67,8 @@ package away3d.core.traverse
             
             //compute viewTransform matrix
             _viewTransform = _cameraVarsStore.createViewTransform(node);
-            _viewTransform.multiply(_cameraViewMatrix, node.sceneTransform);
+            _viewTransform.rawData = _cameraViewMatrix.rawData;
+            _viewTransform.prepend(node.sceneTransform);
             
             if (node is BSPTree) {
             	BSPTree(node).update(_camera, _lens.getFrustum(node, _viewTransform), _cameraVarsStore);

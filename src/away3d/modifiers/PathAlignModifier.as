@@ -2,10 +2,10 @@ package away3d.modifiers
 {
 	import away3d.core.base.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
 	import away3d.core.utils.*;
 	
-	import flash.utils.Dictionary;
+	import flash.geom.*;
+	import flash.utils.*;
 
 	public class PathAlignModifier
 	{
@@ -16,7 +16,7 @@ package away3d.modifiers
 		private var _lengths:Vector.<Number>;
 		private var _lengthArrays:Vector.<Vector.<Number>>;
 		private var _totalLength:Number = 0;
-		private var _cachedVertices:Vector.<Vector.<Number3D>>;
+		private var _cachedVertices:Vector.<Vector.<Vector3D>>;
 		private var _cacheRef:Dictionary;
 		private var _arcLengthPrecision:Number = 0.01;
 		        
@@ -29,7 +29,7 @@ package away3d.modifiers
 		/**
 		 * Applies a vector offset to the mesh before it is modified
 		 */
-		public var offset:Number3D;
+		public var offset:Vector3D;
 		
 		/**
 		 * Forces the y alignment to face only 1 direction. Defaults to false.
@@ -83,14 +83,14 @@ package away3d.modifiers
 		{
 			ini = Init.parse(init);
 			
-			offset = ini.getNumber3D("offset") || new Number3D();
+			offset = ini.getVector3D("offset") || new Vector3D();
 			restrain = ini.getBoolean("restrain", false);
 			fast = ini.getBoolean("fast", false);
 			
 			duplicateMesh(mesh);
 			updatePath(path);
 			
-			_cachedVertices = new Vector.<Vector.<Number3D>>();
+			_cachedVertices = new Vector.<Vector.<Vector3D>>();
 			_cacheRef = new Dictionary();
 		}
 		
@@ -155,7 +155,7 @@ package away3d.modifiers
 		 * @return Number The offset in the curve that yields the closest
 		 * point in the curve to the specified point.
 		 */		
-		public function findClosestCurveOffsetToPoint(point:Number3D):Object
+		public function findClosestCurveOffsetToPoint(point:Vector3D):Object
 		{
 			// Evaluates distances to all control points in the path
 			// in order to determine which is the closest curve.
@@ -165,7 +165,7 @@ package away3d.modifiers
 			for(var i:uint; i<loop; ++i)
 			{
 				var command:PathCommand = _commands[uint(i)];
-				var control:Number3D = command.pControl;
+				var control:Vector3D = command.pControl;
 				
 				var dX:Number = control.x - point.x;
 				var dY:Number = control.y - point.y;
@@ -192,11 +192,11 @@ package away3d.modifiers
 			// the closest value within the curve.
 			minimunDistance = Number.MAX_VALUE;
 			var distancesArr:Vector.<Number> = BezierUtils.getArcLengthArray(_commands[minimunDistanceIndex], 0.1);
-			var pCurvehit:Number3D;
+			var pCurvehit:Vector3D;
 			var minimunDistanceIndex1:uint;
 			for(i = 0; i<10; ++i)
 			{
-				var pCurve:Number3D = BezierUtils.getCoordinatesAt(i/10, _commands[minimunDistanceIndex]);
+				var pCurve:Vector3D = BezierUtils.getCoordinatesAt(i/10, _commands[minimunDistanceIndex]);
 				
 				dX = pCurve.x - point.x;
 				dY = pCurve.y - point.y;
@@ -232,7 +232,7 @@ package away3d.modifiers
 		 */		
 		public function buildCache(divisions:Number):void
 		{
-			_cachedVertices = new Vector.<Vector.<Number3D>>();
+			_cachedVertices = new Vector.<Vector.<Vector3D>>();
 			
 			for(var i:Number = 0; i < _totalLength; i += _totalLength/divisions)
 			{
@@ -242,7 +242,7 @@ package away3d.modifiers
 				var snapshot:Array = [];
 				for each(var face:Face in _activeMesh.faces)
 					for each(var vertex:Vertex in face.vertices)
-						snapshot.push(new Number3D(vertex.x, vertex.y, vertex.z));
+						snapshot.push(new Vector3D(vertex.x, vertex.y, vertex.z));
 				
 				_cachedVertices.push(snapshot);
 			}
@@ -256,7 +256,7 @@ package away3d.modifiers
 		{
 			execute();
 				
-			var snapshot:Vector.<Number3D> = new Vector.<Number3D>();
+			var snapshot:Vector.<Vector3D> = new Vector.<Vector3D>();
 			var i:uint, j:uint;
 			var loop:uint = _activeMesh.faces.length;
 			for(i = 0; i<loop; ++i)
@@ -268,7 +268,7 @@ package away3d.modifiers
 				for(j = 0; j<subLoop; ++j)
 				{
 					var vertex:Vertex = vertices[uint(j)];
-					snapshot.push(new Number3D(vertex.x, vertex.y, vertex.z));
+					snapshot.push(new Vector3D(vertex.x, vertex.y, vertex.z));
 				}
 			}
 			_cachedVertices.push(snapshot);
@@ -282,7 +282,7 @@ package away3d.modifiers
 		 */		
 		public function applyCachedAt(xOffset:Number = 0):void
 		{
-			var snapshot:Vector.<Number3D> = _cacheRef[xOffset];
+			var snapshot:Vector.<Vector3D> = _cacheRef[xOffset];
 			
 			var i:uint, a:uint, b:uint;
 			var loop:uint = _activeMesh.faces.length;
@@ -316,7 +316,7 @@ package away3d.modifiers
 		 */		
 		public function applyCached(index:uint):void
 		{
-			var snapshot:Vector.<Number3D> = _cachedVertices[index];
+			var snapshot:Vector.<Vector3D> = _cachedVertices[index];
 			
 			if(!snapshot)
 				return;
@@ -427,15 +427,16 @@ package away3d.modifiers
 						t = u;
 					
 					// Get the coordinates of the curve at t.
-					var s:Number3D = BezierUtils.getCoordinatesAt(t, _commands[uint(i)]);
+					var s:Vector3D = BezierUtils.getCoordinatesAt(t, _commands[uint(i)]);
 					
 					// Get the normal at t.
-					var tangent:Number3D = BezierUtils.getDerivativeAt(t, _commands[uint(i)]);
+					var tangent:Vector3D = BezierUtils.getDerivativeAt(t, _commands[uint(i)]);
 					
 					var tX:Number = restrain ? -Math.abs(tangent.y) : -tangent.y;
 					var tY:Number = restrain ? Math.abs(tangent.x) : tangent.x;
-					var p:Number3D = new Number3D(tX, tY, 0);
-					p.normalize(origVertex.y + offset.y);
+					var p:Vector3D = new Vector3D(tX, tY, 0);
+					p.normalize();
+					p.scaleBy(origVertex.y + offset.y);
 					
 					// Warp the point.
 					transVertex.x = s.x + p.x;

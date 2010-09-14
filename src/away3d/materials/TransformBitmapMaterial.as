@@ -4,9 +4,9 @@ package away3d.materials
     import away3d.cameras.lenses.*;
     import away3d.containers.*;
     import away3d.core.base.*;
-    import away3d.core.math.*;
 	import away3d.core.render.*;
     import away3d.core.utils.*;
+    import away3d.core.vos.*;
     
     import flash.display.*;
     import flash.geom.*;
@@ -47,13 +47,13 @@ package away3d.materials
 		arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
         	if (_projectionVector && !throughProjection) {
-        		_faceVO = renderer.primitiveElements[priIndex];
+        		_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
         		_source = viewSourceObject.source;
         		if (globalProjection) {
-        			normalR.rotate(_faceVO.face.normal, _source.sceneTransform);
-        			if (normalR.dot(_projectionVector) < 0)
+        			normalR = _source.sceneTransform.deltaTransformVector(_faceVO.face.normal);
+        			if (normalR.dotProduct(_projectionVector) < 0)
         				return;
-        		} else if (_faceVO.face.normal.dot(_projectionVector) < 0)
+        		} else if (_faceVO.face.normal.dotProduct(_projectionVector) < 0)
         			return;
         	}
         	
@@ -68,7 +68,7 @@ package away3d.materials
 			else
 				_mapping = new Matrix();
 			
-			_faceVO = renderer.primitiveElements[priIndex];
+			_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 			_source = viewSourceObject.source;
 			
 			//if not projected, draw the source bitmap once
@@ -111,13 +111,11 @@ package away3d.materials
 					_mapping.concat(projectMapping());
 					_mapping.concat(_invtexturemapping);
 					
-					normalR.clone(_faceVO.face.normal);
-					
 					if (_globalProjection)
-						normalR.rotate(normalR, _source.sceneTransform);
+						normalR = _source.sceneTransform.deltaTransformVector(_faceVO.face.normal);
 					
 					//check to see if the bitmap (non repeating) lies inside the drawtriangle area
-					if ((throughProjection || normalR.dot(_projectionVector) >= 0) && (repeat || !findSeparatingAxis(getFacePoints(_invtexturemapping), getMappingPoints(_mapping)))) {
+					if ((throughProjection || normalR.dotProduct(_projectionVector) >= 0) && (repeat || !findSeparatingAxis(getFacePoints(_invtexturemapping), getMappingPoints(_mapping)))) {
 						
 						//store a clone
 						if (_faceMaterialVO.cleared)
@@ -156,12 +154,12 @@ package away3d.materials
         private var _offsetX:Number = 0;
         private var _offsetY:Number = 0;
         private var _rotation:Number = 0;
-        private var _projectionVector:Number3D;
+        private var _projectionVector:Vector3D;
         private var _projectionDirty:Boolean;
-        private var _N:Number3D = new Number3D();
-        private var _M:Number3D = new Number3D();
-        private var DOWN:Number3D = new Number3D(0, -1, 0);
-        private var RIGHT:Number3D = new Number3D(1, 0, 0);
+        private var _N:Vector3D = new Vector3D();
+        private var _M:Vector3D = new Vector3D();
+        private var DOWN:Vector3D = new Vector3D(0, -1, 0);
+        private var RIGHT:Vector3D = new Vector3D(1, 0, 0);
         private var _transformDirty:Boolean;
         private var _throughProjection:Boolean;
         private var _globalProjection:Boolean;
@@ -169,7 +167,7 @@ package away3d.materials
 		private var y:Number;
 		private var px:Number;
 		private var py:Number;
-        private var normalR:Number3D = new Number3D();
+        private var normalR:Vector3D = new Vector3D();
         private var _u0:Number;
         private var _u1:Number;
         private var _u2:Number;
@@ -187,9 +185,9 @@ package away3d.materials
         private var v2x:Number;
         private var v2y:Number;
         private var v2z:Number;
-        private var v0:Number3D = new Number3D();
-        private var v1:Number3D = new Number3D();
-        private var v2:Number3D = new Number3D();
+        private var v0:Vector3D = new Vector3D();
+        private var v1:Vector3D = new Vector3D();
+        private var v2:Vector3D = new Vector3D();
         private var t:Matrix;
 		private var _invtexturemapping:Matrix;
 		private var fPoint1:Point = new Point();
@@ -234,9 +232,9 @@ package away3d.materials
 		private function projectUV():Vector.<Number>
         {
         	if (globalProjection) {
-	    		v0.transform(_faceVO.vertices[0].position, _source.sceneTransform);
-	    		v1.transform(_faceVO.vertices[1].position, _source.sceneTransform);
-	    		v2.transform(_faceVO.vertices[2].position, _source.sceneTransform);
+	    		v0 = _source.sceneTransform.transformVector(_faceVO.vertices[0].position);
+	    		v1 = _source.sceneTransform.transformVector(_faceVO.vertices[1].position);
+	    		v2 = _source.sceneTransform.transformVector(_faceVO.vertices[2].position);
         	} else {
 	    		v0 = _faceVO.vertices[0].position;
 	    		v1 = _faceVO.vertices[1].position;
@@ -266,9 +264,9 @@ package away3d.materials
 		private function projectMapping():Matrix
         {
         	if (globalProjection) {
-	    		v0.transform(_faceVO.vertices[0].position, _source.sceneTransform);
-	    		v1.transform(_faceVO.vertices[1].position, _source.sceneTransform);
-	    		v2.transform(_faceVO.vertices[2].position, _source.sceneTransform);
+	    		v0 = _source.sceneTransform.transformVector(_faceVO.vertices[0].position);
+	    		v1 = _source.sceneTransform.transformVector(_faceVO.vertices[1].position);
+	    		v2 = _source.sceneTransform.transformVector(_faceVO.vertices[2].position);
         	} else {
 	    		v0 = _faceVO.vertices[0].position;
 	    		v1 = _faceVO.vertices[1].position;
@@ -421,18 +419,18 @@ package away3d.materials
         		_focus = 0;
 			
 			if (_generated) {
-				_uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-				_uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-				_uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+				_uvt[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+				_uvt[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+				_uvt[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
 				
 				if (projectionVector) {
 		    		_uvt = projectUV();
-		        	_u0 = (_uvt[0] - _offsetX)/width;
-		        	_u1 = (_uvt[3] - _offsetX)/width;
-		        	_u2 = (_uvt[6] - _offsetX)/width;
-		        	_v0 = (_uvt[1] - _offsetY)/height;
-		        	_v1 = (_uvt[4] - _offsetY)/height;
-		        	_v2 = (_uvt[7] - _offsetY)/height;
+		        	_u0 = (_uvt[uint(0)] - _offsetX)/width;
+		        	_u1 = (_uvt[uint(3)] - _offsetX)/width;
+		        	_u2 = (_uvt[uint(6)] - _offsetX)/width;
+		        	_v0 = (_uvt[uint(1)] - _offsetY)/height;
+		        	_v1 = (_uvt[uint(4)] - _offsetY)/height;
+		        	_v2 = (_uvt[uint(7)] - _offsetY)/height;
 		   		} else {
 		   			_u0 = _uvs[0].u - _offsetX/width;
 		        	_u1 = _uvs[1].u - _offsetX/width;
@@ -443,19 +441,19 @@ package away3d.materials
 		   		}
 	        	
 	        	if (_rotation) {
-	        		_uvt[0] = (_u0*_cos - _v0*_sin)/_scaleX;
-	        		_uvt[1] = (_u0*_sin + _v0*_cos)/_scaleY;
-	        		_uvt[3] = (_u1*_cos - _v1*_sin)/_scaleX;
-	        		_uvt[4] = (_u1*_sin + _v1*_cos)/_scaleY;
-	        		_uvt[6] = (_u2*_cos - _v2*_sin)/_scaleX;
-	        		_uvt[7] = (_u2*_sin + _v2*_cos)/_scaleY;
+	        		_uvt[uint(0)] = (_u0*_cos - _v0*_sin)/_scaleX;
+	        		_uvt[uint(1)] = (_u0*_sin + _v0*_cos)/_scaleY;
+	        		_uvt[uint(3)] = (_u1*_cos - _v1*_sin)/_scaleX;
+	        		_uvt[uint(4)] = (_u1*_sin + _v1*_cos)/_scaleY;
+	        		_uvt[uint(6)] = (_u2*_cos - _v2*_sin)/_scaleX;
+	        		_uvt[uint(7)] = (_u2*_sin + _v2*_cos)/_scaleY;
 	        	} else {
-	        		_uvt[0] = _u0/_scaleX;
-	        		_uvt[1] = _v0/_scaleY;
-	        		_uvt[3] = _u1/_scaleX;
-	        		_uvt[4] = _v1/_scaleY;
-	        		_uvt[6] = _u2/_scaleX;
-	        		_uvt[7] = _v2/_scaleY;
+	        		_uvt[uint(0)] = _u0/_scaleX;
+	        		_uvt[uint(1)] = _v0/_scaleY;
+	        		_uvt[uint(3)] = _u1/_scaleX;
+	        		_uvt[uint(4)] = _v1/_scaleY;
+	        		_uvt[uint(6)] = _u2/_scaleX;
+	        		_uvt[uint(7)] = _v2/_scaleY;
 	        	}
 	        	
 	    		return _uvt;
@@ -463,9 +461,9 @@ package away3d.materials
 			
 			_faceMaterialVO = getFaceMaterialVO(_faceVO, _source, _view);
 			
-			_faceMaterialVO.uvtData[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-			_faceMaterialVO.uvtData[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-			_faceMaterialVO.uvtData[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+			_faceMaterialVO.uvtData[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
 			
 			if (!_faceMaterialVO.invalidated)
 				return _faceMaterialVO.uvtData;
@@ -474,12 +472,12 @@ package away3d.materials
         	
         	if (projectionVector) {
 	    		_uvt = projectUV();
-	        	_u0 = (_uvt[0] - _offsetX)/width;
-	        	_u1 = (_uvt[3] - _offsetX)/width;
-	        	_u2 = (_uvt[6] - _offsetX)/width;
-	        	_v0 = (_uvt[1] - _offsetY)/height;
-	        	_v1 = (_uvt[4] - _offsetY)/height;
-	        	_v2 = (_uvt[7] - _offsetY)/height;
+	        	_u0 = (_uvt[uint(0)] - _offsetX)/width;
+	        	_u1 = (_uvt[uint(3)] - _offsetX)/width;
+	        	_u2 = (_uvt[uint(6)] - _offsetX)/width;
+	        	_v0 = (_uvt[uint(1)] - _offsetY)/height;
+	        	_v1 = (_uvt[uint(4)] - _offsetY)/height;
+	        	_v2 = (_uvt[uint(7)] - _offsetY)/height;
 	   		} else {
 	   			_u0 = _uvs[0].u - _offsetX/width;
 	        	_u1 = _uvs[1].u - _offsetX/width;
@@ -490,19 +488,19 @@ package away3d.materials
 	   		}
         	
         	if (_rotation) {
-        		_faceMaterialVO.uvtData[0] = (_u0*_cos - _v0*_sin)/_scaleX;
-	        	_faceMaterialVO.uvtData[1] = (_u0*_sin + _v0*_cos)/_scaleY;
-	        	_faceMaterialVO.uvtData[3] = (_u1*_cos - _v1*_sin)/_scaleX;
-	        	_faceMaterialVO.uvtData[4] = (_u1*_sin + _v1*_cos)/_scaleY;
-	        	_faceMaterialVO.uvtData[6] = (_u2*_cos - _v2*_sin)/_scaleX;
-	        	_faceMaterialVO.uvtData[7] = (_u2*_sin + _v2*_cos)/_scaleY;
+        		_faceMaterialVO.uvtData[uint(0)] = (_u0*_cos - _v0*_sin)/_scaleX;
+	        	_faceMaterialVO.uvtData[uint(1)] = (_u0*_sin + _v0*_cos)/_scaleY;
+	        	_faceMaterialVO.uvtData[uint(3)] = (_u1*_cos - _v1*_sin)/_scaleX;
+	        	_faceMaterialVO.uvtData[uint(4)] = (_u1*_sin + _v1*_cos)/_scaleY;
+	        	_faceMaterialVO.uvtData[uint(6)] = (_u2*_cos - _v2*_sin)/_scaleX;
+	        	_faceMaterialVO.uvtData[uint(7)] = (_u2*_sin + _v2*_cos)/_scaleY;
         	} else {
-        		_faceMaterialVO.uvtData[0] = _u0/_scaleX;
-        		_faceMaterialVO.uvtData[1] = _v0/_scaleY;
-        		_faceMaterialVO.uvtData[3] = _u1/_scaleX;
-        		_faceMaterialVO.uvtData[4] = _v1/_scaleY;
-        		_faceMaterialVO.uvtData[6] = _u2/_scaleX;
-        		_faceMaterialVO.uvtData[7] = _v2/_scaleY;
+        		_faceMaterialVO.uvtData[uint(0)] = _u0/_scaleX;
+        		_faceMaterialVO.uvtData[uint(1)] = _v0/_scaleY;
+        		_faceMaterialVO.uvtData[uint(3)] = _u1/_scaleX;
+        		_faceMaterialVO.uvtData[uint(4)] = _v1/_scaleY;
+        		_faceMaterialVO.uvtData[uint(6)] = _u2/_scaleX;
+        		_faceMaterialVO.uvtData[uint(7)] = _v2/_scaleY;
         	}
         	 	
 			return _faceMaterialVO.uvtData;
@@ -709,19 +707,19 @@ package away3d.materials
         * Projects the texture in object space, ignoring the uv coordinates of the vertex objects.
         * Texture renders normally when set to <code>null</code>.
         */
-        public function get projectionVector():Number3D
+        public function get projectionVector():Vector3D
         {
         	return _projectionVector;
         }
         
-        public function set projectionVector(val:Number3D):void
+        public function set projectionVector(val:Vector3D):void
         {
         	_projectionVector = val;
         	if (_projectionVector) {
-        		_N.cross(_projectionVector, DOWN);
-	            if (!_N.modulo) _N = RIGHT;
-	            _M.cross(_N, _projectionVector);
-	            _N.cross(_M, _projectionVector);
+        		_N = DOWN.crossProduct(_projectionVector);
+	            if (!_N.length) _N = RIGHT;
+	            _M = _projectionVector.crossProduct(_N);
+	            _N = _projectionVector.crossProduct(_M);
 	            _N.normalize();
 	            _M.normalize();
         	}
@@ -769,7 +767,7 @@ package away3d.materials
             offsetX = ini.getNumber("offsetX", _offsetX);
             offsetY = ini.getNumber("offsetY", _offsetY);
             rotation = ini.getNumber("rotation", _rotation);
-            projectionVector = ini.getObject("projectionVector", Number3D) as Number3D;
+            projectionVector = ini.getObject("projectionVector", Vector3D) as Vector3D;
             throughProjection = ini.getBoolean("throughProjection", true);
             globalProjection = ini.getBoolean("globalProjection", false);
         }

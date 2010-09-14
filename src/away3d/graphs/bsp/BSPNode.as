@@ -1,25 +1,15 @@
 package away3d.graphs.bsp
 {
-	import away3d.events.BSPBuildEvent;
-	import away3d.graphs.*;
-	import away3d.materials.Material;
-	import away3d.core.base.UV;
-	import away3d.core.traverse.PrimitiveTraverser;
-	import away3d.materials.WireColorMaterial;
-	import away3d.core.base.Vertex;
-	import away3d.core.base.Object3D;
 	import away3d.arcane;
-	import away3d.core.base.Face;
-	import away3d.core.base.Mesh;
-	import away3d.core.geom.NGon;
-	import away3d.core.geom.Plane3D;
-	import away3d.core.math.Number3D;
-	import away3d.core.traverse.Traverser;
+	import away3d.core.base.*;
+	import away3d.core.geom.*;
+	import away3d.core.traverse.*;
+	import away3d.events.*;
+	import away3d.graphs.*;
 	
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.utils.getTimer;
-	import flash.utils.setTimeout;
+	import flash.events.*;
+	import flash.geom.*;
+	import flash.utils.*;
 	
 	use namespace arcane;
 	
@@ -161,13 +151,13 @@ package away3d.graphs.bsp
 			}
 		}
 		
-		/*public function assignDynamic(child : Object3D, center : Number3D, radius : Number) : void
+		/*public function assignDynamic(child : Object3D, center : Vector3D, radius : Number) : void
 		{
 			var dist : Number;
 			var align : int;
 		}*/
 		
-		public function assignCollider(child : Object3D, center : Number3D, radius : Number) : void 
+		public function assignCollider(child : Object3D, center : Vector3D, radius : Number) : void 
 		{
 			var dist : Number;
 			var align : int;
@@ -369,14 +359,14 @@ package away3d.graphs.bsp
 				}
 			}
 			_bounds = [];
-			_bounds.push(new Number3D(_minX, _minY, _minZ));
-			_bounds.push(new Number3D(_maxX, _minY, _minZ));
-			_bounds.push(new Number3D(_maxX, _maxY, _minZ));
-			_bounds.push(new Number3D(_minX, _maxY, _minZ));
-			_bounds.push(new Number3D(_minX, _minY, _maxZ));
-			_bounds.push(new Number3D(_maxX, _minY, _maxZ));
-			_bounds.push(new Number3D(_maxX, _maxY, _maxZ));
-			_bounds.push(new Number3D(_minX, _maxY, _maxZ));
+			_bounds.push(new Vector3D(_minX, _minY, _minZ));
+			_bounds.push(new Vector3D(_maxX, _minY, _minZ));
+			_bounds.push(new Vector3D(_maxX, _maxY, _minZ));
+			_bounds.push(new Vector3D(_minX, _maxY, _minZ));
+			_bounds.push(new Vector3D(_minX, _minY, _maxZ));
+			_bounds.push(new Vector3D(_maxX, _minY, _maxZ));
+			_bounds.push(new Vector3D(_maxX, _maxY, _maxZ));
+			_bounds.push(new Vector3D(_minX, _maxY, _maxZ));
 		}
  		
  		/**

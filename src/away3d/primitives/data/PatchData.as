@@ -250,9 +250,9 @@
 			v.x = vn.x; v.y = vn.y; v.z = vn.z;
 		}
 
-		// Convert Vertex to Number3D
-		/*private function VtoN(v:Vertex):Number3D {
-			return new Number3D(v.x, v.y, v.z);
+		// Convert Vertex to Vector3D
+		/*private function VtoN(v:Vertex):Vector3D {
+			return new Vector3D(v.x, v.y, v.z);
 		}*/
 		
 		// Deep clone an object

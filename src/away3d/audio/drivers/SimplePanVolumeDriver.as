@@ -1,10 +1,7 @@
 package away3d.audio.drivers
 {
-	import away3d.core.math.Number3D;
-	
-	import flash.media.SoundChannel;
-	import flash.media.SoundTransform;
-	import flash.utils.getTimer;
+	import flash.media.*;
+	import flash.geom.*;
 	
 	
 	/**
@@ -64,7 +61,7 @@ package away3d.audio.drivers
 		
 		
 		
-		public override function updateReferenceVector(v:Number3D) : void
+		public override function updateReferenceVector(v:Vector3D) : void
 		{
 			super.updateReferenceVector(v);
 			
@@ -95,7 +92,7 @@ package away3d.audio.drivers
 			// Offset radius so that max value for volume curve is 1,
 			// (i.e. y~=1 for r=0.) Also scale according to configured
 			// driver scale value.
-			r = (_ref_v.modulo / _scale) + 0.28209479;
+			r = (_ref_v.length / _scale) + 0.28209479;
 			r2 = r*r;
 			
 			// Volume is calculated according to the formula for

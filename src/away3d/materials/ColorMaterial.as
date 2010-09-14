@@ -15,9 +15,9 @@ package away3d.materials
         arcane override function renderTriangle(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
         	if (debug)
-				renderer._session.renderTriangleLineFill(_thickness, _color, _alpha, _wireColor, _wireAlpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[priIndex*9], renderer.primitiveProperties[priIndex*9+1]);
+				renderer._session.renderTriangleLineFill(_thickness, _color, _alpha, _wireColor, _wireAlpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[uint(priIndex*9)], renderer.primitiveProperties[uint(priIndex*9 + 1)]);
         	else
-        		renderer._session.renderTriangleColor(_color, _alpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[priIndex*9], renderer.primitiveProperties[priIndex*9+1]);
+        		renderer._session.renderTriangleColor(_color, _alpha, viewSourceObject.screenVertices, renderer.primitiveCommands[priIndex], viewSourceObject.screenIndices, renderer.primitiveProperties[uint(priIndex*9)], renderer.primitiveProperties[uint(priIndex*9 + 1)]);
         }
         
 		/** @private */
@@ -29,7 +29,7 @@ package away3d.materials
 		/** @private */
         arcane function renderFog(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
-            renderer._session.renderFogColor(_color, _alpha, renderer.primitiveProperties[priIndex*9 + 2], renderer.primitiveProperties[priIndex*9 + 3], renderer.primitiveProperties[priIndex*9 + 4], renderer.primitiveProperties[priIndex*9 + 5]);
+            renderer._session.renderFogColor(_color, _alpha, renderer.primitiveProperties[uint(priIndex*9 + 2)], renderer.primitiveProperties[uint(priIndex*9 + 3)], renderer.primitiveProperties[uint(priIndex*9 + 4)], renderer.primitiveProperties[uint(priIndex*9 + 5)]);
         }
         
         protected var _debug:Boolean;

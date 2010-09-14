@@ -1,14 +1,12 @@
 package away3d.physics
 {
-	import away3d.core.math.MatrixAway3D;
-	import away3d.cameras.Camera3D;
+	import away3d.cameras.*;
 	import away3d.arcane;
-	import away3d.core.base.Face;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.Object3D;
-	import away3d.core.geom.Plane3D;
-	import away3d.graphs.bsp.BSPTree;
-	import away3d.core.math.Number3D;
+	import away3d.core.base.*;
+	import away3d.core.geom.*;
+	import away3d.graphs.bsp.*;
+	
+	import flash.geom.*;
 
 	use namespace arcane;
 	
@@ -20,18 +18,18 @@ package away3d.physics
 	 */
 	public class BSPCollider
 	{
-		private var _minBounds : Number3D;
-		private var _maxBounds : Number3D;
+		private var _minBounds : Vector3D;
+		private var _maxBounds : Vector3D;
 		private var _maxClimbHeight : Number = 10;
 		
 		private var _object : Object3D;
 		private var _bspTree : BSPTree;
 		
-		private var _velocity : Number3D = new Number3D();
+		private var _velocity : Vector3D = new Vector3D();
 		
-		private var _startPos : Number3D = new Number3D();
-		private var _targetPos : Number3D = new Number3D();
-		private var _tempPos : Number3D = new Number3D();
+		private var _startPos : Vector3D = new Vector3D();
+		private var _targetPos : Vector3D = new Vector3D();
+		private var _tempPos : Vector3D = new Vector3D();
 		private var _flyMode : Boolean = true;
 		private var _maxIterations : Number = 5;
 		private var _onSolidGround : Boolean;
@@ -48,12 +46,12 @@ package away3d.physics
 		public function BSPCollider(object : Object3D, bspTree : BSPTree)
 		{
 			if (object is Mesh) {
-				_minBounds = new Number3D(object.minX, object.minY, object.minZ);
-				_maxBounds = new Number3D(object.maxX, object.maxY, object.maxZ);
+				_minBounds = new Vector3D(object.minX, object.minY, object.minZ);
+				_maxBounds = new Vector3D(object.maxX, object.maxY, object.maxZ);
 			}
 			else {
-				_minBounds = new Number3D(-100, -100, -100);
-				_maxBounds = new Number3D(100, 100, 100);
+				_minBounds = new Vector3D(-100, -100, -100);
+				_maxBounds = new Vector3D(100, 100, 100);
 			}
 			_object = object;
 			_bspTree = bspTree;
@@ -93,9 +91,9 @@ package away3d.physics
 			_maxIterations = maxIterations;
 		}
 		
-		public function move(x : Number, y : Number, z : Number) : Number3D
+		public function move(x : Number, y : Number, z : Number) : Vector3D
 		{
-			var newVelocity : Number3D;
+			var newVelocity : Vector3D;
 //			if (flyMode || _maxClimbHeight == 0 || y >= 0) {
 				newVelocity = moveBy(x, y, z);
 //			}
@@ -115,23 +113,23 @@ package away3d.physics
 			return newVelocity;
 		}
 		
-		private var _halfExtents : Number3D = new Number3D();
-		private var _collisionStart : Number3D = new Number3D();
+		private var _halfExtents : Vector3D = new Vector3D();
+		private var _collisionStart : Vector3D = new Vector3D();
 		
 		/**
 		 * Moves the object to a target point. If a collision is found, the trajectory is adapted.
 		 * 
 		 * @return Whether or not a collision occured.
 		 */		
-		private function moveBy(x : Number, y : Number, z : Number) : Number3D
+		private function moveBy(x : Number, y : Number, z : Number) : Vector3D
 		{
 			var directChild : Boolean;
 			var it : int;
 			var collPlane : Plane3D;
-			var BSPTransform : MatrixAway3D = _bspTree.sceneTransform;
-			var inverseBSPTransform : MatrixAway3D = _bspTree.inverseSceneTransform;
+			var BSPTransform : Matrix3D = _bspTree.sceneTransform;
+			var inverseBSPTransform : Matrix3D = _bspTree.inverseSceneTransform;
 			var diffY : Number;
-			var newForce : Number3D = new Number3D();
+			var newForce : Vector3D = new Vector3D();
 			var climbed : Boolean;
 			var hit : Boolean;
 			
@@ -145,7 +143,7 @@ package away3d.physics
 				_startPos.z = _object.z;
 			}
 			else
-				_startPos.clone(_object.scenePosition);
+				_startPos = _object.scenePosition.clone();
 			
 			// convert positions to bsp space
 			if (_flyMode) {
@@ -155,14 +153,14 @@ package away3d.physics
 				_targetPos.z = z;
 				
 				// transform to world space
-				_targetPos.transform(_targetPos, _object.sceneTransform);
+				_targetPos = _object.sceneTransform.transformVector(_targetPos);
 			}
 			else {
 				// work in world space
 				_velocity.x = x;
 				_velocity.y = 0;
 				_velocity.z = z;
-				_object.sceneTransform.multiplyVector3x3(_velocity);
+				_velocity = _object.sceneTransform.deltaTransformVector(_velocity);
 				
 				_targetPos.x = _startPos.x + _velocity.x;
 				_targetPos.y = _startPos.y + y;
@@ -170,8 +168,8 @@ package away3d.physics
 			}
 			
 			// transform to bsp local space
-			_startPos.transform(_startPos, inverseBSPTransform);
-			_targetPos.transform(_targetPos, inverseBSPTransform);
+			_startPos = inverseBSPTransform.transformVector(_startPos);
+			_targetPos = inverseBSPTransform.transformVector(_targetPos);
 			
 			updateBounds();
 			
@@ -232,10 +230,10 @@ package away3d.physics
 			if (!hit) {
 				resetBounds();
 				// transform to world space
-				_targetPos.transform(_targetPos, BSPTransform);
+				_targetPos = BSPTransform.transformVector(_targetPos);
 				
 				if (!directChild)
-					_targetPos.transform(_targetPos, _object.parent.inverseSceneTransform);
+					_targetPos = _object.parent.inverseSceneTransform.transformVector(_targetPos);
 				
 				newForce.x = _targetPos.x-_object.x;
 				newForce.y = _targetPos.y-_object.y;
@@ -259,7 +257,7 @@ package away3d.physics
 			return newForce;
 		}
 		
-		private function projectDown(targetPos : Number3D) : void
+		private function projectDown(targetPos : Vector3D) : void
 		{
 			_tempPos.x = targetPos.x;
 			_tempPos.y = targetPos.y - _maxClimbHeight*2;
@@ -332,22 +330,22 @@ package away3d.physics
 			_targetPos.z += c*dist;
 		}
 
-		public function get minBounds() : Number3D
+		public function get minBounds() : Vector3D
 		{
 			return _minBounds;
 		}
 		
-		public function set minBounds(minBounds : Number3D) : void
+		public function set minBounds(minBounds : Vector3D) : void
 		{
 			_minBounds = minBounds;
 		}
 		
-		public function get maxBounds() : Number3D
+		public function get maxBounds() : Vector3D
 		{
 			return _maxBounds;
 		}
 		
-		public function set maxBounds(maxBounds : Number3D) : void
+		public function set maxBounds(maxBounds : Vector3D) : void
 		{
 			_maxBounds = maxBounds;
 		}

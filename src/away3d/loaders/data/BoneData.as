@@ -1,6 +1,6 @@
 package away3d.loaders.data
 {
-	import away3d.core.math.*;
+	import flash.geom.*;
 	/**
 	 * Data class for a bone used in SkinAnimation.
 	 */
@@ -9,6 +9,6 @@ package away3d.loaders.data
 		/**
 		 * Transform information for the joint in a SkinAnimation
 		 */
-		public var jointTransform:MatrixAway3D = new MatrixAway3D();
+		public var jointTransform:Matrix3D = new Matrix3D();
 	}
 }

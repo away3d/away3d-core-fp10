@@ -18,8 +18,8 @@ package away3d.core.render
         private var _root:QuadrantTreeNode;
         private var _quadrant:QuadrantTreeNode;
 		private var _center:Array;
-		private var _result:Array = new Array();
-		private var _list:Array = new Array();
+		private var _result:Vector.<uint> = new Vector.<uint>();
+		private var _list:Vector.<uint> = new Vector.<uint>();
 		private var _except:Object3D;
 		private var _minX:Number;
 		private var _minY:Number;
@@ -33,7 +33,7 @@ package away3d.core.render
         private var _screenClipping:Clipping;
 		private var _priQuadrants:Array = new Array();
 		
-		private function getList(node:QuadrantTreeNode, result:Array):void
+		private function getList(node:QuadrantTreeNode, result:Vector.<uint>):void
         {
             if (node.onlysourceFlag && _except == node.onlysource)
                 return;
@@ -63,13 +63,13 @@ package away3d.core.render
                 while (i--)
                 {
                 	_child = _children[i];
-                    if ((_except == null || primitiveSource[_child].source != _except) && primitiveProperties[_child*9 + 3] > _minX && primitiveProperties[_child*9 + 2] < _maxX && primitiveProperties[_child*9 + 5] > _minY && primitiveProperties[_child*9 + 4] < _maxY)
+                    if ((_except == null || primitiveSource[_child].source != _except) && primitiveProperties[uint(_child*9 + 3)] > _minX && primitiveProperties[uint(_child*9 + 2)] < _maxX && primitiveProperties[uint(_child*9 + 5)] > _minY && primitiveProperties[uint(_child*9 + 4)] < _maxY)
                         result.push(_child);
                 }
             }
         }
         
-        private function getParent(node:QuadrantTreeNode, result:Array):void
+        private function getParent(node:QuadrantTreeNode, result:Vector.<uint>):void
         {
         	node = node.parent;
         	
@@ -82,7 +82,7 @@ package away3d.core.render
                 while (i--)
                 {
                 	_child = _children[i];
-                    if ((_except == null || primitiveSource[_child].source != _except) && primitiveProperties[_child*9 + 3] > _minX && primitiveProperties[_child*9 + 2] < _maxX && primitiveProperties[_child*9 + 5] > _minY && primitiveProperties[_child*9 + 4] < _maxY)
+                    if ((_except == null || primitiveSource[_child].source != _except) && primitiveProperties[uint(_child*9 + 3)] > _minX && primitiveProperties[uint(_child*9 + 2)] < _maxX && primitiveProperties[uint(_child*9 + 5)] > _minY && primitiveProperties[uint(_child*9 + 4)] < _maxY)
                         result.push(_child);
                 }
             }
@@ -144,14 +144,14 @@ package away3d.core.render
 		 * @param	ex		[optional]	Excludes primitives that are children of the 3d object.
 		 * @return						An array of drawing primitives.
 		 */
-        public function getRivals(priIndex:uint, ex:Object3D = null):Array
+        public function getRivals(priIndex:uint, ex:Object3D = null):Vector.<uint>
         {
         	_result.length = 0;
                     
-			_minX = primitiveProperties[priIndex*9 + 2];
-			_maxX = primitiveProperties[priIndex*9 + 3];
-			_minY = primitiveProperties[priIndex*9 + 4];
-			_maxY = primitiveProperties[priIndex*9 + 5];
+			_minX = primitiveProperties[uint(priIndex*9 + 2)];
+			_maxX = primitiveProperties[uint(priIndex*9 + 3)];
+			_minY = primitiveProperties[uint(priIndex*9 + 4)];
+			_maxY = primitiveProperties[uint(priIndex*9 + 5)];
 			_except = ex;
 			
             getList(_priQuadrants[priIndex], _result);
@@ -164,7 +164,7 @@ package away3d.core.render
 		 * 
 		 * @return	An array containing the primitives to be rendered.
 		 */
-        public override function list():Array
+        public override function list():Vector.<uint>
         {
         	//list and result on separate arrays so that no conflicts occur
         	_list.length = 0;

@@ -2,8 +2,8 @@ package away3d.primitives
 {
 	import away3d.arcane;
     import away3d.core.base.*;
-	import away3d.core.math.Number3D;
-	import away3d.core.utils.*;
+    
+    import flash.geom.*;
     
 	use namespace arcane;
 	
@@ -31,9 +31,9 @@ package away3d.primitives
     		
             var i:int;
             var j:int;
-			var tang : Number3D = new Number3D();
-			var n : Number3D = new Number3D();
-			var bitan : Number3D = new Number3D();
+			var tang : Vector3D = new Vector3D();
+			var n : Vector3D = new Vector3D();
+			var bitan : Vector3D = new Vector3D();
 
             grid = new Array(_segmentsR);
             for (i = 0; i < _segmentsR; ++i) {
@@ -41,14 +41,14 @@ package away3d.primitives
                 for (j = 0; j < _segmentsT; ++j) {
 					var u:Number = i / _segmentsR * 2 * _p * Math.PI;
 					var v:Number = j / _segmentsT * 2 * Math.PI;
-					var p : Number3D = getPos(u, v);
-					var p2 : Number3D = getPos(u+.01, v);
+					var p : Vector3D = getPos(u, v);
+					var p2 : Vector3D = getPos(u+.01, v);
 					var cx : Number, cy : Number;
 
 					tang.x = p2.x - p.x; tang.y = p2.y - p.y; tang.z = p2.z - p.z;
 					n.x = p2.x + p.x; n.y = p2.y + p.y; n.z = p2.z + p.z; 
-					bitan.cross(tang, n);
-					n.cross(bitan, tang);
+					bitan = n.crossProduct(tang);
+					n = tang.crossProduct(bitan);
 					bitan.normalize();
 					n.normalize();
 
@@ -89,14 +89,14 @@ package away3d.primitives
             }
     	}
 
-		private function getPos(u : Number, v : Number) : Number3D
+		private function getPos(u : Number, v : Number) : Vector3D
 		{
 			var cu : Number = Math.cos(u);
 			var cv : Number = Math.cos(v);
 			var su : Number = Math.sin(u);
 			var quOverP : Number = _q/_p*u;
 			var cs : Number = Math.cos(quOverP);
-			var pos : Number3D = new Number3D();
+			var pos : Vector3D = new Vector3D();
 
 			pos.x = _radius*(2+cs)*.5 * cu;
 			pos.y = _radius*(2+cs)*su*.5;

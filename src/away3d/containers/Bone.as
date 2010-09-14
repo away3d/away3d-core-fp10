@@ -1,10 +1,10 @@
 package away3d.containers
 {
-	import away3d.core.math.MatrixAway3D;
-	import away3d.animators.data.SkinController;
-	
 	import away3d.arcane;
+	import away3d.animators.data.*;
 	import away3d.core.base.*;
+	
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -186,7 +186,7 @@ package away3d.containers
         }
         
         
-        public override function set transform(val:MatrixAway3D):void
+        public override function set transform(val:Matrix3D):void
         {
         	super.transform = val;
         	

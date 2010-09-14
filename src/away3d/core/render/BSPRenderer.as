@@ -29,6 +29,8 @@ package away3d.core.render
         
         private function filterNonBSP():void
         {
+        	_order.length = _screenTs.length;
+        	
 			for each(_filter in _filters)
 				_filter.filter(this);
 			
@@ -43,8 +45,7 @@ package away3d.core.render
 			}
 			
 			_primitives.length = 0;
-			_screenZs.length = 0;
-//			_order.length = 0;
+			_screenTs.length = 0;
 			_sorting = false;
         }
         
@@ -90,8 +91,8 @@ package away3d.core.render
             }
            	else {
            		_sorting = true;
-           		_primitives.push(priIndex);
-           		_screenZs.push(primitiveScreenZ[priIndex]);
+				_primitives[_primitives.length] = priIndex;
+				_screenTs[_screenTs.length] = 75000*_camera.zoom/primitiveScreenZ[priIndex];
            	}
             
             return true;
@@ -102,7 +103,7 @@ package away3d.core.render
 		 * 
 		 * @return	An array containing the primitives to be rendered.
 		 */
-        public override function list():Array
+        public override function list():Vector.<uint>
         {
             return _primitives;
         }
@@ -112,12 +113,13 @@ package away3d.core.render
         	super.clear();
         	
         	_primitives.length = 0;
-        	_screenZs.length = 0;
+        	_screenTs.length = 0;
         	_allPrimitives.length = 0;
         	_allOrder.length = 0;
 			_scene = _view.scene;
         	_camera = _view.camera;
         	_screenClipping = _view.screenClipping;
+        	_coeffScreenT = 75000*_camera.zoom;
         }
         
         public override function render():void

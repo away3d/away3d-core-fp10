@@ -1,10 +1,6 @@
 package away3d.core.filter
 {
-	import away3d.core.project.PrimitiveType;
-    import away3d.cameras.*;
-    import away3d.containers.*;
-    import away3d.core.clip.*;
-    import away3d.core.draw.*;
+	import away3d.core.project.*;
     import away3d.core.render.*;
 	import away3d.core.utils.*;
     
@@ -21,14 +17,14 @@ package away3d.core.filter
     	private var start:int;
         private var check:int;
     
-        private var primitives:Array;
+        private var primitives:Vector.<uint>;
         private var turn:int;
         
         private var maxZ:Number;
         private var minZ:Number;
         private var maxdeltaZ:Number;
         
-        private var rivals:Array;
+        private var rivals:Vector.<uint>;
         private var parts:Array;
         
         private var ZOrderDeeper:int = 1;
@@ -215,14 +211,14 @@ package away3d.core.filter
         {
         	_viewSourceObjectQ = renderer.primitiveSource[q];
         	_viewSourceObjectW = renderer.primitiveSource[w];
-        	_minX = renderer.primitiveProperties[w*9 + 2];
-        	_maxX = renderer.primitiveProperties[w*9 + 3];
-        	_minY = renderer.primitiveProperties[w*9 + 4];
-        	_maxY = renderer.primitiveProperties[w*9 + 5];
+        	_minX = renderer.primitiveProperties[uint(w*9 + 2)];
+        	_maxX = renderer.primitiveProperties[uint(w*9 + 3)];
+        	_minY = renderer.primitiveProperties[uint(w*9 + 4)];
+        	_maxY = renderer.primitiveProperties[uint(w*9 + 5)];
         	
-        	_index = _viewSourceObjectW.screenIndices[renderer.primitiveProperties[w*9]]*3;
+        	_index = _viewSourceObjectW.screenIndices[uint(renderer.primitiveProperties[uint(w*9)])]*2;
         	w0x = _viewSourceObjectW.screenVertices[_index];
-        	w0y = _viewSourceObjectW.screenVertices[_index + 1];
+        	w0y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
         	
 			if (_viewSourceObjectQ.contains(q, renderer, w0x, w0y))
                 return zcompare(q, w, w0x, w0y);
@@ -245,27 +241,27 @@ package away3d.core.filter
         private function zconflictTS(q:uint, w:uint):int
         {
         	_viewSourceObjectQ = renderer.primitiveSource[q];
-        	_startIndex = renderer.primitiveProperties[q*9];
+        	_startIndex = renderer.primitiveProperties[uint(q*9)];
         	
-        	_index = _viewSourceObjectQ.screenIndices[_startIndex]*3;
+        	_index = _viewSourceObjectQ.screenIndices[_startIndex]*2;
 			q0x = _viewSourceObjectQ.screenVertices[_index];
-            q0y = _viewSourceObjectQ.screenVertices[_index + 1];
-            _index = _viewSourceObjectQ.screenIndices[_startIndex + 1]*3;
+            q0y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectQ.screenIndices[uint(_startIndex + 1)]*2;
             q1x = _viewSourceObjectQ.screenVertices[_index];
             q1y = _viewSourceObjectQ.screenVertices[_index + 1];
-            _index = _viewSourceObjectQ.screenIndices[_startIndex + 2]*3;
+            _index = _viewSourceObjectQ.screenIndices[uint(_startIndex + 2)]*2;
             q2x = _viewSourceObjectQ.screenVertices[_index];
-            q2y = _viewSourceObjectQ.screenVertices[_index + 1];
+            q2y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
     		
         	_viewSourceObjectW = renderer.primitiveSource[w];
-        	_startIndex = renderer.primitiveProperties[w*9];
+        	_startIndex = renderer.primitiveProperties[uint(w*9)];
         	
-    		_index = _viewSourceObjectW.screenIndices[_startIndex]*3;
+    		_index = _viewSourceObjectW.screenIndices[_startIndex]*2;
             w0x = _viewSourceObjectW.screenVertices[_index];
-            w0y = _viewSourceObjectW.screenVertices[_index + 1];
-            _index = _viewSourceObjectW.screenIndices[_startIndex + 1]*3;
+            w0y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectW.screenIndices[uint(_startIndex + 1)]*2;
             w1x = _viewSourceObjectW.screenVertices[_index];
-            w1y = _viewSourceObjectW.screenVertices[_index + 1];
+            w1y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
     
             ql01a = q1y - q0y;
             ql01b = q0x - q1x;
@@ -382,30 +378,30 @@ package away3d.core.filter
         private function zconflictTT(q:uint, w:uint):int
         {
         	_viewSourceObjectQ = renderer.primitiveSource[q];
-        	_startIndex = renderer.primitiveProperties[q*9];
+        	_startIndex = renderer.primitiveProperties[uint(q*9)];
         	
-        	_index = _viewSourceObjectQ.screenIndices[_startIndex]*3;
+        	_index = _viewSourceObjectQ.screenIndices[_startIndex]*2;
 			q0x = _viewSourceObjectQ.screenVertices[_index];
-            q0y = _viewSourceObjectQ.screenVertices[_index + 1];
-            _index = _viewSourceObjectQ.screenIndices[_startIndex + 1]*3;
+            q0y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectQ.screenIndices[uint(_startIndex + 1)]*2;
             q1x = _viewSourceObjectQ.screenVertices[_index];
-            q1y = _viewSourceObjectQ.screenVertices[_index + 1];
-            _index = _viewSourceObjectQ.screenIndices[_startIndex + 2]*3;
+            q1y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectQ.screenIndices[uint(_startIndex + 2)]*2;
             q2x = _viewSourceObjectQ.screenVertices[_index];
-            q2y = _viewSourceObjectQ.screenVertices[_index + 1];
+            q2y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
     		
         	_viewSourceObjectW = renderer.primitiveSource[w];
-    		_startIndex = renderer.primitiveProperties[w*9];
+    		_startIndex = renderer.primitiveProperties[uint(w*9)];
     		
-    		_index = _viewSourceObjectW.screenIndices[_startIndex]*3;
+    		_index = _viewSourceObjectW.screenIndices[_startIndex]*2;
             w0x = _viewSourceObjectW.screenVertices[_index];
-            w0y = _viewSourceObjectW.screenVertices[_index + 1];
-            _index = _viewSourceObjectW.screenIndices[_startIndex + 1]*3;
+            w0y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectW.screenIndices[uint(_startIndex + 1)]*2;
             w1x = _viewSourceObjectW.screenVertices[_index];
-            w1y = _viewSourceObjectW.screenVertices[_index + 1];
-            _index = _viewSourceObjectW.screenIndices[_startIndex + 2]*3;
+            w1y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectW.screenIndices[uint(_startIndex + 2)]*2;
             w2x = _viewSourceObjectW.screenVertices[_index];
-            w2y = _viewSourceObjectW.screenVertices[_index + 1];
+            w2y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
     
             ql01a = q1y - q0y;
             ql01b = q0x - q1x;
@@ -668,14 +664,14 @@ package away3d.core.filter
     	
         private function zcompare(q:uint, w:uint, x:Number, y:Number):int
         {
-        	qz = _viewSourceObjectQ.getUVT(q, renderer, x, y)[2];
-            wz = _viewSourceObjectW.getUVT(w, renderer, x, y)[2];
-    
-            if (qz > wz)
-                return ZOrderDeeper;
+        	qz = _viewSourceObjectQ.getUVT(q, renderer, x, y).z;
+            wz = _viewSourceObjectW.getUVT(w, renderer, x, y).z;
+    		
             if (qz < wz)
+                return ZOrderDeeper;
+            if (qz > wz)
                 return ZOrderHigher;
-    
+    		
             return ZOrderSame;
         }
         
@@ -703,7 +699,7 @@ package away3d.core.filter
             
             while (primitives.length > 0) {
             	
-                var leftover:Array = [];
+                var leftover:Vector.<uint> = new Vector.<uint>();
                 var priIndex:uint;
                 for each (priIndex in primitives) {
                 	
@@ -715,8 +711,8 @@ package away3d.core.filter
                         else
                             check = 0;
 					
-                    maxZ = renderer.primitiveProperties[priIndex*9 + 7] + 1000;
-                    minZ = renderer.primitiveProperties[priIndex*9 + 6] - 1000;
+                    maxZ = renderer.primitiveProperties[uint(priIndex*9 + 7)] + 1000;
+                    minZ = renderer.primitiveProperties[uint(priIndex*9 + 6)] - 1000;
                     maxdeltaZ = 0;
                     
                     rivals = renderer.getRivals(priIndex);

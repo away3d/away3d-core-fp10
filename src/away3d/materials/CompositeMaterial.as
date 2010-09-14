@@ -60,11 +60,11 @@ package away3d.materials
         	} else {
 	        	_source = viewSourceObject.source;
 	        	_session = renderer._session;
-	        	_faceVO = renderer.primitiveElements[priIndex];
+	        	_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 	        	
 				_generated = renderer.primitiveGenerated[priIndex];
 				
-				_startIndex = renderer.primitiveProperties[priIndex*9];
+				_startIndex = renderer.primitiveProperties[uint(priIndex*9)];
 				_screenVertices = viewSourceObject.screenVertices;
 				
 	    		var level:int = 0;
@@ -117,7 +117,7 @@ package away3d.materials
 		/** @private */
         arcane override function renderBitmapLayer(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer, containerRect:Rectangle, parentFaceMaterialVO:FaceMaterialVO):FaceMaterialVO
 		{
-			_faceVO = renderer.primitiveElements[priIndex];
+			_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 			_faceMaterialVO = getFaceMaterialVO(_faceVO, viewSourceObject.source, renderer._view);
 			
 			//get width and height values
@@ -311,12 +311,12 @@ package away3d.materials
 	        		_faceVO.face.bitmapRect = new Rectangle(_faceX = int(_width*_minU), _faceY = int(_height*(1 - _maxV)), _faceWidth = int(_width*(_maxU-_minU)+2), _faceHeight = int(_height*(_maxV-_minV)+2));
 	        		
 	        		//update texturemapping
-	        		_faceMaterialVO.uvtData[0] = (_faceVO.uvs[0].u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[1] = ((1 - _faceVO.uvs[0].v)*_height - _faceY)/_faceHeight;
-					_faceMaterialVO.uvtData[3] = (_faceVO.uvs[1].u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[4] = ((1 - _faceVO.uvs[1].v)*_height - _faceY)/_faceHeight;
-		    		_faceMaterialVO.uvtData[6] = (_faceVO.uvs[2].u*_width - _faceX)/_faceWidth;
-		    		_faceMaterialVO.uvtData[7] = ((1 - _faceVO.uvs[2].v)*_height - _faceY)/_faceHeight;
+	        		_faceMaterialVO.uvtData[uint(0)] = (_faceVO.uvs[0].u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[uint(1)] = ((1 - _faceVO.uvs[0].v)*_height - _faceY)/_faceHeight;
+					_faceMaterialVO.uvtData[uint(3)] = (_faceVO.uvs[1].u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[uint(4)] = ((1 - _faceVO.uvs[1].v)*_height - _faceY)/_faceHeight;
+		    		_faceMaterialVO.uvtData[uint(6)] = (_faceVO.uvs[2].u*_width - _faceX)/_faceWidth;
+		    		_faceMaterialVO.uvtData[uint(7)] = ((1 - _faceVO.uvs[2].v)*_height - _faceY)/_faceHeight;
 	        		_faceMaterialVO.invtexturemapping = transformUV(_faceVO).clone();
 	        		_faceMaterialVO.texturemapping = _faceMaterialVO.invtexturemapping.clone();
 	        		_faceMaterialVO.texturemapping.invert();
@@ -346,22 +346,22 @@ package away3d.materials
         		_faceHeight = _bRect.height;
         		
         		//update texturemapping
-        		_uvt[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-				_uvt[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-				_uvt[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
-        		_uvt[0] = (_uvs[0].u*_width - _faceX)/_faceWidth;
-	    		_uvt[1] = ((1 - _uvs[0].v)*_height - _faceY)/_faceHeight;
-				_uvt[3] = (_uvs[1].u*_width - _faceX)/_faceWidth;
-	    		_uvt[4] = ((1 - _uvs[1].v)*_height - _faceY)/_faceHeight;
-	    		_uvt[6] = (_uvs[2].u*_width - _faceX)/_faceWidth;
-	    		_uvt[7] = ((1 - _uvs[2].v)*_height - _faceY)/_faceHeight;
+        		_uvt[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+				_uvt[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+				_uvt[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
+        		_uvt[uint(0)] = (_uvs[0].u*_width - _faceX)/_faceWidth;
+	    		_uvt[uint(1)] = ((1 - _uvs[0].v)*_height - _faceY)/_faceHeight;
+				_uvt[uint(3)] = (_uvs[1].u*_width - _faceX)/_faceWidth;
+	    		_uvt[uint(4)] = ((1 - _uvs[1].v)*_height - _faceY)/_faceHeight;
+	    		_uvt[uint(6)] = (_uvs[2].u*_width - _faceX)/_faceWidth;
+	    		_uvt[uint(7)] = ((1 - _uvs[2].v)*_height - _faceY)/_faceHeight;
 	    		
 	    		return _uvt;
         	}
         	
-	        _faceMaterialVO.uvtData[2] = 1/(_focus + _screenVertices[_screenIndices[_startIndex]*3 + 2]);
-			_faceMaterialVO.uvtData[5] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 1]*3 + 2]);
-			_faceMaterialVO.uvtData[8] = 1/(_focus + _screenVertices[_screenIndices[_startIndex + 2]*3 + 2]);
+        	_faceMaterialVO.uvtData[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
+			_faceMaterialVO.uvtData[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
 			
     		return _faceMaterialVO.uvtData;
         }

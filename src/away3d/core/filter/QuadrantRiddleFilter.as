@@ -21,9 +21,9 @@
         private var renderer:QuadrantRenderer;
     	private var start:int;
         private var check:int;
-        private var primitives:Array;
+        private var primitives:Vector.<uint>;
         private var turn:int;
-        private var rivals:Array;
+        private var rivals:Vector.<uint>;
         private var parts:Array;
         private var lens:AbstractLens;
         private var positiveArea:Number;
@@ -199,15 +199,15 @@
         
         private final function riddleTT(q:uint, w:uint):Array
         {
-        	positiveArea = renderer.primitiveProperties[q*9 + 8];
+        	positiveArea = renderer.primitiveProperties[uint(q*9 + 8)];
         	
         	if (positiveArea < 0)
         		positiveArea = -positiveArea;
         	
 			_viewSourceObjectW = renderer.primitiveSource[w];
-			_startIndexW = renderer.primitiveProperties[w*9];
+			_startIndexW = renderer.primitiveProperties[uint(w*9)];
 			_viewSourceObjectQ = renderer.primitiveSource[q];
-        	_startIndexQ = renderer.primitiveProperties[q*9];
+        	_startIndexQ = renderer.primitiveProperties[uint(q*9)];
         	
         	//return if triangle area below 10 or if actual rival triangles do not overlap
             if (positiveArea < 10 || positiveArea < 10 || !overlap(q, w))
@@ -215,25 +215,25 @@
 			
 			
 			//deperspective rival v0 
-			_index = _viewSourceObjectW.screenIndices[_startIndexW]*3;
-            av0z = _viewSourceObjectW.screenVertices[_index + 2];
+			_index = _viewSourceObjectW.screenIndices[_startIndexW];
+            av0z = lens.getScreenZ(_viewSourceObjectW.screenUVTs[uint(_index*3 + 2)]);
             av0p = lens.getPerspective(av0z);
-            av0x = _viewSourceObjectW.screenVertices[_index] / av0p;
-            av0y = _viewSourceObjectW.screenVertices[_index + 1] / av0p;
+            av0x = _viewSourceObjectW.screenVertices[uint(_index*2)] / av0p;
+            av0y = _viewSourceObjectW.screenVertices[uint(_index*2 + 1)] / av0p;
 			
 			//deperspective rival v1
-			_index = _viewSourceObjectW.screenIndices[_startIndexW + 1]*3;
-            av1z = _viewSourceObjectW.screenVertices[_index + 2];
+			_index = _viewSourceObjectW.screenIndices[uint(_startIndexW + 1)];
+            av1z = lens.getScreenZ(_viewSourceObjectW.screenUVTs[uint(_index*3 + 2)]);
             av1p = lens.getPerspective(av1z);
-            av1x = _viewSourceObjectW.screenVertices[_index] / av1p;
-            av1y = _viewSourceObjectW.screenVertices[_index + 1] / av1p;
+            av1x = _viewSourceObjectW.screenVertices[uint(_index*2)] / av1p;
+            av1y = _viewSourceObjectW.screenVertices[uint(_index*2 + 1)] / av1p;
 			
 			//deperspective rival v2
-			_index = _viewSourceObjectW.screenIndices[_startIndexW + 2]*3;
-            av2z = _viewSourceObjectW.screenVertices[_index + 2];
+			_index = _viewSourceObjectW.screenIndices[uint(_startIndexW + 2)];
+            av2z = lens.getScreenZ(_viewSourceObjectW.screenUVTs[uint(_index*3 + 2)]);
             av2p = lens.getPerspective(av2z);
-            av2x = _viewSourceObjectW.screenVertices[_index] / av2p;
-            av2y = _viewSourceObjectW.screenVertices[_index + 1] / av2p;
+            av2x = _viewSourceObjectW.screenVertices[uint(_index*2)] / av2p;
+            av2y = _viewSourceObjectW.screenVertices[uint(_index*2 + 1)] / av2p;
 			
 			//calculate rival face normal
             ad1x = av1x - av0x;
@@ -256,25 +256,25 @@
                 return null;
 			
 			//deperspective v0
-			_index = _viewSourceObjectQ.screenIndices[_startIndexQ]*3;
-            tv0z = _viewSourceObjectQ.screenVertices[_index + 2];
+			_index = _viewSourceObjectQ.screenIndices[_startIndexQ];
+            tv0z = lens.getScreenZ(_viewSourceObjectQ.screenUVTs[uint(_index*3 + 2)]);
             tv0p = lens.getPerspective(tv0z);
-            tv0x = _viewSourceObjectQ.screenVertices[_index] / tv0p;
-            tv0y = _viewSourceObjectQ.screenVertices[_index + 1] / tv0p;
+            tv0x = _viewSourceObjectQ.screenVertices[uint(_index*2)] / tv0p;
+            tv0y = _viewSourceObjectQ.screenVertices[uint(_index*2 + 1)] / tv0p;
 
 			//deperspective v1
-			_index = _viewSourceObjectQ.screenIndices[_startIndexQ + 1]*3;
-            tv1z = _viewSourceObjectQ.screenVertices[_index + 2];
+			_index = _viewSourceObjectQ.screenIndices[uint(_startIndexQ + 1)];
+            tv1z = lens.getScreenZ(_viewSourceObjectQ.screenUVTs[uint(_index*3 + 2)]);
             tv1p = lens.getPerspective(tv1z);
-            tv1x = _viewSourceObjectQ.screenVertices[_index] / tv1p;
-            tv1y = _viewSourceObjectQ.screenVertices[_index + 1] / tv1p;
+            tv1x = _viewSourceObjectQ.screenVertices[uint(_index*2)] / tv1p;
+            tv1y = _viewSourceObjectQ.screenVertices[uint(_index*2 + 1)] / tv1p;
 			
 			//deperspective v2
-			_index = _viewSourceObjectQ.screenIndices[_startIndexQ + 2]*3;
-            tv2z = _viewSourceObjectQ.screenVertices[_index + 2];
+			_index = _viewSourceObjectQ.screenIndices[uint(_startIndexQ + 2)];
+            tv2z = lens.getScreenZ(_viewSourceObjectQ.screenUVTs[uint(_index*3 + 2)]);
             tv2p = lens.getPerspective(tv2z);
-            tv2x = _viewSourceObjectQ.screenVertices[_index] / tv2p;
-            tv2y = _viewSourceObjectQ.screenVertices[_index + 1] / tv2p;
+            tv2x = _viewSourceObjectQ.screenVertices[uint(_index*2)] / tv2p;
+            tv2y = _viewSourceObjectQ.screenVertices[uint(_index*2 + 1)] / tv2p;
             
             //calculate the dot product of v0, v1 and v2 to the rival normal
             sv0 = apa*tv0x + apb*tv0y + apc*tv0z - apd;
@@ -373,25 +373,25 @@
         private function overlap(q:uint, w:uint):Boolean
         {
         	
-        	_index = _viewSourceObjectQ.screenIndices[_startIndexQ]*3;
+        	_index = _viewSourceObjectQ.screenIndices[_startIndexQ]*2;
             q0x = _viewSourceObjectQ.screenVertices[_index];
-            q0y = _viewSourceObjectQ.screenVertices[_index + 1];
-            _index = _viewSourceObjectQ.screenIndices[_startIndexQ + 1]*3;
+            q0y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectQ.screenIndices[uint(_startIndexQ + 1)]*2;
             q1x = _viewSourceObjectQ.screenVertices[_index];
-            q1y = _viewSourceObjectQ.screenVertices[_index + 1];
-            _index = _viewSourceObjectQ.screenIndices[_startIndexQ + 2]*3;
+            q1y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectQ.screenIndices[uint(_startIndexQ + 2)]*2;
             q2x = _viewSourceObjectQ.screenVertices[_index];
-            q2y = _viewSourceObjectQ.screenVertices[_index + 1];
+            q2y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
         	
-        	_index = _viewSourceObjectW.screenIndices[_startIndexW]*3;
+        	_index = _viewSourceObjectW.screenIndices[_startIndexW]*2;
             w0x = _viewSourceObjectW.screenVertices[_index];
-            w0y = _viewSourceObjectW.screenVertices[_index + 1];
-            _index = _viewSourceObjectW.screenIndices[_startIndexW + 1]*3;
+            w0y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectW.screenIndices[uint(_startIndexW + 1)]*2;
             w1x = _viewSourceObjectW.screenVertices[_index];
-            w1y = _viewSourceObjectW.screenVertices[_index + 1];
-            _index = _viewSourceObjectW.screenIndices[_startIndexW + 2]*3;
+            w1y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
+            _index = _viewSourceObjectW.screenIndices[uint(_startIndexW + 2)]*2;
             w2x = _viewSourceObjectW.screenVertices[_index];
-            w2y = _viewSourceObjectW.screenVertices[_index + 1];
+            w2y = _viewSourceObjectW.screenVertices[uint(_index + 1)];
         
             ql01a = q1y - q0y;
             ql01b = q0x - q1x;
@@ -465,25 +465,25 @@
         private function riddleTS(q:uint, w:uint):Array
         {
         	_viewSourceObjectQ = renderer.primitiveSource[q];
-			_startIndexQ = renderer.primitiveProperties[q*9];
+			_startIndexQ = renderer.primitiveProperties[uint(q*9)];
 			
-        	_index = _viewSourceObjectQ.screenIndices[_startIndexQ]*3;
-            av0z = _viewSourceObjectQ.screenVertices[_index + 2];
+        	_index = _viewSourceObjectQ.screenIndices[_startIndexQ];
+            av0z = lens.getScreenZ(_viewSourceObjectQ.screenUVTs[uint(_index*3 + 2)]);
             av0p = lens.getPerspective(av0z);
-            av0x = _viewSourceObjectQ.screenVertices[_index] / av0p;
-            av0y = _viewSourceObjectQ.screenVertices[_index + 1] / av0p;
+            av0x = _viewSourceObjectQ.screenVertices[uint(_index*2)] / av0p;
+            av0y = _viewSourceObjectQ.screenVertices[uint(_index*2 + 1)] / av0p;
 			
-			_index = _viewSourceObjectQ.screenIndices[_startIndexQ + 1]*3;
-            av1z = _viewSourceObjectQ.screenVertices[_index + 2];
+			_index = _viewSourceObjectQ.screenIndices[uint(_startIndexQ + 1)];
+            av1z = lens.getScreenZ(_viewSourceObjectQ.screenUVTs[uint(_index*3 + 2)]);
             av1p = lens.getPerspective(av1z);
-            av1x = _viewSourceObjectQ.screenVertices[_index] / av1p;
-            av1y = _viewSourceObjectQ.screenVertices[_index + 1] / av1p;
+            av1x = _viewSourceObjectQ.screenVertices[uint(_index*2)] / av1p;
+            av1y = _viewSourceObjectQ.screenVertices[uint(_index*2 + 1)] / av1p;
 			
-			_index = _viewSourceObjectQ.screenIndices[_startIndexQ + 2]*3;
-            av2z = _viewSourceObjectQ.screenVertices[_index + 2];
+			_index = _viewSourceObjectQ.screenIndices[uint(_startIndexQ + 2)];
+            av2z = lens.getScreenZ(_viewSourceObjectQ.screenUVTs[uint(_index*3 + 2)]);
             av2p = lens.getPerspective(av2z);
-            av2x = _viewSourceObjectQ.screenVertices[_index] / av2p;
-            av2y = _viewSourceObjectQ.screenVertices[_index + 1] / av2p;
+            av2x = _viewSourceObjectQ.screenVertices[uint(_index*2)] / av2p;
+            av2y = _viewSourceObjectQ.screenVertices[uint(_index*2 + 1)] / av2p;
 			   
             ad1x = av1x - av0x;
             ad1y = av1y - av0y;
@@ -502,19 +502,19 @@
                 return null;
 			
 			_viewSourceObjectW = renderer.primitiveSource[w];
-        	_startIndexW = renderer.primitiveProperties[w*9];
+        	_startIndexW = renderer.primitiveProperties[uint(w*9)];
         	
-        	_index = _viewSourceObjectW.screenIndices[_startIndexW]*3;
-            tv0z = _viewSourceObjectW.screenVertices[_index + 2];
+        	_index = _viewSourceObjectW.screenIndices[_startIndexW];
+            tv0z = lens.getScreenZ(_viewSourceObjectW.screenUVTs[uint(_index*3 + 2)]);
             tv0p = lens.getPerspective(tv0z);
-            tv0x = _viewSourceObjectW.screenVertices[_index] / tv0p;
-            tv0y = _viewSourceObjectW.screenVertices[_index + 1] / tv0p;
+            tv0x = _viewSourceObjectW.screenVertices[uint(_index*2)] / tv0p;
+            tv0y = _viewSourceObjectW.screenVertices[uint(_index*2 + 1)] / tv0p;
 			
-			_index = _viewSourceObjectW.screenIndices[_startIndexW + 1]*3;
-            tv1z = _viewSourceObjectW.screenVertices[_index + 2];
+			_index = _viewSourceObjectW.screenIndices[uint(_startIndexW + 1)];
+            tv1z = lens.getScreenZ(_viewSourceObjectW.screenUVTs[uint(_index*3 + 2)]);
             tv1p = lens.getPerspective(tv1z);
-            tv1x = _viewSourceObjectW.screenVertices[_index] / tv1p;
-            tv1y = _viewSourceObjectW.screenVertices[_index + 1] / tv1p;
+            tv1x = _viewSourceObjectW.screenVertices[uint(_index*2)] / tv1p;
+            tv1y = _viewSourceObjectW.screenVertices[uint(_index*2 + 1)] / tv1p;
 			
             sv0 = apa*tv0x + apb*tv0y + apc*tv0z + apd;
             sv1 = apa*tv1x + apb*tv1y + apc*tv1z + apd;
@@ -562,7 +562,7 @@
             
             while (primitives.length > 0)
             {
-                var leftover:Array = [];
+                var leftover:Vector.<uint> = new Vector.<uint>();
 				var priIndex:uint;
                 for each (priIndex in primitives)
                 {
@@ -580,9 +580,9 @@
                     {
                     	if (rival == priIndex)
                             continue;
-                        if (renderer.primitiveProperties[rival*9 + 6] >= renderer.primitiveProperties[priIndex*9 + 7])
+                        if (renderer.primitiveProperties[uint(rival*9 + 6)] >= renderer.primitiveProperties[uint(priIndex*9 + 7)])
                             continue;
-                        if (renderer.primitiveProperties[rival*9 + 7] <= renderer.primitiveProperties[priIndex*9 + 6])
+                        if (renderer.primitiveProperties[uint(rival*9 + 7)] <= renderer.primitiveProperties[uint(priIndex*9 + 6)])
                             continue;
                         
                         parts = riddle(priIndex, rival);

@@ -1,28 +1,15 @@
 package away3d.primitives
 {
-	import away3d.cameras.Camera3D;
-	import away3d.containers.View3D;
-	import away3d.core.base.Object3D;
-	import away3d.core.base.Vertex;
-	import away3d.core.draw.ScreenVertex;
-	import away3d.core.math.MatrixAway3D;
-	import away3d.core.math.Number3D;
-	import away3d.events.ViewEvent;
-	import away3d.materials.BitmapMaskMaterial;
-	import away3d.materials.BitmapMaterial;
-	import away3d.materials.CompositeMaterial;
+	import away3d.cameras.*;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.events.*;
+	import away3d.materials.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.BitmapDataChannel;
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.filters.BlurFilter;
-	import flash.filters.DisplacementMapFilter;
-	import flash.filters.DisplacementMapFilterMode;
-	import flash.geom.ColorTransform;
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.filters.*;
+	import flash.geom.*;
 	
 	/* 
 		This class is a work in progress...
@@ -47,8 +34,8 @@ package away3d.primitives
 		private var _reflectionView:View3D;
 		private var _reflectionViewHolder:Sprite;
 		
-		private var _normal:Number3D;
-		private var _reflectionMatrixAway3D:MatrixAway3D;
+		private var _normal:Vector3D;
+		private var _reflectionMatrix3D:Matrix3D;
 		private var _reflectionMatrix2D:Matrix;
 		private var _plane2DRotation:Number = 0;
 		
@@ -77,10 +64,10 @@ package away3d.primitives
 		private var _v1:Vertex;
 		private var _v2:Vertex;
 		private var _v3:Vertex;
-		private var _sv0:ScreenVertex;
-		private var _sv1:ScreenVertex;
-		private var _sv2:ScreenVertex;
-		private var _sv3:ScreenVertex;
+		private var _sv0:Vector3D;
+		private var _sv1:Vector3D;
+		private var _sv2:Vector3D;
+		private var _sv3:Vector3D;
 		
 		private var _useBackgroundImageForDistortion:Boolean = true;
 		private var _bumpMapDummyPlane:Plane;
@@ -482,10 +469,10 @@ package away3d.primitives
 			_v2 = new Vertex(this.maxX, this.maxY, this.maxZ);
 			_v3 = new Vertex(this.minX, this.minY, this.maxZ);
 			
-			_sv0 = _view.camera.screen(this, _v0) || new ScreenVertex();
-			_sv1 = _view.camera.screen(this, _v1) || new ScreenVertex();
-			_sv2 = _view.camera.screen(this, _v2) || new ScreenVertex();
-			_sv3 = _view.camera.screen(this, _v3) || new ScreenVertex();
+			_sv0 = _view.camera.screen(this, _v0) || new Vector3D();
+			_sv1 = _view.camera.screen(this, _v1) || new Vector3D();
+			_sv2 = _view.camera.screen(this, _v2) || new Vector3D();
+			_sv3 = _view.camera.screen(this, _v3) || new Vector3D();
 			
 			var xS:Array = [{x:_sv0.x}, {x:_sv1.x}, {x:_sv2.x}, {x:_sv3.x}];
 			var yS:Array = [{y:_sv0.y}, {y:_sv1.y}, {y:_sv2.y}, {y:_sv3.y}];
@@ -530,11 +517,11 @@ package away3d.primitives
 		}
 		
 		//Determines if an object is on the front side of the plane.
-		private function onFrontSide(point:Number3D, allowCameraEval:Boolean = true):Boolean
+		private function onFrontSide(point:Vector3D, allowCameraEval:Boolean = true):Boolean
 		{
-			var delta:Number3D = new Number3D();
-			delta.sub(point, this.position);
-			var proj:Number = delta.dot(_normal);
+			var delta:Vector3D = new Vector3D();
+			delta = point.subtract(this.position);
+			var proj:Number = delta.dotProduct(_normal);
 			
 			if(allowCameraEval && !_cameraOnFrontSide)
 				proj *= -1;
@@ -576,12 +563,12 @@ package away3d.primitives
 		}
 		
 		//Applies the 3D reflection matrix to any point and reflects it according to the plane.
-		private function reflectPoint(point:Number3D):Number3D
+		private function reflectPoint(point:Vector3D):Vector3D
 		{
-			var reflectedPoint:Number3D = new Number3D();
-			reflectedPoint.sub(point, this.position);
-			reflectedPoint.transform(reflectedPoint, _reflectionMatrixAway3D);
-			reflectedPoint.add(reflectedPoint, this.position);
+			var reflectedPoint:Vector3D = new Vector3D();
+			reflectedPoint = point.subtract(this.position);
+			reflectedPoint = _reflectionMatrix3D.transformVector(reflectedPoint);
+			reflectedPoint = reflectedPoint.add(this.position);
 			
 			return reflectedPoint;
 		}
@@ -590,17 +577,16 @@ package away3d.primitives
 		//Calculates the global normal of the plane and the reflection matrixes for it.
 		private function calculatePlaneData():void
 		{
-			var p0:Number3D = getVertexGlobalPosition(this.vertices[0]);
-			var p1:Number3D = getVertexGlobalPosition(this.vertices[1]);
-			var p2:Number3D = getVertexGlobalPosition(this.vertices[2]);
+			var p0:Vector3D = getVertexGlobalPosition(this.vertices[0]);
+			var p1:Vector3D = getVertexGlobalPosition(this.vertices[1]);
+			var p2:Vector3D = getVertexGlobalPosition(this.vertices[2]);
 			
-			var d0:Number3D = new Number3D();
-			d0.sub(p1, p0);
-			var d1:Number3D = new Number3D();
-			d1.sub(p2, p0);
+			var d0:Vector3D = new Vector3D();
+			d0 = p1.subtract(p0);
+			var d1:Vector3D = new Vector3D();
+			d1 = p2.subtract(p0);
 			
-			_normal = new Number3D();
-			_normal.cross(d0, d1);
+			_normal = d1.crossProduct(d0);
 			_normal.normalize();
 			
 			var a:Number = _normal.x;
@@ -609,16 +595,7 @@ package away3d.primitives
 			
 			//This matrix is used to reflect any point in the scene according to the plane position
 			//and orientation.
-			_reflectionMatrixAway3D = new MatrixAway3D();
-			_reflectionMatrixAway3D.sxx = 1 - 2*a*a;
-			_reflectionMatrixAway3D.sxy = -2*a*b;
-			_reflectionMatrixAway3D.sxz = -2*a*c;
-			_reflectionMatrixAway3D.syx = -2*a*b;
-			_reflectionMatrixAway3D.syy = 1 - 2*b*b;
-			_reflectionMatrixAway3D.syz = -2*b*c;
-			_reflectionMatrixAway3D.szx = -2*a*c;
-			_reflectionMatrixAway3D.szy = -2*b*c;
-			_reflectionMatrixAway3D.szz = 1 - 2*c*c;
+			_reflectionMatrix3D = new Matrix3D([1 - 2*a*a, -2*a*b, -2*a*c, 0, -2*a*b, 1 - 2*b*b, -2*b*c, 0, -2*a*c, -2*b*c, 1 - 2*c*c, 0, 0, 0, 0, 1]);
 			
 			//This matrix is used to flip what the refl camera see's so that
 			//it emulates the correct position of virtual objects in the refl view and hence
@@ -634,14 +611,12 @@ package away3d.primitives
 		
 		//TODO: This is used to obtain global normal, maybe its not needed.
 		//Quicker way?
-		private function getVertexGlobalPosition(vertex:Vertex):Number3D
+		private function getVertexGlobalPosition(vertex:Vertex):Vector3D
 		{
-			var m:MatrixAway3D = new MatrixAway3D();
-	        m.tx = vertex.x;
-	        m.ty = vertex.y;
-	        m.tz = vertex.z;
-	        m.multiply(this.transform, m);
-			return new Number3D(m.tx, m.ty, m.tz);
+			var m:Matrix3D = new Matrix3D();
+			m.position = vertex.position;
+	        m.append(this.transform);
+			return m.position;
 		}
 		
 		//This is the only way I found to obtain a perspectived image of the plane's background material

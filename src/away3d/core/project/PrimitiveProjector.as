@@ -7,7 +7,6 @@ package away3d.core.project
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
 	import away3d.core.render.*;
 	import away3d.core.session.*;
 	import away3d.core.utils.*;
@@ -15,28 +14,34 @@ package away3d.core.project
 	import away3d.materials.*;
 	import away3d.sprites.*;
 	
-	import flash.utils.Dictionary;
+	import flash.geom.*;
+	import flash.utils.*;
 	
 	use namespace arcane;
 	
 	public class PrimitiveProjector
 	{
 		/** @private */
-		arcane var _cameraVarsStore:CameraVarsStore;
+		private var _cameraVarsStore:CameraVarsStore;
 		/** @private */
-		arcane var _screenVertices:Array;
+		private var _screenVertices:Vector.<Number>;
 		/** @private */
-		arcane var _screenIndices:Array;
+		private var _screenIndices:Vector.<int>;
 		/** @private */
-		arcane var _viewSourceObject:ViewSourceObject;
+		private var _screenUVTs:Vector.<Number>;
+		/** @private */
+		private var _viewSourceObject:ViewSourceObject;
 		private var _view:View3D;
 		private var _screenVerticesStore:Dictionary = new Dictionary(true);
 		private var _screenIndicesStore:Dictionary = new Dictionary(true);
+		private var _screenUVTsStore:Dictionary = new Dictionary(true);
 		private var _viewSourceObjectStore:Dictionary = new Dictionary(true);
 		private var _mesh:Mesh;
 		private var _clipFlag:Boolean;
-		private var _defaultStartIndices:Array = new Array();
-		private var _startIndices:Array;
+		private var _defaultStartIndices:Vector.<int> = new Vector.<int>();
+		private var _startIndices:Vector.<int>;
+		private var _defaultVerts:Vector.<Number> = new Vector.<Number>();
+		private var _verts:Vector.<Number>;
 		private var _defaultVertices:Array = new Array();
 		private var _vertices:Array;
 		private var _defaultClippedFaceVOs:Array = new Array();
@@ -69,28 +74,34 @@ package away3d.core.project
 		private var _n12:Face;
 		private var _n20:Face;
 		private var _dofCache:DofCache;
-		private var _cameraViewMatrix:MatrixAway3D;
+		private var _cameraViewMatrix:Matrix3D;
 		private var _viewTransformDictionary:Dictionary;
 		private var _container:ObjectContainer3D;
 		private var _screenX:Number;
         private var _screenY:Number;
         private var _screenZ:Number;
-		private var _i:int;
-		private var _depthPoint:Number3D = new Number3D();
+        private var _screenT:Number;
+		private var _i:uint;
+		private var _depthPoint:Vector3D = new Vector3D();
         private var _sIndex:uint;
 		private var _eIndex:uint;
 		private var _pushfront:Boolean;
 		private var _pushback:Boolean;
 		
 		
-        public function getScreenVertices(source:Object3D):Array
+        public function getScreenVerts(source:Object3D):Vector.<Number>
 		{
-			return _screenVerticesStore[source] || (_screenVerticesStore[source] = []);
+			return _screenVerticesStore[source] || (_screenVerticesStore[source] = new Vector.<Number>());
 		}
 		
-		public function getScreenIndices(source:Object3D):Array
+		public function getScreenUVTs(source:Object3D):Vector.<Number>
 		{
-			return _screenIndicesStore[source] || (_screenIndicesStore[source] = []);
+			return _screenUVTsStore[source] || (_screenUVTsStore[source] = new Vector.<Number>());
+		}
+		
+		public function getScreenIndices(source:Object3D):Vector.<int>
+		{
+			return _screenIndicesStore[source] || (_screenIndicesStore[source] = new Vector.<int>());
 		}
 
 		public function getViewSourceObject(source:Object3D):ViewSourceObject
@@ -104,7 +115,7 @@ package away3d.core.project
         	_cameraVarsStore = _view.cameraVarsStore;
         }
         
-		public function project(source:Object3D, viewTransform:MatrixAway3D, renderer:Renderer):void
+		public function project(source:Object3D, viewTransform:Matrix3D, renderer:Renderer):void
 		{
 			_cameraVarsStore.createVertexClassificationDictionary(source);
 			
@@ -122,6 +133,8 @@ package away3d.core.project
 			if (_clipFlag) {
             	_vertices = _defaultVertices;
 				_vertices.length = 0;
+				_verts = _defaultVerts;
+				_verts.length = 0;
 				_screenIndices = getScreenIndices(source);
 				_screenIndices.length = 0;
             	_startIndices = _defaultStartIndices;
@@ -132,9 +145,10 @@ package away3d.core.project
 				_segmentVOs.length = 0;
             	_spriteVOs = _defaultClippedBillboards;
 				_spriteVOs.length = 0;
-            	_clipping.checkElements(_mesh, _faceVOs, _segmentVOs, _spriteVOs, _vertices, _screenIndices, _startIndices);
+            	_clipping.checkElements(_mesh, _faceVOs, _segmentVOs, _spriteVOs, _vertices, _verts, _screenIndices, _startIndices);
 			} else {
             	_vertices = _mesh.vertices;
+            	_verts = _mesh.verts;
             	_screenIndices = _mesh.indices;
             	_startIndices = _mesh.startIndices;
             	_faceVOs = _mesh.faceVOs;
@@ -142,13 +156,16 @@ package away3d.core.project
             	_spriteVOs = _mesh.spriteVOs;
             }
             
-			_screenVertices = getScreenVertices(source);
+			_screenVertices = getScreenVerts(source);
 			_screenVertices.length = 0;
-            _lens.project(viewTransform, _vertices, _screenVertices);
+			_screenUVTs = getScreenUVTs(source);
+			_screenUVTs.length = 0;
+            _lens.project(viewTransform, _verts, _screenVertices, _screenUVTs);
             
 			_viewSourceObject = getViewSourceObject(source);
 			_viewSourceObject.screenVertices = _screenVertices;
 			_viewSourceObject.screenIndices = _screenIndices;
+			_viewSourceObject.screenUVTs = _screenUVTs;
             
 			if (_mesh.outline) {
             	_i = _faceVOs.length;
@@ -160,13 +177,13 @@ package away3d.core.project
 			//loop through all clipped faces
             for each (_faceVO in _faceVOs) {
 				
-				_startIndex = _startIndices[_i++];
-                _endIndex = _startIndices[_i];
+				_startIndex = _startIndices[uint(_i++)];
+                _endIndex = _startIndices[uint(_i)];
                 
 				if (!_clipFlag) {
 					_index = _startIndex;
 					
-					while (_screenVertices[_screenIndices[_index]*3] != null && _index < _endIndex)
+					while (_index < _endIndex && _screenUVTs[uint(_screenIndices[_index]*3 + 2)] > 0)
 						_index++;
 					
 					if (_index < _endIndex)
@@ -219,36 +236,37 @@ package away3d.core.project
                 if (!renderer.primitive(renderer.createDrawTriangle(_faceVO, _faceVO.commands, _faceVO.uvs, _material, _startIndex, _endIndex, _viewSourceObject, _area, _faceVO.generated)))
                 	continue;
 				
+				continue;
             	_face = _faceVO.face;
                 
                 if (_mesh.outline && !_backface) {
             		_mesh.pushback = true;
             		_mesh.pushfront = false;
                     _n01 = _mesh.geometry.neighbour01(_face);
-                    if (_n01 == null || _viewSourceObject.getArea(_startIndices[_outlineIndices[_n01.faceVO]]) <= 0) {
+                    if (_n01 == null || _viewSourceObject.getArea(_startIndices[uint(_outlineIndices[_n01.faceVO])]) <= 0) {
                     	_segmentVO = _cameraVarsStore.createSegmentVO(_mesh.outline);
                     	_sIndex = _screenIndices.length;
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex];
-                    	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+1];
+                    	_screenIndices[_screenIndices.length] = _screenIndices[uint(_startIndex+1)];
                     	_eIndex = _screenIndices.length;
                     	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _sIndex, _eIndex, _viewSourceObject, true));
                     }
 					
                     _n12 = _mesh.geometry.neighbour12(_face);
-                    if (_n12 == null || _viewSourceObject.getArea(_startIndices[_outlineIndices[_n12.faceVO]]) <= 0) {
+                    if (_n12 == null || _viewSourceObject.getArea(_startIndices[uint(_outlineIndices[_n12.faceVO])]) <= 0) {
                     	_segmentVO = _cameraVarsStore.createSegmentVO(_mesh.outline);
                     	_sIndex = _screenIndices.length;
-                    	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+1];
-                    	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+2];
+                    	_screenIndices[_screenIndices.length] = _screenIndices[uint(_startIndex+1)];
+                    	_screenIndices[_screenIndices.length] = _screenIndices[uint(_startIndex+2)];
                     	_eIndex = _screenIndices.length;
                     	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _sIndex, _eIndex, _viewSourceObject, true));
                     }
                     
                     _n20 = _mesh.geometry.neighbour20(_face);
-                    if (_n20 == null || _viewSourceObject.getArea(_startIndices[_outlineIndices[_n20.faceVO]]) <= 0) {
+                    if (_n20 == null || _viewSourceObject.getArea(_startIndices[uint(_outlineIndices[_n20.faceVO])]) <= 0) {
                     	_segmentVO = _cameraVarsStore.createSegmentVO(_mesh.outline);
                     	_sIndex = _screenIndices.length;
-                    	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex+2];
+                    	_screenIndices[_screenIndices.length] = _screenIndices[uint(_startIndex+2)];
                     	_screenIndices[_screenIndices.length] = _screenIndices[_startIndex];
                     	_eIndex = _screenIndices.length;
                     	renderer.primitive(renderer.createDrawSegment(_segmentVO, _segmentVO.commands, _mesh.outline, _sIndex, _eIndex, _viewSourceObject, true));
@@ -261,13 +279,13 @@ package away3d.core.project
             
             for each (_segmentVO in _segmentVOs)
             {
-				_startIndex = _startIndices[_i++];
-                _endIndex = _startIndices[_i];
+				_startIndex = _startIndices[uint(_i++)];
+                _endIndex = _startIndices[uint(_i)];
                 
 				if (!_clipFlag) {
 					_index = _startIndex;
 					
-					while (_screenVertices[_screenIndices[_index]*3] != null && _index < _endIndex)
+					while (_index < _endIndex && _screenUVTs[uint(_screenIndices[_index]*3 + 2)] > 0)
 						_index++;
 					
 					if (_index < _endIndex)
@@ -286,13 +304,13 @@ package away3d.core.project
             //loop through all clipped sprites
             for each (_spriteVO in _spriteVOs)
             {
-            	_startIndex = _startIndices[_i++];
-				_endIndex = _startIndices[_i];
+            	_startIndex = _startIndices[uint(_i++)];
+				_endIndex = _startIndices[uint(_i)];
 				
 				if (!_clipFlag) {
 					_index = _startIndex;
 					
-					while (_screenVertices[_screenIndices[_index]*3] != null && _index < _endIndex)
+					while (_index < _endIndex && _screenUVTs[uint(_screenIndices[_index]*3 + 2)] > 0)
 						_index++;
 					
 					if (_index < _endIndex)
@@ -301,14 +319,14 @@ package away3d.core.project
                 
                 //switch materials for directional sprites
 				if (_spriteVO.materials.length) {
-					var minZ:Number = Infinity;
-					var z:Number;
+					var minT:Number = 0;
+					var t:Number;
 					_index = _endIndex - _startIndex;
 		            while (_index--) {
-		                z = _screenVertices[(_startIndex + _index)*3 + 2];
+		                t = _screenUVTs[uint((_startIndex + _index)*3 + 2)];
 		                
-		                if (minZ > z) {
-		                    minZ = z;
+		                if (minT < t) {
+		                    minT = t;
 		                    if (_index)
 		                    	_spmaterial = _spriteVO.materials[_index - 1];
 		                    else
@@ -322,45 +340,47 @@ package away3d.core.project
                 if (!_spmaterial.visible)
                     continue;
 		        
-		        _index = _screenIndices[_startIndex]*3;
-		        _screenZ = _screenVertices[_index + 2];
-		        
+		        _index = _screenIndices[_startIndex];
+				_screenT = _screenUVTs[uint(_index*3 + 2)];
+				_screenZ = _lens.getScreenZ(_screenT);
 		        if (_spriteVO.distanceScaling)
 		        	_scale = _spriteVO.scaling*_lens.getPerspective(_screenZ);
 		        else
 		        	_scale = _spriteVO.scaling;
 		        
+		        _index *= 2;
+		        
 		        if (_spriteVO.displayObject) {
 					switch(_spriteVO.align){
 						case SpriteAlign.CENTER:
 							_screenVertices[_index] -= _spriteVO.displayObject.width/2;
-							_screenVertices[_index + 1] -= _spriteVO.displayObject.height/2;
+							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height/2;
 							break;
 						case SpriteAlign.TOP:
 							_screenVertices[_index] -= _spriteVO.displayObject.width/2;
 							break;
 						case SpriteAlign.BOTTOM:
 							_screenVertices[_index] -= _spriteVO.displayObject.width/2;
-							_screenVertices[_index + 1] -= _spriteVO.displayObject.height;
+							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height;
 							break;
 						case SpriteAlign.RIGHT:
 							_screenVertices[_index] -= _spriteVO.displayObject.width;
-						    _screenVertices[_index + 1] -= _spriteVO.displayObject.height/2;
+						    _screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height/2;
 						  break;
 						case SpriteAlign.TOP_RIGHT:
 							_screenVertices[_index] -= _spriteVO.displayObject.width;
 							break;
 						case SpriteAlign.BOTTOM_RIGHT:
 							_screenVertices[_index] -= _spriteVO.displayObject.width;
-							_screenVertices[_index + 1] -= _spriteVO.displayObject.height;
+							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height;
 							break;
 						case SpriteAlign.LEFT:
-							_screenVertices[_index + 1] -= _spriteVO.displayObject.height/2;
+							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height/2;
 							break;
 						case SpriteAlign.TOP_LEFT:
 							break;
 						case SpriteAlign.BOTTOM_LEFT:				
-							_screenVertices[_index + 1] -= _spriteVO.displayObject.height;
+							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height;
 							break;
 					}
 		            renderer.primitive(renderer.createDrawDisplayObject(_spriteVO, _startIndex, _viewSourceObject, _scale));
@@ -397,28 +417,27 @@ package away3d.core.project
 					if (!isNaN(child.ownSession.screenZ)) {
 						_screenZ = child.ownSession.screenZ;
 					} else {
-						if (child.scenePivotPoint.modulo) {
-							_depthPoint.clone(child.scenePivotPoint);
-							_depthPoint.rotate(_depthPoint, _cameraViewMatrix);
-							_depthPoint.add(_viewTransformDictionary[child].position, _depthPoint);
+						if (child.scenePivotPoint.length) {
+							_depthPoint = _viewTransformDictionary[child].position.add(_cameraViewMatrix.deltaTransformVector(child.scenePivotPoint));
 							
-			             	_screenZ = _depthPoint.modulo;
+			             	_screenZ = _depthPoint.length;
 							
 						} else {
-							_screenZ = _viewTransformDictionary[child].position.modulo;
+							_screenZ = _viewTransformDictionary[child].position.length;
 						}
 			            
 		             	if (child.pushback)
 		             		_screenZ += child.parentBoundingRadius;
-		             		
+		             	
 		             	if (child.pushfront)
 		             		_screenZ -= child.parentBoundingRadius;
-		             		
+		             	
 		             	_screenZ += child.screenZOffset;
 	    			}
 	    			
-					_screenIndices.push(_index = _screenVertices.length/3);
-					_screenVertices.push(_screenX, _screenY, _screenZ);
+					_screenIndices.push(_index = _screenVertices.length/2);
+					_screenVertices.push(_screenX, _screenY);
+					_screenUVTs.push(0, 0, _lens.getT(_screenZ));
 					child.spriteVO.displayObject = child.session.getContainer(_view);
 					renderer.primitive(renderer.createDrawDisplayObject(child.spriteVO, _index, _viewSourceObject, 1));
 				}

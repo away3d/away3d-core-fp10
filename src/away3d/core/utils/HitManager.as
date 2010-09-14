@@ -1,10 +1,9 @@
 package away3d.core.utils 
 {
-	import away3d.core.project.PrimitiveType;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
+	import away3d.core.project.*;
 	import away3d.core.render.*;
 	import away3d.core.session.*;
 	import away3d.core.vos.*;
@@ -33,7 +32,7 @@ package away3d.core.utils
         private var _object:Object3D;
 		private var _uv:UV;
 		
-        private var _inv:MatrixAway3D = new MatrixAway3D();
+        private var _inv:Matrix3D = new Matrix3D();
         private var _persp:Number;
 		private var _renderer:Renderer;
         private var _hitSourceObject:ViewSourceObject;
@@ -59,7 +58,7 @@ package away3d.core.utils
 	        	
         		_renderer = session.getRenderer(view);
         		
-        		var lists:Array = session.getRenderer(_view).list();
+        		var lists:Vector.<uint> = session.getRenderer(_view).list();
         		var priIndex:uint;
 	        	for each (priIndex in lists)
 	               checkPrimitive(priIndex);
@@ -89,13 +88,13 @@ package away3d.core.utils
             if (!_source || !_source._mouseEnabled)
                 return;
             
-            if (_renderer.primitiveProperties[int(priIndex*9 + 2)] > _screenX)
+            if (_renderer.primitiveProperties[uint(priIndex*9 + 2)] > _screenX)
                 return;
-            if (_renderer.primitiveProperties[int(priIndex*9 + 3)] < _screenX)
+            if (_renderer.primitiveProperties[uint(priIndex*9 + 3)] < _screenX)
                 return;
-            if (_renderer.primitiveProperties[int(priIndex*9 + 4)] > _screenY)
+            if (_renderer.primitiveProperties[uint(priIndex*9 + 4)] > _screenY)
                 return;
-            if (_renderer.primitiveProperties[int(priIndex*9 + 5)] < _screenY)
+            if (_renderer.primitiveProperties[uint(priIndex*9 + 5)] < _screenY)
                 return;
             
             _primitiveElement = _renderer.primitiveElements[priIndex];
@@ -104,29 +103,30 @@ package away3d.core.utils
             //	return;
 			
 			if (_hitSourceObject.contains(priIndex, _renderer, _screenX, _screenY)) {
-                var uvt:Array = _hitSourceObject.getUVT(priIndex, _renderer, _screenX, _screenY);
-                if (_screenZ > uvt[2]) {
+                var uvt:Vector3D = _hitSourceObject.getUVT(priIndex, _renderer, _screenX, _screenY);
+                var z:Number = _view.camera.lens.getScreenZ(uvt.z);
+                if (_screenZ > z) {
                     if (_primitiveType == PrimitiveType.FACE) {
                         //return if material pixel is transparent
                         //TODO: sort out eventuality for composite materials
                     	var bitmapMaterial:BitmapMaterial = _renderer.primitiveMaterials[priIndex] as BitmapMaterial;
-                        if (bitmapMaterial && !(bitmapMaterial.getPixel32(uvt[0], uvt[1]) >> 24) && !(bitmapMaterial is CompositeMaterial))
+                        if (bitmapMaterial && !(bitmapMaterial.getPixel32(uvt.x, uvt.y) >> 24) && !(bitmapMaterial is CompositeMaterial))
                             return;
-                        _uv = new UV(uvt[0], uvt[1]);
+                        _uv = new UV(uvt.x, uvt.y);
                     } else {
                         _uv = null;
                     }
                     
-                	_screenZ = uvt[2];
+                	_screenZ = z;
                 	_material = _renderer.primitiveMaterials[priIndex];
                     
                     //persp = camera.zoom / (1 + screenZ / camera.focus);
 					_persp = _view.camera.lens.getPerspective(_screenZ);
                     _inv = _view.camera.invViewMatrix;
 					
-                    _sceneX = _screenX / _persp * _inv.sxx + _screenY / _persp * _inv.sxy + _screenZ * _inv.sxz + _inv.tx;
-                    _sceneY = _screenX / _persp * _inv.syx + _screenY / _persp * _inv.syy + _screenZ * _inv.syz + _inv.ty;
-                    _sceneZ = _screenX / _persp * _inv.szx + _screenY / _persp * _inv.szy + _screenZ * _inv.szz + _inv.tz;
+                    _sceneX = _screenX / _persp * _inv.rawData[0] + _screenY / _persp * _inv.rawData[4] + _screenZ * _inv.rawData[8] + _inv.rawData[12];
+                    _sceneY = _screenX / _persp * _inv.rawData[1] + _screenY / _persp * _inv.rawData[5] + _screenZ * _inv.rawData[9] + _inv.rawData[13];
+                    _sceneZ = _screenX / _persp * _inv.rawData[2] + _screenY / _persp * _inv.rawData[6] + _screenZ * _inv.rawData[10] + _inv.rawData[14];
                     
                     _object = _source;
                     _elementVO = _primitiveElement;

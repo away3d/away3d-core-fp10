@@ -5,7 +5,8 @@ package away3d.cameras.lenses
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
+	
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -22,7 +23,7 @@ package away3d.cameras.lenses
         		_near = _clipping.minZ;
 		}
 		/** @private */
-		arcane override function getFrustum(node:Object3D, viewTransform:MatrixAway3D):Frustum
+		arcane override function getFrustum(node:Object3D, viewTransform:Matrix3D):Frustum
 		{
 			_frustum = _cameraVarsStore.createFrustum(node);
 			_focusOverZoom = _camera.focus/_camera.zoom;
@@ -89,20 +90,32 @@ package away3d.cameras.lenses
 			return _camera.focus*_camera.zoom / screenZ;
 		}
 		/** @private */
-		arcane override function project(viewTransform:MatrixAway3D, vertices:Array, screenVertices:Array):void
+		arcane override function getT(screenZ:Number):Number
+		{
+			return 1/screenZ;
+		}
+		/** @private */
+		arcane override function getScreenZ(t:Number):Number
+		{
+			return 1/t;
+		}
+		/** @private */
+		arcane override function project(viewTransform:Matrix3D, verts:Vector.<Number>, screenVerts:Vector.<Number>, uvts:Vector.<Number>):void
         {
-        	_length = 0;
-        	
-        	for each (_vertex in vertices) {
+			_length = uvts.length = verts.length;
+			
+			var index1:uint = 0;
+			var index2:uint = 0;
+        	while (index1 < _length) {
         		
-	        	_vx = _vertex.x;
-	        	_vy = _vertex.y;
-	        	_vz = _vertex.z;
-	        	
-	            
-	    		_wx = _vx * viewTransform.sxx + _vy * viewTransform.sxy + _vz * viewTransform.sxz + viewTransform.tx;
-	    		_wy = _vx * viewTransform.syx + _vy * viewTransform.syy + _vz * viewTransform.syz + viewTransform.ty;
-	    		_wz = _vx * viewTransform.szx + _vy * viewTransform.szy + _vz * viewTransform.szz + viewTransform.tz;
+	        	_vector.x = verts[index1];
+	        	_vector.y = verts[uint(index1 + 1)];
+	        	_vector.z = verts[uint(index1 + 2)];
+				_vector = viewTransform.transformVector(_vector);
+	    		_wx = _vector.x;
+	    		_wy = _vector.y;
+	    		_wz = _vector.z;
+	    		
 				_wx2 = _wx*_wx;
 				_wy2 = _wy*_wy;
 	    		_c = Math.sqrt(_wx2 + _wy2 + _wz*_wz);
@@ -113,23 +126,26 @@ package away3d.cameras.lenses
 	                throw new Error("isNaN(sz)");
 	            
 	            if (_sz < _near && _clipping is RectangleClipping) {
-	                screenVertices[_length] = null;
-	                screenVertices[_length+1] = null;
-	                screenVertices[_length+2] = null;
-	                _length += 3;
+	                screenVerts[index2] = 0;
+	                screenVerts[uint(index2+1)] = 0;
+	                uvts[uint(index1+2)] = 0;
+	                index1 += 3;
+	                index2 += 2;
 	                continue;
 	            }
 	            
 				_persp = _c2? _camera.zoom*_camera.focus*(_c - _wz)/_c2 : 0;
 				
-	            screenVertices[_length] = _wx * _persp;
-	            screenVertices[_length+1] = _wy * _persp;
-	            screenVertices[_length+2] = _sz;
-	            _length += 3;
+	            screenVerts[index2] = _wx * _persp;
+	            screenVerts[uint(index2+1)] = _wy * _persp;
+	            uvts[uint(index1+2)] = 1/_sz;
+	            index1 += 3;
+	            index2 += 2;
 	        }
         }
         
 		private var _length:int;
+		private var _vector:Vector3D = new Vector3D();
 		private var _wx:Number;
 		private var _wy:Number;
 		private var _wz:Number;

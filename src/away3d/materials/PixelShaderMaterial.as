@@ -1,19 +1,11 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.containers.View3D;
-	import away3d.core.base.Face;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.Object3D;
-	import away3d.core.base.UV;
-	import away3d.core.math.MatrixAway3D;
-	import away3d.core.math.Number3D;
+	import away3d.containers.*;
+	import away3d.core.base.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.Shader;
-	import flash.display.ShaderJob;
-	import flash.display.Sprite;
-	import flash.geom.ColorTransform;
+	import flash.display.*;
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -41,10 +33,10 @@ package away3d.materials
 		[Embed(source="../pbks/PositionInterpolator.pbj", mimeType="application/octet-stream")]
 		private var PositionInterpolator : Class;
 		
-		private var _posMtx : MatrixAway3D = new MatrixAway3D();		
+		private var _posMtx : Matrix3D = new Matrix3D();		
 		
-		private var _positionMapMatrix : MatrixAway3D;
-		private var _normalMapMatrix : MatrixAway3D;
+		private var _positionMapMatrix : Matrix3D;
+		private var _normalMapMatrix : Matrix3D;
 		
 		/**
 		 * Creates a new PixelShaderMaterial object.
@@ -101,12 +93,12 @@ package away3d.materials
 			var faces : Array = _mesh.geometry.faces;
 			var face : Face;
 			var i : int = faces.length;
-			var min : Number3D = new Number3D(_mesh.minX, _mesh.minY, _mesh.minZ);
-			var max : Number3D = new Number3D(_mesh.maxX, _mesh.maxY, _mesh.maxZ);
-			var diffExtr : Number3D = new Number3D();
-			var v0 : Number3D = new Number3D();
-			var v1 : Number3D = new Number3D();
-			var v2 : Number3D = new Number3D();
+			var min : Vector3D = new Vector3D(_mesh.minX, _mesh.minY, _mesh.minZ);
+			var max : Vector3D = new Vector3D(_mesh.maxX, _mesh.maxY, _mesh.maxZ);
+			var diffExtr : Vector3D;
+			var v0 : Vector3D = new Vector3D();
+			var v1 : Vector3D = new Vector3D();
+			var v2 : Vector3D = new Vector3D();
 			var uv0 : UV = new UV();
 			var uv1 : UV = new UV();
 			var uv2 : UV = new UV();
@@ -116,19 +108,13 @@ package away3d.materials
 			var h : Number = bitmap.height;
 			var shader : Shader = new Shader(new PositionInterpolator());
 			var container : Sprite = new Sprite();
-			diffExtr.sub(max, min);
+			diffExtr = max.subtract(min);
 			
-			_positionMapMatrix = new MatrixAway3D();
-			_positionMapMatrix.sxx = diffExtr.x;
-			_positionMapMatrix.syy = diffExtr.y;
-			_positionMapMatrix.szz = diffExtr.z;
-			_positionMapMatrix.tx = min.x;
-			_positionMapMatrix.ty = min.y;
-			_positionMapMatrix.tz = min.z;
-			_pointLightShader.data.positionTransformation.value = [ _positionMapMatrix.sxx, 0, 0, 0,
-															 		0, _positionMapMatrix.syy, 0, 0,
-														 			0, 0, _positionMapMatrix.szz, 0,
-														 			_positionMapMatrix.tx, _positionMapMatrix.ty, _positionMapMatrix.tz, 1
+			_positionMapMatrix = new Matrix3D(Vector.<Number>([diffExtr.x, 0, 0, 0, 0, diffExtr.y, 0, 0, 0, 0, diffExtr.z, 0, min.x, min.y, min.z, 1]));
+			_pointLightShader.data.positionTransformation.value = [ _positionMapMatrix.rawData[0], 0, 0, 0,
+															 		0, _positionMapMatrix.rawData[5], 0, 0,
+														 			0, 0, _positionMapMatrix.rawData[10], 0,
+														 			_positionMapMatrix.rawData[12], _positionMapMatrix.rawData[13], _positionMapMatrix.rawData[14], 1
 																	];
 			diffExtr.x = 1/diffExtr.x;
 			diffExtr.y = 1/diffExtr.y;
@@ -144,14 +130,14 @@ package away3d.materials
 				uv1.v = (1-face.uv1.v)*h;
 				uv2.u = face.uv2.u*w;
 				uv2.v = (1-face.uv2.v)*h;
-				u01 = uv1.u-uv0.u;
-				v01 = uv1.v-uv0.v;
-				u02 = uv2.u-uv0.u;
-				v02 = uv2.v-uv0.v;
+				u01 = uv1.u - uv0.u;
+				v01 = uv1.v - uv0.v;
+				u02 = uv2.u - uv0.u;
+				v02 = uv2.v - uv0.v;
 				
-				v0.sub(face.v0.position, min);
-				v1.sub(face.v1.position, min);
-				v2.sub(face.v2.position, min);
+				v0 = face.v0.position.subtract(min);
+				v1 = face.v1.position.subtract(min);
+				v2 = face.v2.position.subtract(min);
 				v0.x *= diffExtr.x;
 				v0.y *= diffExtr.y;
 				v0.z *= diffExtr.z;
@@ -206,21 +192,22 @@ package away3d.materials
 		protected function updatePixelShader(source:Object3D, view : View3D) : void
 		{
 			if (_useWorldCoords) {
-				 if (!_normalMapMatrix) _normalMapMatrix = new MatrixAway3D();
-				_normalMapMatrix.inverse(_mesh.sceneTransform);
+				 _normalMapMatrix.rawData = _mesh.sceneTransform.rawData;
+				_normalMapMatrix.invert();
 				
-				_posMtx.multiply(_mesh.sceneTransform, _positionMapMatrix);
-
+				_posMtx.rawData = _mesh.sceneTransform.rawData;
+				_posMtx.prepend(_positionMapMatrix);
+				
 				// the transpose of the inverse 
-				_pointLightShader.data.normalTransformation.value = [ 	_normalMapMatrix.sxx, _normalMapMatrix.sxy, _normalMapMatrix.sxz,
-																		_normalMapMatrix.syx, _normalMapMatrix.syy, _normalMapMatrix.syz,
-																		_normalMapMatrix.szx, _normalMapMatrix.szy, _normalMapMatrix.szz
+				_pointLightShader.data.normalTransformation.value = [ 	_normalMapMatrix.rawData[0], _normalMapMatrix.rawData[1], _normalMapMatrix.rawData[2],
+																		_normalMapMatrix.rawData[4], _normalMapMatrix.rawData[5], _normalMapMatrix.rawData[6],
+																		_normalMapMatrix.rawData[8], _normalMapMatrix.rawData[9], _normalMapMatrix.rawData[10]
 																	];
 				
-				_pointLightShader.data.positionTransformation.value = [ 	_posMtx.sxx, _posMtx.syx, _posMtx.szx, 0,
-															 				_posMtx.sxy, _posMtx.syy, _posMtx.szy, 0,
-															 				_posMtx.sxz, _posMtx.syz, _posMtx.szz, 0,
-															 				_posMtx.tx, _posMtx.ty, _posMtx.tz, 1
+				_pointLightShader.data.positionTransformation.value = [ 	_posMtx.rawData[0], _posMtx.rawData[1], _posMtx.rawData[2], 0,
+															 				_posMtx.rawData[4], _posMtx.rawData[5], _posMtx.rawData[6], 0,
+															 				_posMtx.rawData[8], _posMtx.rawData[9], _posMtx.rawData[10], 0,
+															 				_posMtx.rawData[12], _posMtx.rawData[13], _posMtx.rawData[14], 1
 																		];
 			}
 		}

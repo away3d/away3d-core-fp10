@@ -2,9 +2,10 @@
 {
 	import away3d.arcane;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.primitives.data.*;
-
+	
+	import flash.geom.*;
+	
 	use namespace arcane;
 	
 	public class NURBS extends AbstractPrimitive
@@ -32,8 +33,8 @@
 		private var _tmpPM:WeightedVertex = new WeightedVertex();
 		private var _tmpP1:WeightedVertex = new WeightedVertex();
 		private var _tmpP2:WeightedVertex = new WeightedVertex();
-		private var _tmpN1:Number3D = new Number3D();
-		private var _tmpN2:Number3D = new Number3D();
+		private var _tmpN1:Vector3D = new Vector3D();
+		private var _tmpN2:Vector3D = new Vector3D();
 		
 		public var surface:Array = new Array();
 		
@@ -345,7 +346,7 @@
 						}
 					}
 				}
-				np.nurbData["position"] = new Number2D(uS, vS);
+				np.nurbData["position"] = new Point(uS, vS);
 			}
 		}
 		
@@ -362,16 +363,16 @@
 		 * @return                 The offset surface point being returned
 		 * 
 		 */
-		public function getSurfacePoint(surfacePoint:Number3D, uS:Number, vS:Number, vecOffset:Number, uTol:Number = 0.01, vTol:Number = 0.01):Number3D {
+		public function getSurfacePoint(surfacePoint:Vector3D, uS:Number, vS:Number, vecOffset:Number, uTol:Number = 0.01, vTol:Number = 0.01):Vector3D {
 			nurbPoint(_tmpPM, uS, vS);
 			nurbPoint(_tmpP1, uS+uTol, vS);
 			nurbPoint(_tmpP2, uS, vS+vTol);
 
-			_tmpN1 = new Number3D(_tmpP1.x - _tmpPM.x, _tmpP1.y - _tmpPM.y, _tmpP1.z - _tmpPM.z);
-			_tmpN2 = new Number3D(_tmpP2.x - _tmpPM.x, _tmpP2.y - _tmpPM.y, _tmpP2.z - _tmpPM.z);
-			surfacePoint.cross(_tmpN1, _tmpN2);
+			_tmpN1 = new Vector3D(_tmpP1.x - _tmpPM.x, _tmpP1.y - _tmpPM.y, _tmpP1.z - _tmpPM.z);
+			_tmpN2 = new Vector3D(_tmpP2.x - _tmpPM.x, _tmpP2.y - _tmpPM.y, _tmpP2.z - _tmpPM.z);
+			surfacePoint = _tmpN2.crossProduct(_tmpN1);
 			surfacePoint.normalize();
-			surfacePoint.scale(surfacePoint, -vecOffset)
+			surfacePoint.scaleBy(-vecOffset);
 
 			surfacePoint.x += _tmpPM.x;
 			surfacePoint.y += _tmpPM.y;

@@ -1,9 +1,9 @@
 package away3d.core.utils
 {
-	import away3d.core.base.*;
 	import away3d.core.geom.*;
-	import away3d.core.math.*;
-
+	
+	import flash.geom.*;
+	
 	public class BezierUtils
 	{
 		public function BezierUtils()
@@ -16,9 +16,9 @@ package away3d.core.utils
 			if(command.type == PathCommand.MOVE)
 				return [command];
 			
-			var pMidOnCurve:Number3D;
-			var pMidStartControl:Number3D;
-			var pMidControlEnd:Number3D;
+			var pMidOnCurve:Vector3D;
+			var pMidStartControl:Vector3D;
+			var pMidControlEnd:Vector3D;
 			var command1:PathCommand;
 			var command2:PathCommand;
 			
@@ -43,15 +43,15 @@ package away3d.core.utils
 			return [command1, command2];
 		}
 		
-		static public function getMidPoint(p1:Number3D, p2:Number3D):Number3D
+		static public function getMidPoint(p1:Vector3D, p2:Vector3D):Vector3D
 		{
 			var mX:Number = (p1.x + p2.x)/2;
 			var mY:Number = (p1.y + p2.y)/2;
 			
-			return new Number3D(mX, mY, 0);
+			return new Vector3D(mX, mY, 0);
 		}
 		
-		static public function getCoordinatesAt(t:Number, command:PathCommand):Number3D
+		static public function getCoordinatesAt(t:Number, command:PathCommand):Vector3D
 		{
 			var tSqr:Number = t*t;
 			var invT:Number = 1 - t;
@@ -61,7 +61,7 @@ package away3d.core.utils
 			var pY:Number = invTSqr*command.pStart.y + 2*invT*t*command.pControl.y + tSqr*command.pEnd.y;
 			var pZ:Number = invTSqr*command.pStart.z + 2*invT*t*command.pControl.z + tSqr*command.pEnd.z;
 			
-			return new Number3D(pX, pY, pZ);
+			return new Vector3D(pX, pY, pZ);
 		}
 		
 		static public function createControlPointForLine(line:PathCommand):void
@@ -73,22 +73,22 @@ package away3d.core.utils
 			var pY:Number = (line.pStart.y + line.pEnd.y)/2;
 			var pZ:Number = (line.pStart.z + line.pEnd.z)/2;
 			
-			line.pControl = new Number3D(pX, pY, pZ);
+			line.pControl = new Vector3D(pX, pY, pZ);
 		}
 		
-		static public function getDerivativeAt(t:Number, command:PathCommand):Number3D
+		static public function getDerivativeAt(t:Number, command:PathCommand):Vector3D
 		{
 			var pX:Number = -2*(1 - t)*command.pStart.x + 2*(1 - 2*t)*command.pControl.x + 2*t*command.pEnd.x;
 			var pY:Number = -2*(1 - t)*command.pStart.y + 2*(1 - 2*t)*command.pControl.y + 2*t*command.pEnd.y;
 			var pZ:Number = -2*(1 - t)*command.pStart.z + 2*(1 - 2*t)*command.pControl.z + 2*t*command.pEnd.z;
 			
-			return new Number3D(pX, pY, pZ);
+			return new Vector3D(pX, pY, pZ);
 		}
 		
 		static public function getArcLengthArray(command:PathCommand, delta:Number):Vector.<Number>
 		{
 			// Get the points on the command for the specified delta.
-			var commandPoints:Vector.<Number3D> = new Vector.<Number3D>();
+			var commandPoints:Vector.<Vector3D> = new Vector.<Vector3D>();
 			for(var t:Number = 0; t <= 1; t += delta)
 				commandPoints.push(BezierUtils.getCoordinatesAt(t, command));
 			
@@ -99,8 +99,8 @@ package away3d.core.utils
 			var loop:uint = commandPoints.length - 1;
 			for(var i:uint; i<loop; ++i)
 			{
-				var pStart:Number3D = commandPoints[uint(i)];
-				var pEnd:Number3D = commandPoints[uint(i+1)];
+				var pStart:Vector3D = commandPoints[uint(i)];
+				var pEnd:Vector3D = commandPoints[uint(i+1)];
 				var dX:Number = pEnd.x - pStart.x;
 				var dY:Number = pEnd.y - pStart.y;
 				var dZ:Number = pEnd.z - pStart.z;
