@@ -36,7 +36,7 @@ package away3d.materials
 		private var _posMtx : Matrix3D = new Matrix3D();		
 		
 		private var _positionMapMatrix : Matrix3D;
-		private var _normalMapMatrix : Matrix3D;
+		private var _normalMapMatrix : Matrix3D = new Matrix3D();
 		
 		/**
 		 * Creates a new PixelShaderMaterial object.
