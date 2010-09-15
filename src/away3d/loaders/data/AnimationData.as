@@ -1,9 +1,9 @@
 package away3d.loaders.data
 {
 	import away3d.animators.*;
-	import away3d.containers.*;
 	import away3d.core.base.*;
 	
+	import flash.geom.*;
 	import flash.utils.*;
 	
 	/**
@@ -46,12 +46,12 @@ package away3d.loaders.data
 		/**
 		 * Array representing the frames used in vertex animation.
 		 */
-		public var frames:Array = [];
+		public var frames:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
 		
 		/**
 		 * Array representing the vertices used in vertex animation.
 		 */
-		public var vertices:Array = [];
+		public var vertices:Vector.<Vertex> = new Vector.<Vertex>();
 		
 		public function clone(object:Object3D):AnimationData
 		{

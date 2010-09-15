@@ -44,9 +44,9 @@ package away3d.materials.utils
 		
 		private static function createTriangleTBN(model : Mesh) : void
 		{
-			var faces : Array = model.geometry.faces;
+			var faces : Vector.<Face> = model.geometry.faces;
 			var face : Face;
-			var i : int = faces.length;
+			var i : uint = faces.length;
 			var tangent : Vector3D;
 			var bitangent : Vector3D;
 			var edge1 : Vector3D = new Vector3D();
@@ -55,7 +55,8 @@ package away3d.materials.utils
 			var st2 : UV = new UV();
 			var denom : Number;
 			
-			while (face = Face(faces[--i])) {
+			while (i--) {
+				face = faces[i];
 				edge1 = face.v1.position.subtract(face.v0.position);
 				edge2 = face.v2.position.subtract(face.v0.position);
 				st1.u = face.uv1.u - face.uv0.u;
@@ -85,25 +86,27 @@ package away3d.materials.utils
 		
 		private static function createVertexTBN(model : Mesh) : void
 		{
-			var vertices : Array = model.geometry.vertices;
+			var vertices : Vector.<Vertex> = model.geometry.vertices;
 			var v : Vertex;
-			var i : int = vertices.length;
+			var i : uint = vertices.length;
 			var tangent : Vector3D;
 			var bitangent : Vector3D;
 			var normal : Vector3D;
 			var len : int;
 			var face : Face;
-			var faces : Array;
+			var faces : Vector.<Element>;
 			var j : int;
 
-			while (v = Vertex(vertices[--i])) {
+			while (i--) {
+				v = vertices[i];
 				tangent = new Vector3D();
 				bitangent = new Vector3D();
 				normal = new Vector3D();
 				faces = v.parents;
 				j = faces.length;
 				
-				while (face = Face(faces[--j])) {
+				while (j--) {
+					face = faces[j] as Face
 					tangent.x += face.extra.tangent.x;
 					tangent.y += face.extra.tangent.y;
 					tangent.z += face.extra.tangent.z;
@@ -128,9 +131,9 @@ package away3d.materials.utils
 		
 		private static function renderNormalMapSmooth(model : Mesh, tangentMap : BitmapData) : void
 		{
-			var faces : Array = model.geometry.faces;
+			var faces : Vector.<Face> = model.geometry.faces;
 			var face : Face;
-			var i : int = faces.length;
+			var i : uint = faces.length;
 			var normal0 : Vector3D;
 			var tangent0 : Vector3D;
 			var bitangent0 : Vector3D;
@@ -149,7 +152,8 @@ package away3d.materials.utils
 			
 			shader.data.normalMap.input = tangentMap;
 			
-			while (face = Face(faces[--i])) {
+			while (i--) {
+				face = faces[i];
 				uv0.u = face.uv0.u*w;
 				uv0.v = (1-face.uv0.v)*h;
 				uv1.u = face.uv1.u*w;
@@ -204,9 +208,9 @@ package away3d.materials.utils
 		
 		private static function renderNormalMap(model : Mesh, tangentMap : BitmapData) : void
 		{
-			var faces : Array = model.geometry.faces;
+			var faces : Vector.<Face> = model.geometry.faces;
 			var face : Face;
-			var i : int = faces.length;
+			var i : uint = faces.length;
 			var normal : Vector3D = new Vector3D();
 			var tangent : Vector3D = new Vector3D();
 			var bitangent : Vector3D = new Vector3D();
@@ -220,7 +224,8 @@ package away3d.materials.utils
 			
 			shader.data.normalMap.input = tangentMap;
 			
-			while (face = Face(faces[--i])) {
+			while (i--) {
+				face = faces[i];
 				uv0.u = face.uv0.u*w;
 				uv0.v = (1-face.uv0.v)*h;
 				uv1.u = face.uv1.u*w;

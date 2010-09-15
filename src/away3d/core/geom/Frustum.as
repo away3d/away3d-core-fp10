@@ -18,7 +18,7 @@ package away3d.core.geom
 		public static const IN:int = 1;
 		public static const INTERSECT:int = 2;
 		
-		public var planes:Array;
+		public var planes:Vector.<Plane3D>;
 		
 		private var _matrix:Matrix3D = new Matrix3D();
 		private var _distance:Number;
@@ -28,7 +28,7 @@ package away3d.core.geom
 		 */
 		public function Frustum()
 		{
-			planes = new Array(6);
+			planes = new Vector.<Plane3D>(6, true);
 			planes[LEFT] = new Plane3D();
 			planes[RIGHT] = new Plane3D();
 			planes[TOP] = new Plane3D();

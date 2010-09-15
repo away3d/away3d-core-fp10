@@ -292,7 +292,6 @@ package away3d.lights
         public function clone(light:AbstractLight = null):AbstractLight
         {
             var abstractLight:AbstractLight = (light as AbstractLight) || new AbstractLight();
-            super.clone(abstractLight);
             abstractLight.color = color;
             abstractLight.debug = debug;
             return abstractLight;

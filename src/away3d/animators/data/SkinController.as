@@ -2,6 +2,7 @@
 {
 	import away3d.arcane;
 	import away3d.containers.*;
+	import away3d.core.base.*;
 	
 	import flash.geom.*;
 	
@@ -30,7 +31,7 @@
         /**
          * Store of all <code>SkinVertex</code> objects being controlled
          */
-        public var skinVertices:Array =  new Array();
+        public var skinVertices:Vector.<SkinVertex> =  new Vector.<SkinVertex>();
         
         public function get sceneTransform():Matrix3D
 		{

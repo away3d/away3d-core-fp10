@@ -6,12 +6,12 @@
 	
     public class SkinVertex
     {
-    	private var _i:int;
+    	private var _i:uint;
     	private var _position:Vector3D = new Vector3D();
 		public var baseVertex:Vertex;
         public var skinnedVertex:Vertex;
-        public var weights:Array = [];
-        public var controllers:Array = [];
+        public var weights:Vector.<Number> = new Vector.<Number>();
+        public var controllers:Vector.<SkinController> = new Vector.<SkinController>();
 		
         public function SkinVertex(vertex:Vertex)
         {
@@ -26,7 +26,7 @@
             
             _i = weights.length;
             while (_i--) {
-				_position = (controllers[_i] as SkinController).sceneTransform.transformVector(baseVertex.position);
+				_position = controllers[_i].sceneTransform.transformVector(baseVertex.position);
 				_position.scaleBy(weights[_i]);
 				skinnedVertex.add(_position);
             }

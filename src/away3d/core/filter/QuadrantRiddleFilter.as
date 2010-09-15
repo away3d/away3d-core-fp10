@@ -179,7 +179,7 @@
         private var _index:uint;
         private var _startIndexQ:uint;
         private var _startIndexW:uint;
-        private var _uvs:Array;
+        private var _uvs:Vector.<UV>;
         
     	private function riddle(q:uint, w:uint):Array
         {
@@ -358,13 +358,13 @@
             
 			if (sv1*sv2 >= -1) {
                 return renderer.primitiveSource[q].fivepointcut(q, renderer, _startIndexQ+2, tv20x, tv20y, tv20z, _startIndexQ, tv01x, tv01y, tv01z, _startIndexQ+1,
-                    _uvs[2], UV.weighted(_uvs[2], _uvs[0], -sv0, sv2), _uvs[0], UV.weighted(_uvs[0], _uvs[1], sv1, -sv0), _uvs[1]);
+                    _uvs[uint(2)], UV.weighted(_uvs[uint(2)], _uvs[uint(0)], -sv0, sv2), _uvs[uint(0)], UV.weighted(_uvs[uint(0)], _uvs[uint(1)], sv1, -sv0), _uvs[uint(1)]);
             } else if (sv0*sv1 >= -1) {
                 return renderer.primitiveSource[q].fivepointcut(q, renderer, _startIndexQ+1, tv12x, tv12y, tv12z, _startIndexQ+2, tv20x, tv20y, tv20z, _startIndexQ,
-                    _uvs[1], UV.weighted(_uvs[1], _uvs[2], -sv2, sv1), _uvs[2], UV.weighted(_uvs[2], _uvs[0], sv0, -sv2), _uvs[0]);
+                    _uvs[uint(1)], UV.weighted(_uvs[uint(1)], _uvs[uint(2)], -sv2, sv1), _uvs[uint(2)], UV.weighted(_uvs[uint(2)], _uvs[uint(0)], sv0, -sv2), _uvs[uint(0)]);
             } else {                                                           
                 return renderer.primitiveSource[q].fivepointcut(q, renderer, _startIndexQ, tv01x, tv01y, tv01z, _startIndexQ+1, tv12x, tv12y, tv12z, _startIndexQ+2,
-                    _uvs[0], UV.weighted(_uvs[0], _uvs[1], -sv1, sv0), _uvs[1], UV.weighted(_uvs[1], _uvs[2], sv2, -sv1), _uvs[2]);
+                    _uvs[uint(0)], UV.weighted(_uvs[uint(0)], _uvs[uint(1)], -sv1, sv0), _uvs[uint(1)], UV.weighted(_uvs[uint(1)], _uvs[uint(2)], sv2, -sv1), _uvs[uint(2)]);
             }
 
             return null;

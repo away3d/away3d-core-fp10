@@ -1,12 +1,11 @@
 package away3d.core.clip
 {
-	import away3d.core.utils.ViewSourceObject;
-	import away3d.core.session.AbstractSession;
 	import away3d.arcane;
 	import away3d.core.base.*;
 	import away3d.core.geom.*;
 	import away3d.core.render.*;
-	import away3d.core.vos.FaceVO;
+	import away3d.core.session.*;
+	import away3d.core.vos.*;
 	
 	import flash.utils.*;
 	
@@ -17,9 +16,9 @@ package away3d.core.clip
     */
     public class NearfieldClipping extends Clipping
     {
-    	private var _faces:Array;
+    	private var _faces:Vector.<Face>;
     	private var _face:Face;
-    	private var _faceVOs:Array = new Array();
+    	private var _faceVOs:Vector.<FaceVO> = new Vector.<FaceVO>();
     	private var _faceVO:FaceVO;
     	private var _newFaceVO:FaceVO;
     	private var _v0C:VertexClassification;
@@ -85,7 +84,7 @@ package away3d.core.clip
             return true;
         }
         
-		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		public override function checkElements(mesh:Mesh, clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];

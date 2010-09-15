@@ -1,6 +1,5 @@
 package away3d.materials
 {
-	import away3d.core.utils.*;
 	import away3d.materials.shaders.*;
 	
 	import flash.display.*;

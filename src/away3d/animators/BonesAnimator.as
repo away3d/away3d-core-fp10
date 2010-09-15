@@ -9,7 +9,7 @@ package away3d.animators
 	
 	public class BonesAnimator extends Animator
     {
-        private var _channels:Array;
+        private var _channels:Vector.<Channel> = new Vector.<Channel>();
 		
         protected override function updateTarget():void
         {
@@ -39,7 +39,6 @@ package away3d.animators
         {
         	super(target, init);
             Debug.trace(" + BonesAnimator");
-			_channels = [];
         }
 		
 		/**

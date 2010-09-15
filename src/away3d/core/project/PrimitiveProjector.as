@@ -42,14 +42,14 @@ package away3d.core.project
 		private var _startIndices:Vector.<int>;
 		private var _defaultVerts:Vector.<Number> = new Vector.<Number>();
 		private var _verts:Vector.<Number>;
-		private var _defaultVertices:Array = new Array();
-		private var _vertices:Array;
-		private var _defaultClippedFaceVOs:Array = new Array();
-		private var _faceVOs:Array;
-		private var _defaultClippedSegmentVOs:Array = new Array();
-		private var _segmentVOs:Array;
-		private var _defaultClippedBillboards:Array = new Array();
-		private var _spriteVOs:Array;
+		private var _defaultVertices:Vector.<Vertex> = new Vector.<Vertex>();
+		private var _vertices:Vector.<Vertex>;
+		private var _defaultClippedFaceVOs:Vector.<FaceVO> = new Vector.<FaceVO>();
+		private var _faceVOs:Vector.<FaceVO>;
+		private var _defaultClippedSegmentVOs:Vector.<SegmentVO> = new Vector.<SegmentVO>();
+		private var _segmentVOs:Vector.<SegmentVO>;
+		private var _defaultClippedBillboards:Vector.<SpriteVO> = new Vector.<SpriteVO>();
+		private var _spriteVOs:Vector.<SpriteVO>;
 		private var _camera:Camera3D;
 		private var _clipping:Clipping;
 		private var _lens:AbstractLens;
@@ -236,7 +236,6 @@ package away3d.core.project
                 if (!renderer.primitive(renderer.createDrawTriangle(_faceVO, _faceVO.commands, _faceVO.uvs, _material, _startIndex, _endIndex, _viewSourceObject, _area, _faceVO.generated)))
                 	continue;
 				
-				continue;
             	_face = _faceVO.face;
                 
                 if (_mesh.outline && !_backface) {
@@ -403,7 +402,7 @@ package away3d.core.project
 			_cameraViewMatrix = _view.camera.viewMatrix;
 			_viewTransformDictionary = _view.cameraVarsStore.viewTransformDictionary;
 			
-			var _container_children:Array = _container.children;
+			var _container_children:Vector.<Object3D> = _container.children;
 			var child:Object3D;
         	for each (child in _container_children) {
 				if (child.ownCanvas && child.visible) {

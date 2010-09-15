@@ -3,7 +3,6 @@
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.core.render.*;
 	import away3d.core.utils.*;
 	import away3d.lights.*;
@@ -79,12 +78,12 @@
 		{
 			priIndex;
 			
-			uvt[uint(0)] = _uvs[0].u;
-    		uvt[uint(1)] = 1 - _uvs[0].v;
-    		uvt[uint(3)] = _uvs[1].u;
-    		uvt[uint(4)] = 1 - _uvs[1].v;
-    		uvt[uint(6)] = _uvs[2].u;
-    		uvt[uint(7)] = 1 - _uvs[2].v;
+			uvt[uint(0)] = _uvs[uint(0)].u;
+    		uvt[uint(1)] = 1 - _uvs[uint(0)].v;
+    		uvt[uint(3)] = _uvs[uint(1)].u;
+    		uvt[uint(4)] = 1 - _uvs[uint(1)].v;
+    		uvt[uint(6)] = _uvs[uint(2)].u;
+    		uvt[uint(7)] = 1 - _uvs[uint(2)].v;
     		
     		return uvt;
 		}

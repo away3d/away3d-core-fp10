@@ -214,7 +214,7 @@ package away3d.containers
             var bone:Bone = (object as Bone) || new Bone();
             super.clone(bone);
             
-            bone.joint = bone.children[0];
+            bone.joint = bone.children[0] as ObjectContainer3D;
             
             return bone;
         }
@@ -227,7 +227,7 @@ package away3d.containers
             super.cloneAll(bone);
             
             bone.boneId = boneId;
-            bone.joint = bone.children[0];
+            bone.joint = bone.children[0] as ObjectContainer3D;
             
             return bone;
         }

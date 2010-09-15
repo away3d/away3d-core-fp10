@@ -330,7 +330,7 @@ package away3d.sprites
             spriteVO.sprite3d = this;
             
         	//setup the vertex
-            _commands = spriteVO.commands = ["M"];
+            _commands = spriteVO.commands = Vector.<String>(["M"]);
             _vertex = _vertices[0] = spriteVO.vertices[0] = new Vertex();
 			
 			_vertex.parents.push(this);

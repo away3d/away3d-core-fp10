@@ -67,8 +67,21 @@ package away3d.core.utils
         private var _index2:uint;
         private var _index3:uint;
         private var _index4:uint;
-        private var _uvs:Array;
+        private var _uvs:Vector.<UV>;
         private var _priLength:uint;
+        private var _vertexIndex:uint;
+        private var segmentCommands:Vector.<String> = Vector.<String>(["M", "L"]);
+        private var faceCommands:Vector.<String> = Vector.<String>(["M", "L", "L"]);
+        
+        private function getEndLoopIndex(i:uint):uint
+        {
+        	var j:uint = i + 1;
+        	
+        	while(j < _endIndex && _faceVO.commands[j - _startIndex] != PathCommand.MOVE)
+        		j++;
+        	
+        	return j - 1;
+        }
         
 		public var source:Object3D;
 		public var screenVertices:Vector.<Number>;
@@ -91,7 +104,7 @@ package away3d.core.utils
         			//use crossing count on an infinite ray projected from the test point along the x axis
 	        		var c:Boolean = false;
 	        		var i:uint = _startIndex;
-	        		var j:uint = _endIndex - 1;
+	        		var j:uint;
 	        		var vertix:Number;
 	        		var vertiy:Number;
 	        		var vertjx:Number;
@@ -101,6 +114,9 @@ package away3d.core.utils
 	        		
 	        		_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 					while (i < _endIndex) {
+						if (_faceVO.commands[i - _startIndex] == PathCommand.MOVE)
+							j = getEndLoopIndex(i);
+						
 						if (_faceVO.commands[i - _startIndex] == PathCommand.CURVE)
 							i++;
 						
@@ -109,8 +125,6 @@ package away3d.core.utils
 						
 						j = i++;
 						
-						if (_faceVO.commands[i - _startIndex] == PathCommand.MOVE)
-							j = i++;
 					}
 					return c;
 					
@@ -294,24 +308,24 @@ package away3d.core.utils
 					if (area > -20 && area < 20)
 		                return null;
 		            
-					var vertexIndex:int = screenVertices.length/2;
+					_vertexIndex = screenVertices.length/2;
 					
 					_index0 = screenIndices.length;
 		        	screenIndices[screenIndices.length] = screenIndices[_startIndex];
-		        	screenIndices[screenIndices.length] = vertexIndex;
-		        	screenIndices[screenIndices.length] = vertexIndex+2;
+		        	screenIndices[screenIndices.length] = _vertexIndex;
+		        	screenIndices[screenIndices.length] = _vertexIndex+2;
 		        	_index1 = screenIndices.length;
 		        	screenIndices[screenIndices.length] = screenIndices[uint(_startIndex+1)];
-		        	screenIndices[screenIndices.length] = vertexIndex+1;
-		        	screenIndices[screenIndices.length] = vertexIndex;
+		        	screenIndices[screenIndices.length] = _vertexIndex+1;
+		        	screenIndices[screenIndices.length] = _vertexIndex;
 		        	_index2 = screenIndices.length;
 		        	screenIndices[screenIndices.length] = screenIndices[uint(_startIndex+2)];
-		        	screenIndices[screenIndices.length] = vertexIndex+2;
-		        	screenIndices[screenIndices.length] = vertexIndex+1;
+		        	screenIndices[screenIndices.length] = _vertexIndex+2;
+		        	screenIndices[screenIndices.length] = _vertexIndex+1;
 		        	_index3 = screenIndices.length;
-		        	screenIndices[screenIndices.length] = vertexIndex;
-		        	screenIndices[screenIndices.length] = vertexIndex+1;
-		        	screenIndices[screenIndices.length] = vertexIndex+2;
+		        	screenIndices[screenIndices.length] = _vertexIndex;
+		        	screenIndices[screenIndices.length] = _vertexIndex+1;
+		        	screenIndices[screenIndices.length] = _vertexIndex+2;
 		        	_index4 = screenIndices.length;
 		        	
 		        	ScreenVertex.median(_startIndex, _startIndex+1, screenVertices, screenIndices, screenUVTs);
@@ -329,10 +343,10 @@ package away3d.core.utils
 		            var uv20:UV = UV.median(uv2, uv0);
 					
 					_priLength = renderer.primitiveType.length;
-					renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv0,  uv01, uv20], _material, _index0, _index1, this, getArea(_index0), true);
-	                renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv1,  uv12, uv01], _material, _index1, _index2, this, getArea(_index1), true);
-	                renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv2,  uv20, uv12], _material, _index2, _index3, this, getArea(_index2), true);
-	                renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv01, uv12, uv20], _material, _index3, _index4, this, getArea(_index3), true);
+					renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv0, uv01, uv20]), _material, _index0, _index1, this, getArea(_index0), true);
+					renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv1, uv12, uv01]), _material, _index1, _index2, this, getArea(_index1), true);
+					renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv2, uv20, uv12]), _material, _index2, _index3, this, getArea(_index2), true);
+					renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv01, uv12, uv20]), _material, _index3, _index4, this, getArea(_index3), true);
 	            	
 	            	return [_priLength, _priLength + 1, _priLength + 2, _priLength + 3];
 	            	
@@ -342,11 +356,13 @@ package away3d.core.utils
 	            	if (length < 5)
 		                return null;
 					
+					_vertexIndex = screenVertices.length/2;
+					
 					_index0 = screenIndices.length;
 		        	screenIndices[screenIndices.length] = screenIndices[_startIndex];
-		        	screenIndices[screenIndices.length] = screenVertices.length;
+		        	screenIndices[screenIndices.length] = _vertexIndex;
 		        	_index1 = screenIndices.length;
-		        	screenIndices[screenIndices.length] = screenVertices.length;
+		        	screenIndices[screenIndices.length] = _vertexIndex;
 		        	screenIndices[screenIndices.length] = screenIndices[uint(_startIndex+1)];
 		        	_index2 = screenIndices.length;
 		        	
@@ -355,9 +371,9 @@ package away3d.core.utils
 					_segmentVO = renderer.primitiveElements[priIndex] as SegmentVO;
 		        	_material = renderer.primitiveMaterials[priIndex];
 		        	
-		        	_priLength = renderer.primitiveType.length;
-	                renderer.createDrawSegment(_segmentVO, ["M", "L"], _material, _index0, _index1, this, true);
-	                renderer.createDrawSegment(_segmentVO, ["M", "L"], _material, _index1, _index2, this, true);
+					_priLength = renderer.primitiveType.length;
+					renderer.createDrawSegment(_segmentVO, segmentCommands, _material, _index0, _index1, this, true);
+					renderer.createDrawSegment(_segmentVO, segmentCommands, _material, _index1, _index2, this, true);
                 	
 	            	return [_priLength, _priLength + 1];
 	            	
@@ -405,9 +421,9 @@ package away3d.core.utils
 				screenUVTs.push(0, 0, lens.getT(v12z));
 		        
 				_priLength = renderer.primitiveType.length;
-	            renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv0,  uv01, uv12], _material, _index0, _index1, this, getArea(_index0), true);
-	            renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv01,  uv1, uv12], _material, _index1, _index2, this, getArea(_index1), true);
-	            renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv0,  uv12, uv2], _material, _index2, _index3, this, getArea(_index2), true);
+				renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv0, uv01, uv12]), _material, _index0, _index1, this, getArea(_index0), true);
+				renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv01, uv1, uv12]), _material, _index1, _index2, this, getArea(_index1), true);
+				renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv0, uv12, uv2]), _material, _index2, _index3, this, getArea(_index2), true);
 	            
             } else {
             	_index0 = screenIndices.length;
@@ -432,10 +448,10 @@ package away3d.core.utils
 				screenVertices[screenVertices.length] = v12y;
 				screenUVTs.push(0, 0, lens.getT(v12z));
 	        	
-	        	_priLength = renderer.primitiveType.length;
-	            renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv0,  uv01, uv2], _material, _index0, _index1, this, getArea(_index0), true);
-	            renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv01,  uv1, uv12], _material, _index1, _index2, this, getArea(_index1), true);
-	            renderer.createDrawTriangle(_faceVO, ["M", "L", "L"], [uv01,  uv12, uv2], _material, _index2, _index3, this, getArea(_index2), true);
+				_priLength = renderer.primitiveType.length;
+				renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv0, uv01, uv2]), _material, _index0, _index1, this, getArea(_index0), true);
+				renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv01, uv1, uv12]), _material, _index1, _index2, this, getArea(_index1), true);
+				renderer.createDrawTriangle(_faceVO, faceCommands, Vector.<UV>([uv01, uv12, uv2]), _material, _index2, _index3, this, getArea(_index2), true);
             }
             
             return [_priLength, _priLength + 1, _priLength + 2];
@@ -460,9 +476,9 @@ package away3d.core.utils
 			_segmentVO = renderer.primitiveElements[priIndex] as SegmentVO;
 		    _material = renderer.primitiveMaterials[priIndex];
 		    
-		    _priLength = renderer.primitiveType.length;
-            renderer.createDrawSegment(_segmentVO, ["M", "L"], _material, _index0, _index1, this, true);
-	        renderer.createDrawSegment(_segmentVO, ["M", "L"], _material, _index1, _index2, this, true);
+			_priLength = renderer.primitiveType.length;
+			renderer.createDrawSegment(_segmentVO, segmentCommands, _material, _index0, _index1, this, true);
+			renderer.createDrawSegment(_segmentVO, segmentCommands, _material, _index1, _index2, this, true);
 	        
 	        return [_priLength, _priLength + 1];
     	}

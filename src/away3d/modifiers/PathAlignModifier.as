@@ -264,7 +264,7 @@ package away3d.modifiers
 				var face:Face = _activeMesh.faces[uint(i)];
 				
 				var subLoop:uint = face.vertices.length;
-				var vertices:Array = face.vertices;
+				var vertices:Vector.<Vertex> = face.vertices;
 				for(j = 0; j<subLoop; ++j)
 				{
 					var vertex:Vertex = vertices[uint(j)];
@@ -286,12 +286,12 @@ package away3d.modifiers
 			
 			var i:uint, a:uint, b:uint;
 			var loop:uint = _activeMesh.faces.length;
-			var arr:Array = _activeMesh.faces;
+			var arr:Vector.<Face> = _activeMesh.faces;
 			for(a = 0; a<loop; ++a)
 			{
 				var face:Face = arr[uint(a)];
 				var subLoop:uint = face.vertices.length;
-				var subArr:Array = face.vertices;
+				var subArr:Vector.<Vertex> = face.vertices;
 				for(b = 0; b<subLoop; ++b)
 				{
 					var vertex:Vertex = subArr[uint(b)];

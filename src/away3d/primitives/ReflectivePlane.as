@@ -500,7 +500,7 @@ package away3d.primitives
 		{
 			_hideList = [];
 			
-			var _scene_children:Array  = this.scene.children;
+			var _scene_children:Vector.<Object3D>  = this.scene.children;
 			for each(var obj:Object3D in _scene_children)
 			{
 				if(obj.visible && !onFrontSide(obj.position))

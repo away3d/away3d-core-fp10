@@ -64,9 +64,31 @@
         		parent.incrementPolyCount(delta);
         }
         
-        private var _children:Array = [];
+        private var _children:Vector.<Object3D> = new Vector.<Object3D>();
         private var _polyCount:int;
         
+        private function getMaxChild(prop:String):Number
+		{
+			var child:Object3D;
+			var maxVal:Number = -Infinity;
+			for each (child in _children)
+				if (maxVal < child[prop])
+					maxVal = child[prop];
+			
+			return maxVal;
+		}
+		
+		private function getMinChild(prop:String):Number
+		{
+			var child:Object3D;
+			var minVal:Number = Infinity;
+			for each (child in _children)
+				if (minVal > child[prop])
+					minVal = child[prop];
+			
+			return minVal;
+		}
+		
         private function onSessionUpdate(event:Object3DEvent):void
         {
 			if (event.object.ownCanvas && _session)
@@ -94,7 +116,7 @@
         protected override function updateDimensions():void
         {
         	//update bounding radius
-        	var children:Array = _children.concat();
+        	var children:Vector.<Object3D> = _children.concat();
         	
         	if (children.length) {
 	        	
@@ -127,22 +149,16 @@
 	            _boundingRadius = mradius;
 	            
 	            //update max/min X
-	            children.sortOn("parentmaxX", Array.DESCENDING | Array.NUMERIC);
-	            _maxX = children[0].parentmaxX;
-	            children.sortOn("parentminX", Array.NUMERIC);
-	            _minX = children[0].parentminX;
+	            _maxX = getMaxChild("parentMaxX");
+	            _minX = getMinChild("parentMinX");
 	            
 	            //update max/min Y
-	            children.sortOn("parentmaxY", Array.DESCENDING | Array.NUMERIC);
-	            _maxY = children[0].parentmaxY;
-	            children.sortOn("parentminY", Array.NUMERIC);
-	            _minY = children[0].parentminY;
+	            _maxY = getMaxChild("parentMaxY");
+	            _minY = getMinChild("parentMinY");
 	            
 	            //update max/min Z
-	            children.sortOn("parentmaxZ", Array.DESCENDING | Array.NUMERIC);
-	            _maxZ = children[0].parentmaxZ;
-	            children.sortOn("parentminZ", Array.NUMERIC);
-	            _minZ = children[0].parentminZ;
+	            _maxZ = getMaxChild("parentMaxZ");
+	            _minZ = getMinChild("parentMinZ");
          	}
          	
             super.updateDimensions();
@@ -151,7 +167,7 @@
         /**
         * Returns the children of the container as an array of 3d objects
         */
-        public function get children():Array
+        public function get children():Vector.<Object3D>
         {
             return _children;
         }
@@ -511,7 +527,7 @@
         private function cloneBones(container:ObjectContainer3D, root:ObjectContainer3D):void
         {
         	//wire up new bones to new skincontrollers if available
-        	var _container_children:Array = container.children;
+        	var _container_children:Vector.<Object3D> = container.children;
             for each (var child:Object3D in _container_children) {
             	if (child is ObjectContainer3D) {
             		(child as ObjectContainer3D).cloneBones(child as ObjectContainer3D, root);

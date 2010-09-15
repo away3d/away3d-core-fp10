@@ -3,8 +3,8 @@ package away3d.core.clip
 	import away3d.arcane;
 	import away3d.core.base.*;
 	import away3d.core.geom.*;
-	import away3d.core.session.AbstractSession;
-	import away3d.core.vos.FaceVO;
+	import away3d.core.session.*;
+	import away3d.core.vos.*;
 	
 	import flash.utils.*;
 	
@@ -15,9 +15,9 @@ package away3d.core.clip
     */
     public class FrustumClipping extends Clipping
     {
-    	private var _faces:Array;
+    	private var _faces:Vector.<Face>;
     	private var _face:Face;
-    	private var _faceVOs:Array = new Array();
+    	private var _faceVOs:Vector.<FaceVO> = new Vector.<FaceVO>();
     	private var _faceVO:FaceVO;
     	private var _newFaceVO:FaceVO;
     	private var _v0C:VertexClassification;
@@ -62,7 +62,7 @@ package away3d.core.clip
             objectCulling = ini.getBoolean("objectCulling", true);
         }
         
-		public override function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		public override function checkElements(mesh:Mesh, clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];
@@ -95,7 +95,7 @@ package away3d.core.clip
 		 */		
 		private var _verticesC:Array;
 		private var _distances:Array;
-		private function checkIrregularFace(clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedBillboards:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		private function checkIrregularFace(clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_pass = true;
 			
@@ -154,7 +154,7 @@ package away3d.core.clip
 			}
 			else
 			{
-				var _frustum_planes:Array = _frustum.planes;
+				var _frustum_planes:Vector.<Plane3D> = _frustum.planes;
 				var _continue:Boolean = false;
 				
 				for each(_plane in _frustum_planes)
@@ -409,7 +409,7 @@ package away3d.core.clip
     			_newFaceVO.vertices.push(newVertices[i]);
 		}
 		
-		private function checkNormalFace(clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		private function checkNormalFace(clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			_pass = true;
 				
@@ -451,7 +451,7 @@ package away3d.core.clip
 			}
 			else
 			{
-				var _frustum_planes:Array = _frustum.planes;
+				var _frustum_planes:Vector.<Plane3D> = _frustum.planes;
 				var _continue:Boolean = false;
 				
 				for each(_plane in _frustum_planes)

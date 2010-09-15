@@ -3,6 +3,7 @@
 	import away3d.*;
 	import away3d.core.base.*;
 	import away3d.materials.*;
+	import away3d.sprites.*;
     
 	use namespace arcane;
 	
@@ -142,7 +143,7 @@
 		/**
 		 * @inheritDoc
 		 */
-        public override function get vertices():Array
+        public override function get vertices():Vector.<Vertex>
         {
     		if (_primitiveDirty)
     			updatePrimitive();
@@ -153,7 +154,7 @@
 		/**
 		 * @inheritDoc
 		 */
-        public override function get faces():Array
+        public override function get faces():Vector.<Face>
         {
     		if (_primitiveDirty)
     			updatePrimitive();
@@ -164,7 +165,7 @@
 		/**
 		 * @inheritDoc
 		 */
-        public override function get segments():Array
+        public override function get segments():Vector.<Segment>
         {
     		if (_primitiveDirty)
     			updatePrimitive();
@@ -175,7 +176,7 @@
 		/**
 		 * @inheritDoc
 		 */
-        public override function get sprites():Array
+        public override function get sprites():Vector.<Sprite3D>
         {
     		if (_primitiveDirty)
     			updatePrimitive();
@@ -186,7 +187,7 @@
 		/**
 		 * @inheritDoc
 		 */
-        public override function get elements():Array
+        public override function get elements():Vector.<Element>
         {
     		if (_primitiveDirty)
     			updatePrimitive();

@@ -90,9 +90,9 @@ package away3d.materials
 		
 		private function createPositionMap() : void
 		{
-			var faces : Array = _mesh.geometry.faces;
+			var faces : Vector.<Face> = _mesh.geometry.faces;
 			var face : Face;
-			var i : int = faces.length;
+			var i : uint = faces.length;
 			var min : Vector3D = new Vector3D(_mesh.minX, _mesh.minY, _mesh.minZ);
 			var max : Vector3D = new Vector3D(_mesh.maxX, _mesh.maxY, _mesh.maxZ);
 			var diffExtr : Vector3D;
@@ -123,7 +123,8 @@ package away3d.materials
 			_positionMap = new BitmapData(w, h, false, 0);
 			
 			
-			while (face = Face(faces[--i])) {
+			while (i--) {
+				face = faces[i];
 				uv0.u = face.uv0.u*w;
 				uv0.v = (1-face.uv0.v)*h;
 				uv1.u = face.uv1.u*w;

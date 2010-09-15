@@ -1,5 +1,6 @@
 package away3d.core.vos 
 {
+	import away3d.core.base.*;
 	import away3d.materials.*;
 	
 	/**
@@ -7,9 +8,9 @@ package away3d.core.vos
 	 */
 	public class ElementVO 
 	{
-		public var commands:Array = new Array();
+		public var commands:Vector.<String> = new Vector.<String>();
 		
-		public var vertices:Array = new Array();
+		public var vertices:Vector.<Vertex> = new Vector.<Vertex>();
 		
 		public var screenZ:Number;
 		

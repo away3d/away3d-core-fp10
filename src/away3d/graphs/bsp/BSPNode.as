@@ -108,7 +108,7 @@ package away3d.graphs.bsp
 			return _bevelPlanes;
 		}
 
-		public function get faces() : Array
+		public function get faces() : Vector.<Face>
 		{
 			return _mesh? _mesh.faces : null;
 		}

@@ -7,8 +7,8 @@ package away3d.core.base
     {
         private var weight:Number;
         private var vertices:Mesh;
-    	private var _vertices:Array;
-    	private var _verticesComp:Array;
+    	private var _vertices:Vector.<Vertex>;
+    	private var _verticesComp:Vector.<Vertex>;
 		/**
 		 * Creates a new <code>Morpher</code> object.
 		 *

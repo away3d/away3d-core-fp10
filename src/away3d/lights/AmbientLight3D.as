@@ -1,9 +1,6 @@
 package away3d.lights
 {
 	import away3d.arcane;
-    import away3d.core.base.*;
-    import away3d.materials.*;
-    import away3d.primitives.*;
     
 	import flash.display.*;
 	

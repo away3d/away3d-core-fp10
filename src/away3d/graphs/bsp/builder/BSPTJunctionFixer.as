@@ -72,7 +72,7 @@ package away3d.graphs.bsp.builder
 		// details of the implementation
 		private function removeTJunctions(sourceNode : BSPNode, targetNode : BSPNode, portal : BSPPortal) : void
 		{
-			var faces : Array = sourceNode.faces;
+			var faces : Vector.<Face> = sourceNode.faces;
 			var face : Face;
 			var i : int = -1;
 			var len : int = faces.length;
@@ -88,13 +88,13 @@ package away3d.graphs.bsp.builder
 			}
 		}
 
-		private function testTJunctions(sourceNode : BSPNode, face : Face, targetFaces : Array, plane : Plane3D) : Boolean
+		private function testTJunctions(sourceNode : BSPNode, face : Face, targetFaces : Vector.<Face>, plane : Plane3D) : Boolean
 		{
 			var targetFace : Face;
 			var i : int = targetFaces.length;
 
 			while (--i >= 0) {
-				targetFace = Face(targetFaces[i]);
+				targetFace = targetFaces[i];
 				if (face.hasEdgeOnPlane(plane, BSPTree.EPSILON) && fixTJunctions(sourceNode, face, targetFace))
 					return true;
 			}
@@ -111,7 +111,7 @@ package away3d.graphs.bsp.builder
 			var t : Number;
 
 			while (--i >= 0) {
-				v = Vertex(targetFace.vertices[i]);
+				v = targetFace.vertices[i];
 				t = getTFraction(v0, v1, v);
 				if (t > 0) {
 					splitFace(sourceNode, face, 0, v, t);

@@ -5,6 +5,7 @@ package away3d.core.clip
 	import away3d.core.base.*;
 	import away3d.core.render.*;
 	import away3d.core.utils.*;
+	import away3d.core.vos.*;
 	import away3d.events.*;
 	
 	import flash.display.*;
@@ -260,7 +261,7 @@ package away3d.core.clip
             return true;
         }
 		
-		public function checkElements(mesh:Mesh, clippedFaceVOs:Array, clippedSegmentVOs:Array, clippedSpriteVOs:Array, clippedVertices:Array, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		public function checkElements(mesh:Mesh, clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			throw new Error("Not implemented");
 		}

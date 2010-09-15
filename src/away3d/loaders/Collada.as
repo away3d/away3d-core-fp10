@@ -81,7 +81,7 @@
 							//channel.target = _containers[channel.name];
 							animator.addChannel(channel);
 							
-							var times:Array = channel.times;
+							var times:Vector.<Number> = channel.times;
 							
 							if (_animationData.start > times[0])
 								_animationData.start = times[0];
@@ -110,7 +110,7 @@
 				                case "translateX":
 				                case "translationX":
 								case "transform(3)(0)":
-				                	channel.type = ["x"];
+				                	channel.type = Vector.<String>(["x"]);
 									if (yUp)
 										for each (param in channel.param)
 											param[0] *= -1*scaling;
@@ -119,9 +119,9 @@
 								case "translationY":
 								case "transform(3)(1)":
 									if (yUp)
-										channel.type = ["y"];
+										channel.type = Vector.<String>(["y"]);
 									else
-										channel.type = ["z"];
+										channel.type = Vector.<String>(["z"]);
 									for each (param in channel.param)
 										param[0] *= scaling;
 				     				break;
@@ -129,14 +129,14 @@
 								case "translationZ":
 								case "transform(3)(2)":
 									if (yUp)
-										channel.type = ["z"];
+										channel.type = Vector.<String>(["z"]);
 									else
-										channel.type = ["y"];
+										channel.type = Vector.<String>(["y"]);
 									for each (param in channel.param)
 										param[0] *= scaling;
 				     				break;
 				     			case "jointOrientX":
-				     				channel.type = ["rotationX"];
+				     				channel.type = Vector.<String>(["rotationX"]);
 				     				if (yUp)
 										for each (param in channel.param)
 											param[0] *= -1;
@@ -144,13 +144,13 @@
 								case "rotateXANGLE":
 								case "rotateX":
 								case "RotX":
-				     				channel.type = [rX];
+				     				channel.type = Vector.<String>([rX]);
 				     				if (yUp)
 										for each (param in channel.param)
 											param[0] *= -1;
 				     				break;
 				     			case "jointOrientY":
-				     				channel.type = ["rotationY"];
+				     				channel.type = Vector.<String>(["rotationY"]);
 				     				//if (yUp)
 										for each (param in channel.param)
 											param[0] *= -1;
@@ -159,15 +159,15 @@
 								case "rotateY":
 								case "RotY":
 									if (yUp)
-										channel.type = [rY];
+										channel.type = Vector.<String>([rY]);
 									else
-										channel.type = [rZ];
+										channel.type = Vector.<String>([rZ]);
 									//if (yUp)
 										for each (param in channel.param)
 											param[0] *= -1;
 				     				break;
 				     			case "jointOrientZ":
-				     				channel.type = ["rotationZ"];
+				     				channel.type = Vector.<String>(["rotationZ"]);
 				     				//if (yUp)
 										for each (param in channel.param)
 											param[0] *= -1;
@@ -176,16 +176,16 @@
 								case "rotateZ":
 								case "RotZ":
 									if (yUp)
-										channel.type = [rZ];
+										channel.type = Vector.<String>([rZ]);
 									else
-										channel.type = [rY];
+										channel.type = Vector.<String>([rY]);
 									//if (yUp)
 										for each (param in channel.param)
 											param[0] *= -1;
 				            		break;
 								case "scaleX":
 								case "transform(0)(0)":
-									channel.type = [sX];
+									channel.type = Vector.<String>([sX]);
 									//if (yUp)
 									//	for each (param in channel.param)
 									//		param[0] *= -1;
@@ -193,25 +193,25 @@
 								case "scaleY":
 								case "transform(1)(1)":
 									if (yUp)
-										channel.type = [sY];
+										channel.type = Vector.<String>([sY]);
 									else
-										channel.type = [sZ];
+										channel.type = Vector.<String>([sZ]);
 				     				break;
 								case "scaleZ":
 								case "transform(2)(2)":
 									if (yUp)
-										channel.type = [sZ];
+										channel.type = Vector.<String>([sZ]);
 									else
-										channel.type = [sY];
+										channel.type = Vector.<String>([sY]);
 				     				break;
 								case "translate":
 								case "translation":
 									if (yUp) {
-										channel.type = ["x", "y", "z"];
+										channel.type = Vector.<String>(["x", "y", "z"]);
 										for each (param in channel.param)
 											param[0] *= -1;
 				     				} else {
-				     					channel.type = ["x", "z", "y"];
+				     					channel.type = Vector.<String>(["x", "z", "y"]);
 				     				}
 				     				for each (param in channel.param) {
 										param[0] *= scaling;
@@ -221,20 +221,20 @@
 									break;
 								case "scale":
 									if (yUp)
-										channel.type = [sX, sY, sZ];
+										channel.type = Vector.<String>([sX, sY, sZ]);
 									else
-										channel.type = [sX, sZ, sY];
+										channel.type = Vector.<String>([sX, sZ, sY]);
 				     				break;
 								case "rotate":
 									if (yUp) {
-										channel.type = [rX, rY, rZ];
+										channel.type = Vector.<String>([rX, rY, rZ]);
 										for each (param in channel.param) {
 											param[0] *= -1;
 											param[1] *= -1;
 											param[2] *= -1;
 										}
 				     				} else {
-										channel.type = [rX, rZ, rY];
+										channel.type = Vector.<String>([rX, rZ, rY]);
 										for each (param in channel.param) {
 											param[1] *= -1;
 											param[2] *= -1;
@@ -243,11 +243,11 @@
 									break;
 								case "matrix":
 								case "transform":
-									channel.type = ["transform"];
+									channel.type = Vector.<String>(["transform"]);
 									break;
 								
 								case "visibility":
-									channel.type = ["visibility"];
+									channel.type = Vector.<String>(["visibility"]);
 									break;
 				            }
 						}
@@ -1008,11 +1008,10 @@
                     case "OUTPUT":
                         i=0;
                         while (i < len) {
-                           channel.param[i] = [];
+                           channel.param[i] = new Array();
                             
                             if (stride == 16) {
-		                    	var m:Matrix3D = array2matrix(list.slice(i*stride, i*stride + 16), yUp, scaling);
-		                    	channel.param[i].push(m);
+		                    	channel.param[i].push(array2matrix(list.slice(i*stride, i*stride + 16), yUp, scaling));
                             } else {
 	                            j = 0;
 	                            while (j < stride) {
@@ -1034,7 +1033,7 @@
                         i=0;
                         while (i < len)
                         {
-                        	channel.inTangent[i] = [];
+                        	channel.inTangent[i] = new Vector.<Point>();
                         	j = 0;
                             while (j < stride) {
                                 channel.inTangent[i].push(new Point(list[stride * i + j], list[stride * i + j + 1]));
@@ -1047,7 +1046,7 @@
                         i=0;
                         while (i < len)
                         {
-                        	channel.outTangent[i] = [];
+                        	channel.outTangent[i] = new Vector.<Point>();
                         	j = 0;
                             while (j < stride) {
                                 channel.outTangent[i].push(new Point(list[stride * i + j], list[stride * i + j + 1]));

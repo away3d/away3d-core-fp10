@@ -39,6 +39,9 @@ package away3d.core.utils
         private var _fStore:Array = [];
         private var _sActive:Array = [];
         private var _sStore:Array = [];
+        private var segmentCommands:Vector.<String> = Vector.<String>(["M", "L"]);
+        private var faceCommands:Vector.<String> = Vector.<String>(["M", "L", "L"]);
+        
 		public var view:View3D;
     	
         /**
@@ -131,8 +134,8 @@ package away3d.core.utils
         		_fActive.push(_faceVO = new FaceVO());
         	
         	_faceVO.face = face;
-        	_faceVO.material = material;
-        	_faceVO.commands = ["M", "L", "L"];
+			_faceVO.material = material;
+			_faceVO.commands = faceCommands;
         	_faceVO.back = back;
         	_faceVO.generated = true;
         	
@@ -146,8 +149,8 @@ package away3d.core.utils
         	else
         		_sActive.push(_segmentVO = new SegmentVO());
         	
-        	_segmentVO.material = material;
-        	_segmentVO.commands = ["M", "L"];
+			_segmentVO.material = material;
+			_segmentVO.commands = segmentCommands;
         	_segmentVO.generated = true;
         	
         	return _segmentVO;

@@ -4,7 +4,6 @@ package away3d.materials.shaders
 	import away3d.cameras.lenses.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.math.*;
 	import away3d.core.render.*;
 	import away3d.core.session.*;
 	import away3d.core.utils.*;
@@ -189,7 +188,7 @@ package away3d.materials.shaders
         
         protected var _startIndex:uint;
         protected var _endIndex:uint;
-        protected var _uvs:Array;
+        protected var _uvs:Vector.<UV>;
         protected var _generated:Boolean;
         protected var _screenVertices:Vector.<Number>;
 		protected var _screenIndices:Vector.<int>;

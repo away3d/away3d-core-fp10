@@ -78,7 +78,7 @@
         /** @private */
         protected var _faceVO:FaceVO;
         /** @private */
-        protected var _uvs:Array;
+        protected var _uvs:Vector.<UV>;
 		/** @private */
         arcane override function updateMaterial(source:Object3D, view:View3D):void
         {
@@ -353,12 +353,12 @@
 				_uvt[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
 				_uvt[uint(5)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 1)]*3 + 2)];
 				_uvt[uint(8)] = _screenUVTs[uint(_screenIndices[uint(_startIndex + 2)]*3 + 2)];
-				_uvt[uint(0)] = _uvs[0].u;
-	    		_uvt[uint(1)] = 1 - _uvs[0].v;
-	    		_uvt[uint(3)] = _uvs[1].u;
-	    		_uvt[uint(4)] = 1 - _uvs[1].v;
-	    		_uvt[uint(6)] = _uvs[2].u;
-	    		_uvt[uint(7)] = 1 - _uvs[2].v;
+				_uvt[uint(0)] = _uvs[uint(0)].u;
+	    		_uvt[uint(1)] = 1 - _uvs[uint(0)].v;
+	    		_uvt[uint(3)] = _uvs[uint(1)].u;
+	    		_uvt[uint(4)] = 1 - _uvs[uint(1)].v;
+	    		_uvt[uint(6)] = _uvs[uint(2)].u;
+	    		_uvt[uint(7)] = 1 - _uvs[uint(2)].v;
 	    		
 	    		return _uvt;
 			}

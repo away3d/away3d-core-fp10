@@ -36,8 +36,9 @@ package away3d.core.base
     public class Element extends EventDispatcher
     {
     	protected var _index:int;
-		protected var _vertices:Array = new Array();
-		protected var _commands:Array = new Array();
+		protected var _vertices:Vector.<Vertex> = new Vector.<Vertex>();
+		protected var _uvs:Vector.<UV> = new Vector.<UV>();
+		protected var _commands:Vector.<String> = new Vector.<String>();
 		protected var _pathCommands:Array = new Array();
 		protected var _lastAddedVertex:Vertex = new Vertex();
     	
@@ -108,7 +109,7 @@ package away3d.core.base
 		/**
 		 * Returns an array of vertex objects that make up the 3d element.
 		 */
-        public function get vertices():Array
+        public function get vertices():Vector.<Vertex>
         {
             return _vertices;
         }
@@ -116,7 +117,7 @@ package away3d.core.base
 		/**
 		 * Returns an array of drawing command strings that make up the 3d element.
 		 */
-        public function get commands():Array
+        public function get commands():Vector.<String>
         {
             return _commands;
         }

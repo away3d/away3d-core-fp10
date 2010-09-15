@@ -29,6 +29,7 @@ package away3d.materials
 		/** @private */
         arcane function renderFog(priIndex:uint, viewSourceObject:ViewSourceObject, renderer:Renderer):void
         {
+        	viewSourceObject;
             renderer._session.renderFogColor(_color, _alpha, renderer.primitiveProperties[uint(priIndex*9 + 2)], renderer.primitiveProperties[uint(priIndex*9 + 3)], renderer.primitiveProperties[uint(priIndex*9 + 4)], renderer.primitiveProperties[uint(priIndex*9 + 5)]);
         }
         

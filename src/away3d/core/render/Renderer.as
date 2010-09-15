@@ -126,8 +126,8 @@ package away3d.core.render
 		public var primitiveProperties:Vector.<Number> = new Vector.<Number>();
 		public var primitiveElements:Vector.<ElementVO> = new Vector.<ElementVO>();
 		public var primitiveSource:Vector.<ViewSourceObject> = new Vector.<ViewSourceObject>();
-		public var primitiveCommands:Vector.<Array> = new Vector.<Array>();
-		public var primitiveUVs:Vector.<Array> = new Vector.<Array>();
+		public var primitiveCommands:Vector.<Vector.<String>> = new Vector.<Vector.<String>>();
+		public var primitiveUVs:Vector.<Vector.<UV>> = new Vector.<Vector.<UV>>();
 		public var primitiveMaterials:Vector.<Material> = new Vector.<Material>();
 		public var primitiveGenerated:Vector.<Boolean> = new Vector.<Boolean>();
 		
@@ -221,7 +221,7 @@ package away3d.core.render
 	        return _primitiveIndex;
 	    }
 	    
-	    public function createDrawSegment(segmentVO:SegmentVO, commands:Array, material:Material, startIndex:uint, endIndex:uint, viewSourceObject:ViewSourceObject, generated:Boolean = false):uint
+	    public function createDrawSegment(segmentVO:SegmentVO, commands:Vector.<String>, material:Material, startIndex:uint, endIndex:uint, viewSourceObject:ViewSourceObject, generated:Boolean = false):uint
 	    {
 	    	_primitiveIndex = primitiveType.length;
 	    	_primitiveIndex9 = _primitiveIndex*9;
@@ -292,7 +292,7 @@ package away3d.core.render
 			return _primitiveIndex;
 	    }
 	    
-		public function createDrawTriangle(faceVO:FaceVO, commands:Array, uvs:Array, material:Material, startIndex:uint, endIndex:uint, viewSourceObject:ViewSourceObject, area:Number = 0, generated:Boolean = false):uint
+		public function createDrawTriangle(faceVO:FaceVO, commands:Vector.<String>, uvs:Vector.<UV>, material:Material, startIndex:uint, endIndex:uint, viewSourceObject:ViewSourceObject, area:Number = 0, generated:Boolean = false):uint
 		{
 			_primitiveIndex = primitiveType.length;
 			_primitiveIndex9 = _primitiveIndex*9;

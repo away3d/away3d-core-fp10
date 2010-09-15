@@ -8,7 +8,7 @@ package away3d.core.vos
 	{
 		public var generated:Boolean;
 		
-		public var uvs:Array = new Array();
+		public var uvs:Vector.<UV> = new Vector.<UV>();
 		
 		public var back:Material;
 		

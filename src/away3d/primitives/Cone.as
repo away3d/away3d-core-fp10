@@ -2,7 +2,6 @@
 {
 	import away3d.arcane;
 	import away3d.core.base.*;
-	import away3d.core.utils.*;
     
 	use namespace arcane;
 	
