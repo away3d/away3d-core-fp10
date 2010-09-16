@@ -5,8 +5,6 @@ package away3d.animators
 	import away3d.core.base.*;
 	import away3d.core.utils.*;
 	
-	import flash.utils.*;
-	
 	public class BonesAnimator extends Animator
     {
         private var _channels:Vector.<Channel> = new Vector.<Channel>();

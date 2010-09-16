@@ -417,12 +417,12 @@ package away3d.core.project
 						_screenZ = child.ownSession.screenZ;
 					} else {
 						if (child.scenePivotPoint.length) {
-							_depthPoint = _viewTransformDictionary[child].position.add(_cameraViewMatrix.deltaTransformVector(child.scenePivotPoint));
+							_depthPoint = (_viewTransformDictionary[child]as Matrix3D).position.add(_cameraViewMatrix.deltaTransformVector(child.scenePivotPoint));
 							
 			             	_screenZ = _depthPoint.length;
 							
 						} else {
-							_screenZ = _viewTransformDictionary[child].position.length;
+							_screenZ = (_viewTransformDictionary[child] as Matrix3D).position.length;
 						}
 			            
 		             	if (child.pushback)

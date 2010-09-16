@@ -3,7 +3,6 @@ package away3d.cameras.lenses
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.clip.*;
 	import away3d.core.geom.*;
 	
 	import flash.geom.*;
@@ -84,12 +83,6 @@ package away3d.cameras.lenses
 		{
 			return _camera.zoom;
 		}
-        /** @private */
-		arcane override function getPerspective(screenZ:Number):Number
-		{
-			screenZ;
-			return _camera.zoom/_camera.focus;
-		}
 		/** @private */
 		arcane override function getT(screenZ:Number):Number
 		{
@@ -107,5 +100,14 @@ package away3d.cameras.lenses
 			_screenMatrix.prepend(viewTransform);
         	Utils3D.projectVectors(_screenMatrix, verts, screenVerts, uvts);
         }
+		
+        /**
+         * @inheritDoc
+         */
+		public override function getPerspective(screenZ:Number):Number
+		{
+			screenZ;
+			return _camera.zoom/_camera.focus;
+		}
 	}
 }

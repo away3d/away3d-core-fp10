@@ -1,10 +1,9 @@
 package away3d.events
 {
-	import away3d.core.vos.ElementVO;
 	import away3d.containers.*;
-    import away3d.core.draw.*;
     import away3d.materials.*;
     import away3d.core.base.*;
+	import away3d.core.vos.*;
     
     import flash.events.Event;
     

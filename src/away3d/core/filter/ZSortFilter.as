@@ -62,7 +62,6 @@ package away3d.core.filter
 					j = np1[j];
                 }
             }
-        	//renderer._order = renderer._screenZs.sort(Array.NUMERIC | Array.RETURNINDEXEDARRAY);
         }
 		
 		/**

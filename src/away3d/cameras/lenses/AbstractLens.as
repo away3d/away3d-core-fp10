@@ -60,11 +60,6 @@ package away3d.cameras.lenses
 			throw new Error("Not implemented");
 		}
 		/** @private */
-		arcane function getPerspective(screenZ:Number):Number
-		{
-			throw new Error("Not implemented");
-		}
-		/** @private */
 		arcane function getT(screenZ:Number):Number
 		{
 			throw new Error("Not implemented");
@@ -121,5 +116,16 @@ package away3d.cameras.lenses
     	protected var classification:int;
     	protected var viewTransform:Matrix3D;
     	protected var view:Matrix3D = new Matrix3D();
+    	
+		/**
+		 * Returns the perspective scaling value for a distance z from the camera
+		 * 
+		 * @param screenZ	The screenZ of the point
+		 * @return			The perspetive scaling value.
+		 */
+		public function getPerspective(screenZ:Number):Number
+		{
+			throw new Error("Not implemented");
+		}
     }
 }

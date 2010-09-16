@@ -93,15 +93,16 @@ package away3d.core.clip
 		 * Trying to add support for irregular shapes in FrustumClipping.
 		 * WORK IN PROGRESS. 
 		 */		
-		private var _verticesC:Array;
+		private var _verticesC:Vector.<VertexClassification>;
 		private var _distances:Array;
 		private function checkIrregularFace(clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
+			clippedSegmentVOs; clippedSpriteVOs; clippedVerts;
 			_pass = true;
 			
 			var i:uint;
 				
-			_verticesC = [];
+			_verticesC = new Vector.<VertexClassification>();
 			for(i = 0; i<_faceVO.vertices.length; i++)
 				_verticesC.push(_cameraVarsStore.createVertexClassification(_faceVO.vertices[i]));
 			
@@ -411,6 +412,7 @@ package away3d.core.clip
 		
 		private function checkNormalFace(clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
+			clippedSegmentVOs; clippedSpriteVOs;
 			_pass = true;
 				
 			_v0 = _faceVO.vertices[0];

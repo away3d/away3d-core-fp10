@@ -8,13 +8,11 @@
     public final class Number3D extends Vector3D
     {
     	private const MathPI:Number = Math.PI;
-    	private var mod:Number;
         private var dist:Number;
         private var num:Vector3D;
         private var vx:Number;
         private var vy:Number;
         private var vz:Number;
-        private var m1:Matrix3D;
     	
     	/**
     	 * The modulo of the 3d number object.

@@ -1,14 +1,14 @@
 package away3d.core.draw
 {
-    import flash.geom.Vector3D;
     import away3d.core.geom.*;
+    
+    import flash.geom.*;
 
     /**
     * representation of a 3d vertex resolved to the view.
     */
     public final class ScreenVertex extends Vector3D
     {
-		private var persp:Number;
 		private var faz:Number;
 		private var fbz:Number;
 		private var ifmz2:Number;

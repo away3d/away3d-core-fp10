@@ -84,11 +84,6 @@ package away3d.cameras.lenses
 			var b:Number = _clipHeight/Math.tan(_camera.fov*toRADIANS);
 			return (b + Math.sqrt(Math.pow(b, 2) - 4*_clipTop*_clipBottom/_camera.zoom))/(2*_camera.focus);
 		}
-        /** @private */
-		arcane override function getPerspective(screenZ:Number):Number
-		{
-			return _camera.focus*_camera.zoom / screenZ;
-		}
 		/** @private */
 		arcane override function getT(screenZ:Number):Number
 		{
@@ -153,5 +148,13 @@ package away3d.cameras.lenses
 		private var _wy2:Number;
 		private var _c:Number;
 		private var _c2:Number;
+		
+        /**
+         * @inheritDoc
+         */
+		public override function getPerspective(screenZ:Number):Number
+		{
+			return _camera.focus*_camera.zoom / screenZ;
+		}
 	}
 }

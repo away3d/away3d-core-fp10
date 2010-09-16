@@ -86,6 +86,8 @@ package away3d.core.clip
         
 		public override function checkElements(mesh:Mesh, clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
+			clippedSegmentVOs; clippedSpriteVOs;
+			
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];
 			_processed = new Dictionary();

@@ -56,7 +56,7 @@ package away3d.debug
 	*/
 	public class AwayStats extends Sprite
 	{
-		private var _views : Array;
+		private var _views : Vector.<View3D>;
 		private var _timer : Timer;
 		private var _last_frame_timestamp : Number;
 		
@@ -166,7 +166,7 @@ package away3d.debug
 			_enable_mod_fr = enableModifyFrameRate;
 			_mean_data_length = meanDataLength;
 			
-			_views = [];
+			_views = new Vector.<View3D>();
 			if (view3d)
 				_views.push(view3d);
 			
@@ -286,7 +286,7 @@ package away3d.debug
 		{
 			var logo : Shape;
 			var markers : Shape;
-			var logo_tf : TextField;
+			//var logo_tf : TextField;
 			var fps_label_tf : TextField;
 			var afps_label_tf : TextField;
 			
@@ -334,7 +334,7 @@ package away3d.debug
 			_top_bar.addChild(markers);
 			
 			// CURRENT FPS
-			fps_label_tf = new TextField
+			fps_label_tf = new TextField();
 			fps_label_tf.defaultTextFormat = _label_format;
 			fps_label_tf.autoSize = TextFieldAutoSize.LEFT; 
 			fps_label_tf.text = 'FR:';
@@ -858,7 +858,7 @@ package away3d.debug
 		
 		private function _onMouseUpOrLeave(ev : Event) : void
 		{
-			_endDrag()
+			_endDrag();
 		}
 	}
 }

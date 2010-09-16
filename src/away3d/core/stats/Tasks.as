@@ -1,13 +1,10 @@
 package away3d.core.stats 
 {
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.geom.Rectangle;
-	import flash.system.System;
-	import flash.utils.Dictionary;
-	import flash.utils.getTimer;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.geom.*;
+	import flash.system.*;
+	import flash.utils.*;
 	
     /**
      * 
@@ -170,13 +167,13 @@ package away3d.core.stats
 				//MEM				
 				graphBitmapData.setPixel(0, int(_height - memGraph), 0x0000FF);
 				
-				tasks["FPS"].htmlText = tasks["FPS"].defaultText + fps + "/" + stage.frameRate;
-				tasks["MEM"].htmlText = tasks["MEM"].defaultText + mem;
+				(tasks["FPS"] as StaticTextField).htmlText = (tasks["FPS"] as StaticTextField).defaultText + fps + "/" + stage.frameRate;
+				(tasks["MEM"] as StaticTextField).htmlText = (tasks["MEM"] as StaticTextField).defaultText + mem;
 				
 				fs = 0;
 			}
 			
-			tasks["MS"].htmlText = tasks["MS"].defaultText + (timer - ms);
+			(tasks["MS"] as StaticTextField).htmlText = (tasks["MS"] as StaticTextField).defaultText + (timer - ms);
 			ms = timer;
         }
         

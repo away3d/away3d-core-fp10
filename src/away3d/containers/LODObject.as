@@ -3,6 +3,8 @@ package away3d.containers
     import away3d.cameras.*;
     import away3d.core.base.*;
 
+    import flash.geom.*;
+    
     /**
     * 3d object container that is drawn only if its scaling to perspective falls within a given range.
     */ 
@@ -52,8 +54,7 @@ package away3d.containers
 		 */
         public function matchLOD(camera:Camera3D):Boolean
         {
-            var z:Number = camera.view.cameraVarsStore.viewTransformDictionary[this].rawData[14];
-            var persp:Number = camera.zoom / (1 + z / camera.focus);
+            var persp:Number = camera.lens.getPerspective((camera.view.cameraVarsStore.viewTransformDictionary[this] as Matrix3D).rawData[uint(14)]);
 
             if (persp < minp)
                 return false;

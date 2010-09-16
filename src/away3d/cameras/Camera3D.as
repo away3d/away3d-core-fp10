@@ -301,7 +301,7 @@ package away3d.cameras
             	_verts = Vector.<Number>([vertex.x, vertex.y, vertex.z]);
             
             _cameraVarsStore.createViewTransform(object).rawData = viewMatrix.rawData;
-            _cameraVarsStore.viewTransformDictionary[object].prepend(object.sceneTransform);
+            (_cameraVarsStore.viewTransformDictionary[object] as Matrix3D).prepend(object.sceneTransform);
             
 			_screenVertices.length = 0;
 			_screenUVs.length = 0;

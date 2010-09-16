@@ -210,7 +210,7 @@
         	_startIndexQ = renderer.primitiveProperties[uint(q*9)];
         	
         	//return if triangle area below 10 or if actual rival triangles do not overlap
-            if (positiveArea < 10 || positiveArea < 10 || !overlap(q, w))
+            if (positiveArea < 10 || positiveArea < 10 || !overlap())
                 return null;
 			
 			
@@ -370,9 +370,8 @@
             return null;
         }
          
-        private function overlap(q:uint, w:uint):Boolean
+        private function overlap():Boolean
         {
-        	
         	_index = _viewSourceObjectQ.screenIndices[_startIndexQ]*2;
             q0x = _viewSourceObjectQ.screenVertices[_index];
             q0y = _viewSourceObjectQ.screenVertices[uint(_index + 1)];
