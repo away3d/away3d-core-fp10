@@ -595,7 +595,7 @@ package away3d.primitives
 			
 			//This matrix is used to reflect any point in the scene according to the plane position
 			//and orientation.
-			_reflectionMatrix3D = new Matrix3D([1 - 2*a*a, -2*a*b, -2*a*c, 0, -2*a*b, 1 - 2*b*b, -2*b*c, 0, -2*a*c, -2*b*c, 1 - 2*c*c, 0, 0, 0, 0, 1]);
+			_reflectionMatrix3D = new Matrix3D(Vector.<Number>([1 - 2*a*a, -2*a*b, -2*a*c, 0, -2*a*b, 1 - 2*b*b, -2*b*c, 0, -2*a*c, -2*b*c, 1 - 2*c*c, 0, 0, 0, 0, 1]));
 			
 			//This matrix is used to flip what the refl camera see's so that
 			//it emulates the correct position of virtual objects in the refl view and hence

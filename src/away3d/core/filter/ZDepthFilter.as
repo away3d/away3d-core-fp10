@@ -2,4 +2,4 @@
 			_order = renderer._order;
 			_minT = renderer._coeffScreenT/_maxZ;			var i:uint;
 			for each (i in _order) {
-				if (renderer._screenTs[_order[i]] < _minT) {					_order.splice(i);					break;				}			}        }				/**		 * Used to trace the values of a filter.		 * 		 * @return A string representation of the filter object.		 */        public function toString():String        {            return "ZDepthFilter";        }    }}
+				if (renderer._screenTs[_order[i]] < _minT) {					_order.splice(i, renderer._order.length - i);					break;				}			}        }				/**		 * Used to trace the values of a filter.		 * 		 * @return A string representation of the filter object.		 */        public function toString():String        {            return "ZDepthFilter";        }    }}
