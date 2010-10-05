@@ -13,6 +13,16 @@ package away3d.events
     	 * Defines the value of the type property of a geometryChanged event object.
     	 */
     	public static const GEOMETRY_UPDATED:String = "geometryUpdated";
+    	    	    	
+    	/**
+    	 * Defines the value of the type property of a dimensionsChanged event object.
+    	 */
+    	public static const DIMENSIONS_CHANGED:String = "dimensionsChanged";
+    	    	    	
+    	/**
+    	 * Defines the value of the type property of a geometryChanged event object.
+    	 */
+    	public static const GEOMETRY_CHANGED:String = "geometryChanged";
     	
     	/**
     	 * A reference to the 3d object that is relevant to the event.

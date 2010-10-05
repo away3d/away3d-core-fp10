@@ -62,7 +62,7 @@
         	for each (skinVertex in skinVertices) {
         		skinVertex.skinnedVertex._positionDirty = true;
         		if (skinVertex.skinnedVertex.geometry)
-        			skinVertex.skinnedVertex.geometry.notifyGeometryUpdate();
+        			skinVertex.skinnedVertex.geometry.notifyDimensionsUpdate();
 			}
         }
         

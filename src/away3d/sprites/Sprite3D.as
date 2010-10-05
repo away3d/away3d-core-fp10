@@ -24,8 +24,6 @@ package away3d.sprites
     {
 		/** @private */
         arcane var _vertex:Vertex;
-		/** @private */
-        arcane var _material:Material;
         
 		private var _width:Number;
 		private var _height:Number;
@@ -115,22 +113,22 @@ package away3d.sprites
 		/**
 		 * Defines the material of the 3d sprite.
 		 */
-        public function get material():Material
+        public override function get material():Material
         {
             return _material;
         }
 
-        public function set material(value:Material):void
+        public override function set material(value:Material):void
         {
             if (_material == value)
                 return;
 			
-			if (_material != null && parent)
+			if (parent)
 				parent.removeMaterial(this, _material);
 			
             _material = spriteVO.material = value;
 			
-			if (_material != null && parent)
+			if (parent)
 				parent.addMaterial(this, _material);
         }
         

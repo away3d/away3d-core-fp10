@@ -3,6 +3,7 @@ package away3d.core.base
     import away3d.arcane;
 	import away3d.core.geom.*;
     import away3d.events.*;
+    import away3d.materials.*;
     
     import flash.events.EventDispatcher;
     
@@ -41,6 +42,7 @@ package away3d.core.base
 		protected var _commands:Vector.<String> = new Vector.<String>();
 		protected var _pathCommands:Array = new Array();
 		protected var _lastAddedVertex:Vertex = new Vertex();
+    	protected var _material:Material;
     	
 		/** @private */
         arcane var _visible:Boolean = true;
@@ -54,17 +56,6 @@ package away3d.core.base
                 _vertexchanged = new ElementEvent(ElementEvent.VERTEX_CHANGED, this);
             
             dispatchEvent(_vertexchanged);
-        }
-		/** @private */
-        arcane function notifyVertexValueChange():void
-        {
-            if (!hasEventListener(ElementEvent.VERTEXVALUE_CHANGED))
-                return;
-			
-            if (_vertexvaluechanged == null)
-                _vertexvaluechanged = new ElementEvent(ElementEvent.VERTEXVALUE_CHANGED, this);
-            
-            dispatchEvent(_vertexvaluechanged);
         }
 		/** @private */
         arcane function notifyVisibleChange():void
@@ -90,7 +81,6 @@ package away3d.core.base
         }
         
 		private var _vertexchanged:ElementEvent;
-		private var _vertexvaluechanged:ElementEvent;
 		private var _visiblechanged:ElementEvent;
 		private var _mappingchanged:ElementEvent;
 		
@@ -112,6 +102,14 @@ package away3d.core.base
         public function get vertices():Vector.<Vertex>
         {
             return _vertices;
+        }
+        
+		/**
+		 * Returns an array of uv objects that are used by the element.
+		 */
+		public function get uvs():Vector.<UV>
+        {
+            return _uvs;
         }
         
 		/**
@@ -210,7 +208,15 @@ package away3d.core.base
         {
             return -Math.sqrt(radius2);
         }
-		        
+        
+		public function get material():Material
+        {
+            return _material;
+        }
+
+        public function set material(value:Material):void
+        { 
+        }
         
         /**
          * Offsets the vertices of the face by given amounts in x, y and z.

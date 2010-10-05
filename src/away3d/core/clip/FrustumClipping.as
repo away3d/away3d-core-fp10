@@ -15,11 +15,12 @@ package away3d.core.clip
     */
     public class FrustumClipping extends Clipping
     {
-    	private var _faces:Vector.<Face>;
-    	private var _face:Face;
-    	private var _faceVOs:Vector.<FaceVO> = new Vector.<FaceVO>();
+    	private var _faceVOs:Vector.<FaceVO>;
+    	private var _segmentVOs:Vector.<SegmentVO>;
+    	private var _spriteVOs:Vector.<SpriteVO>;
     	private var _faceVO:FaceVO;
-    	private var _newFaceVO:FaceVO;
+    	private var _segmentVO:SegmentVO;
+    	private var _spriteVO:SpriteVO;
     	private var _v0C:VertexClassification;
     	private var _v1C:VertexClassification;
     	private var _v2C:VertexClassification;
@@ -67,25 +68,27 @@ package away3d.core.clip
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];
 			_processed = new Dictionary(true);
-			_faces = mesh.faces;
-            _faceVOs.length = 0;
-            
-            //clip faces
-            for each(_face in _faces)
-            {
-            	if (!_face.visible)
-					continue;
-				
-            	_faceVOs[_faceVOs.length] = _face.faceVO;
-            }
+			
+			
+            _faceVOs = mesh.faceVOs;
             
 			for each(_faceVO in _faceVOs)
 			{
 				if(true/*_faceVO.vertices.length == 3*/)
-					checkNormalFace(clippedFaceVOs, clippedSegmentVOs, clippedSpriteVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
+					checkNormalFace(_faceVO, clippedFaceVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
 				else
-					checkIrregularFace(clippedFaceVOs, clippedSegmentVOs, clippedSpriteVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
+					checkIrregularFace(_faceVO, clippedFaceVOs, clippedSegmentVOs, clippedSpriteVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
 	        }
+	        
+			_segmentVOs = mesh.segmentVOs;
+			
+			for each(_segmentVO in _segmentVOs)
+				checkNormalSegment(_segmentVO, clippedSegmentVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
+	        
+			_spriteVOs = mesh.spriteVOs;
+	        
+			for each(_spriteVO in _spriteVOs)
+				checkNormalSprite(_spriteVO, clippedSpriteVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
 	        
 	        startIndices[startIndices.length] = clippedIndices.length;
 		}
@@ -96,7 +99,7 @@ package away3d.core.clip
 		 */		
 		private var _verticesC:Vector.<VertexClassification>;
 		private var _distances:Array;
-		private function checkIrregularFace(clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		private function checkIrregularFace(faceVO:FaceVO, clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
 			clippedSegmentVOs; clippedSpriteVOs; clippedVerts;
 			_pass = true;
@@ -406,19 +409,18 @@ package away3d.core.clip
         		_newFaceVO.vertices[2] = _newFaceVO.v2 = _v2;
         	}*/
         	
-        	_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
+        	var newFaceVO1:FaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
     		for(i = 0; i<newVertices.length; i++)
-    			_newFaceVO.vertices.push(newVertices[i]);
+    			newFaceVO1.vertices.push(newVertices[i]);
 		}
 		
-		private function checkNormalFace(clippedFaceVOs:Vector.<FaceVO>, clippedSegmentVOs:Vector.<SegmentVO>, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		private function checkNormalFace(faceVO:FaceVO, clippedFaceVOs:Vector.<FaceVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
 		{
-			clippedSegmentVOs; clippedSpriteVOs;
 			_pass = true;
 				
-			_v0 = _faceVO.vertices[0];
-    		_v1 = _faceVO.vertices[1];
-    		_v2 = _faceVO.vertices[2];
+			_v0 = faceVO.vertices[0];
+    		_v1 = faceVO.vertices[1];
+    		_v2 = faceVO.vertices[2];
     		
 			_v0C = _cameraVarsStore.createVertexClassification(_v0);
 			_v1C = _cameraVarsStore.createVertexClassification(_v1);
@@ -481,7 +483,7 @@ package away3d.core.clip
 			}
 			
 			if(_pass) {
-				clippedFaceVOs[clippedFaceVOs.length] = _faceVO;
+				clippedFaceVOs[clippedFaceVOs.length] = faceVO;
 				
 				startIndices[startIndices.length] = clippedIndices.length;
         		
@@ -514,32 +516,32 @@ package away3d.core.clip
 				_v0w = _v0d;
 				_v1w = _v1d;
 				_v2w = _v2d;
-				_v0 = _faceVO.vertices[0];
-    			_v1 = _faceVO.vertices[1];
-    			_v2 = _faceVO.vertices[2];
-    			_uv0 = _faceVO.uvs[0];
-    			_uv1 = _faceVO.uvs[1];
-    			_uv2 = _faceVO.uvs[2];
+				_v0 = faceVO.vertices[0];
+    			_v1 = faceVO.vertices[1];
+    			_v2 = faceVO.vertices[2];
+    			_uv0 = faceVO.uvs[0];
+    			_uv1 = faceVO.uvs[1];
+    			_uv2 = faceVO.uvs[2];
 			} else if(_v1d >= 0 && _v2d < 0) {
 				_v0w = _v1d;
 				_v1w = _v2d;
 				_v2w = _v0d;
-				_v0 = _faceVO.vertices[1];
-    			_v1 = _faceVO.vertices[2];
-    			_v2 = _faceVO.vertices[0];
-    			_uv0 = _faceVO.uvs[1];
-    			_uv1 = _faceVO.uvs[2];
-    			_uv2 = _faceVO.uvs[0];
+				_v0 = faceVO.vertices[1];
+    			_v1 = faceVO.vertices[2];
+    			_v2 = faceVO.vertices[0];
+    			_uv0 = faceVO.uvs[1];
+    			_uv1 = faceVO.uvs[2];
+    			_uv2 = faceVO.uvs[0];
 			} else if(_v2d >= 0 && _v0d < 0) {
 				_v0w = _v2d;
 				_v1w = _v0d;
 				_v2w = _v1d;
-    			_v0 = _faceVO.vertices[2];
-    			_v1 = _faceVO.vertices[0];
-    			_v2 = _faceVO.vertices[1];
-    			_uv0 = _faceVO.uvs[2];
-    			_uv1 = _faceVO.uvs[0];
-    			_uv2 = _faceVO.uvs[1];
+    			_v0 = faceVO.vertices[2];
+    			_v1 = faceVO.vertices[0];
+    			_v2 = faceVO.vertices[1];
+    			_uv0 = faceVO.uvs[2];
+    			_uv1 = faceVO.uvs[0];
+    			_uv2 = faceVO.uvs[1];
 			}
     		
         	_d = (_v0w - _v1w);
@@ -555,13 +557,15 @@ package away3d.core.clip
         		
         		_uv20 = _uv0? _cameraVarsStore.createUV((_uv2.u*_v0w - _uv0.u*_v2w)/_d, (_uv2.v*_v0w - _uv0.v*_v2w)/_d, _session) : null;
         		
-        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
-        		_newFaceVO.vertices[0] = _v0;
-        		_newFaceVO.vertices[1] = _v01;
-        		_newFaceVO.vertices[2] = _v20;
-        		_newFaceVO.uvs[0] = _uv0;
-        		_newFaceVO.uvs[1] = _uv01;
-        		_newFaceVO.uvs[2] = _uv20;
+        		var newFaceVO1:FaceVO = _cameraVarsStore.createFaceVO(faceVO.face, faceVO.material, faceVO.back);
+        		newFaceVO1.vertices[0] = _v0;
+        		newFaceVO1.vertices[1] = _v01;
+        		newFaceVO1.vertices[2] = _v20;
+        		newFaceVO1.uvs[0] = _uv0;
+        		newFaceVO1.uvs[1] = _uv01;
+        		newFaceVO1.uvs[2] = _uv20;
+        		
+        		checkNormalFace(newFaceVO1, clippedFaceVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
         	} else {
         		_d = (_v2w - _v1w);
         		
@@ -569,22 +573,71 @@ package away3d.core.clip
         		
         		_uv12 = _uv0? _cameraVarsStore.createUV((_uv1.u*_v2w - _uv2.u*_v1w)/_d, (_uv1.v*_v2w - _uv2.v*_v1w)/_d, _session) : null;
         		
-        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
-        		_newFaceVO.vertices[0] = _v0;
-        		_newFaceVO.vertices[1] = _v01;
-        		_newFaceVO.vertices[2] = _v2;
-        		_newFaceVO.uvs[0] = _uv0;
-        		_newFaceVO.uvs[1] = _uv01;
-        		_newFaceVO.uvs[2] = _uv2;
+        		var newFaceVO2:FaceVO = _cameraVarsStore.createFaceVO(faceVO.face, faceVO.material, faceVO.back);
+        		newFaceVO2.vertices[0] = _v0;
+        		newFaceVO2.vertices[1] = _v01;
+        		newFaceVO2.vertices[2] = _v2;
+        		newFaceVO2.uvs[0] = _uv0;
+        		newFaceVO2.uvs[1] = _uv01;
+        		newFaceVO2.uvs[2] = _uv2;
         		
-        		_newFaceVO = _faceVOs[_faceVOs.length] = _cameraVarsStore.createFaceVO(_faceVO.face, _faceVO.material, _faceVO.back);
-        		_newFaceVO.vertices[0] = _v01;
-        		_newFaceVO.vertices[1] = _v12;
-        		_newFaceVO.vertices[2] = _v2;
-        		_newFaceVO.uvs[0] = _uv01;
-        		_newFaceVO.uvs[1] = _uv12;
-        		_newFaceVO.uvs[2] = _uv2;
+        		var newFaceVO3:FaceVO = _cameraVarsStore.createFaceVO(faceVO.face, faceVO.material, faceVO.back);
+        		newFaceVO3.vertices[0] = _v01;
+        		newFaceVO3.vertices[1] = _v12;
+        		newFaceVO3.vertices[2] = _v2;
+        		newFaceVO3.uvs[0] = _uv01;
+        		newFaceVO3.uvs[1] = _uv12;
+        		newFaceVO3.uvs[2] = _uv2;
+        		
+        		checkNormalFace(newFaceVO2, clippedFaceVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
+        		checkNormalFace(newFaceVO3, clippedFaceVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
         	}
+		}
+		
+		private function checkNormalSegment(segmentVO:SegmentVO, clippedSegmentVOs:Vector.<SegmentVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		{
+			//always pass segments
+			
+			_v0 = segmentVO.vertices[0];
+    		_v1 = segmentVO.vertices[1];
+    		
+			clippedSegmentVOs[clippedSegmentVOs.length] = segmentVO;
+			
+			startIndices[startIndices.length] = clippedIndices.length;
+    		
+			if(!_processed[_v0]) {
+                clippedVertices[clippedVertices.length] = _v0;
+                clippedVerts.push(_v0.x, _v0.y, _v0.z);
+                clippedIndices[clippedIndices.length] = (_processed[_v0] = clippedVertices.length) - 1;
+            } else {
+            	clippedIndices[clippedIndices.length] = _processed[_v0] - 1;
+            }
+            if(!_processed[_v1]) {
+                clippedVertices[clippedVertices.length] = _v1;
+                clippedVerts.push(_v1.x, _v1.y, _v1.z);
+                clippedIndices[clippedIndices.length] = (_processed[_v1] = clippedVertices.length) - 1;
+            } else {
+            	clippedIndices[clippedIndices.length] = _processed[_v1] - 1;
+            }
+		}
+		
+		private function checkNormalSprite(spriteVO:SpriteVO, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
+		{
+			//always pass segments
+			
+			_v0 = spriteVO.vertices[0];
+    		
+			clippedSpriteVOs[clippedSpriteVOs.length] = spriteVO;
+			
+			startIndices[startIndices.length] = clippedIndices.length;
+    		
+			if(!_processed[_v0]) {
+                clippedVertices[clippedVertices.length] = _v0;
+                clippedVerts.push(_v0.x, _v0.y, _v0.z);
+                clippedIndices[clippedIndices.length] = (_processed[_v0] = clippedVertices.length) - 1;
+            } else {
+            	clippedIndices[clippedIndices.length] = _processed[_v0] - 1;
+            }
 		}
 		
 		/**
