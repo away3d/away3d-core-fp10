@@ -1,6 +1,5 @@
 package away3d.core.vos
 {
-	import away3d.materials.*;
 	import away3d.sprites.*;
 	
 	import flash.geom.*;

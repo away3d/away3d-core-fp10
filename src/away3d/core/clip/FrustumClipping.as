@@ -70,6 +70,7 @@ package away3d.core.clip
 			_faces = mesh.faces;
             _faceVOs.length = 0;
             
+            //clip faces
             for each(_face in _faces)
             {
             	if (!_face.visible)

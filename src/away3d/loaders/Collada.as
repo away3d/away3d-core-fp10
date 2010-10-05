@@ -25,7 +25,6 @@
         private var animationLibrary:AnimationLibrary;
         private var channelLibrary:ChannelLibrary;
         private var yUp:Boolean;
-        private var toRADIANS:Number = Math.PI / 180;
 		private var rotationMatrix:Matrix3D = new Matrix3D();
     	private var scalingMatrix:Matrix3D = new Matrix3D();
     	private var translationMatrix:Matrix3D = new Matrix3D();
@@ -666,7 +665,7 @@
             var trianglesXMLList:XMLList = geometryData.geoXML["mesh"].triangles;
             
             // C4D
-            var isC4D:Boolean = (trianglesXMLList.length()==0 && geometryData.geoXML["mesh"].polylist.length()>0);
+            //var isC4D:Boolean = (trianglesXMLList.length()==0 && geometryData.geoXML["mesh"].polylist.length()>0);
             if(!trianglesXMLList.length()) {
             	if (geometryData.geoXML["mesh"].polylist.length()) {
             		trianglesXMLList = geometryData.geoXML["mesh"].polylist;

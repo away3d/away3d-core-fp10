@@ -114,7 +114,6 @@ package away3d.physics
 		}
 		
 		private var _halfExtents : Vector3D = new Vector3D();
-		private var _collisionStart : Vector3D = new Vector3D();
 		
 		/**
 		 * Moves the object to a target point. If a collision is found, the trajectory is adapted.

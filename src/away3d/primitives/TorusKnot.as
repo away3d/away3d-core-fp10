@@ -92,7 +92,6 @@ package away3d.primitives
 		private function getPos(u : Number, v : Number) : Vector3D
 		{
 			var cu : Number = Math.cos(u);
-			var cv : Number = Math.cos(v);
 			var su : Number = Math.sin(u);
 			var quOverP : Number = _q/_p*u;
 			var cs : Number = Math.cos(quOverP);

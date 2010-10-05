@@ -17,11 +17,6 @@
         private var _segmentsH:int;
         private var _yUp:Boolean;
         
-        private function buildWireCone():void
-        {
-
-        }
-        
 		/**
 		 * @inheritDoc
 		 */

@@ -29,7 +29,6 @@
 		private var _vRange:Number;	
 		private var _autoGenKnotSeq:Boolean = false;
 		private var _invert:Boolean;
-		private var _weldThreshold:Number;
 		private var _tmpPM:WeightedVertex = new WeightedVertex();
 		private var _tmpP1:WeightedVertex = new WeightedVertex();
 		private var _tmpP2:WeightedVertex = new WeightedVertex();

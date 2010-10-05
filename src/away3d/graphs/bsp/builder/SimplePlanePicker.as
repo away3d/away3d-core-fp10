@@ -1,16 +1,13 @@
 package away3d.graphs.bsp.builder
 {
 	import away3d.arcane;
-	import away3d.core.geom.NGon;
-	import away3d.core.geom.Plane3D;
+	import away3d.core.geom.*;
 
-	import away3d.events.IteratorEvent;
-	import away3d.graphs.VectorIterator;
+	import away3d.events.*;
+	import away3d.graphs.*;
 
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.utils.getTimer;
-	import flash.utils.setTimeout;
+	import flash.events.*;
+	import flash.utils.*;
 
 	use namespace arcane;
 

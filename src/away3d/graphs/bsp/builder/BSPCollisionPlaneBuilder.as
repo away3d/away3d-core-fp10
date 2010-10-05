@@ -11,7 +11,7 @@ package away3d.graphs.bsp.builder
 	use namespace arcane;
 
 	/**
-	 * Generates bevel planes used for collision detection (prevents offsets causing false collisions at angles > 180°)
+	 * Generates bevel planes used for collision detection (prevents offsets causing false collisions at angles > 180ï¿½)
 	 */
 	internal class BSPCollisionPlaneBuilder extends AbstractBuilderDecorator implements IBSPPortalProvider
 	{
@@ -23,7 +23,7 @@ package away3d.graphs.bsp.builder
 		public function BSPCollisionPlaneBuilder(wrapped : IBSPPortalProvider)
 		{
 			super(wrapped, 1);
-			_warningEvent = new BSPBuildEvent(BSPBuildEvent.BUILD_WARNING)
+			_warningEvent = new BSPBuildEvent(BSPBuildEvent.BUILD_WARNING);
 			_warningEvent.message = "An invalid bevel plane was found. This could indicate inverted faces or other integrity errors in the model.";
 			
 			setProgressMessage("Building collision beveling planes");

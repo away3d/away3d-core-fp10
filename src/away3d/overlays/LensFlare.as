@@ -2,7 +2,6 @@ package away3d.overlays
 {
 	import away3d.cameras.*;
 	import away3d.core.base.*;
-	import away3d.core.draw.*;
 	
 	import flash.geom.*;
 	import flash.display.*;

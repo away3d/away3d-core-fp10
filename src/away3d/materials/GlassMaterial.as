@@ -1,15 +1,11 @@
 package away3d.materials
 {
-	import away3d.cameras.Camera3D;
-	import away3d.containers.View3D;
-	import away3d.core.base.Mesh;
-	import away3d.core.base.Object3D;
-	import away3d.primitives.utils.CubeFaces;
+	import away3d.cameras.*;
+	import away3d.containers.*;
+	import away3d.core.base.*;
 	
-	import flash.display.BitmapData;
-	import flash.display.Shader;
-	import flash.display.ShaderPrecision;
-	import flash.utils.ByteArray;
+	import flash.display.*;
+	import flash.utils.*;
 	
 	/**
 	 * BitmapData material which creates reflections based on a cube map.

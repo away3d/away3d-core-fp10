@@ -30,7 +30,6 @@ package away3d.materials
 		private var _objectViewPos : Vector3D = new Vector3D();
 		
 		private var _objectLightPos : Vector3D = new Vector3D();
-		private var _objectDirMatrix : Matrix3D = new Matrix3D();
 		
 		private var _specular : Number;
 		

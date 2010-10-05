@@ -6,7 +6,6 @@ package away3d.loaders
     import away3d.core.utils.*;
     import away3d.events.*;
     import away3d.loaders.data.*;
-    import away3d.loaders.utils.*;
     import away3d.materials.*;
     
     import flash.display.*;
@@ -30,9 +29,9 @@ package away3d.loaders
             kmzFile = new ZipFile(kmz);
 			for(var i:int = 0; i < kmzFile.entries.length; ++i) {
 				var entry:ZipEntry = kmzFile.entries[i];
-				var data:ByteArray = kmzFile.getInput(entry);
+				var d:ByteArray = kmzFile.getInput(entry);
 				if(entry.name.indexOf(".dae")>-1 && entry.name.indexOf("models/")>-1) {
-					collada = new XML(data.toString());
+					collada = new XML(d.toString());
 					//TODO: swap this to parseGeometry()
 					_container = Collada.parse(collada, ini);
 					if (container is Loader3D) {

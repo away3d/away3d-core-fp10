@@ -14,7 +14,7 @@ package away3d.loaders
     	/** @private */
         arcane override function prepareData(data:*):void
         {
-        	ase = Cast.string(data)
+        	ase = Cast.string(data);
         	
             var lines:Array = ase.split('\r\n');
             var vertices:Array = [];

@@ -2,7 +2,6 @@
 {
 	import away3d.*;
 	import away3d.core.base.*;
-	import away3d.core.utils.*;
 	import away3d.materials.*;
 	import away3d.primitives.data.PatchData;
 	import flash.utils.*;

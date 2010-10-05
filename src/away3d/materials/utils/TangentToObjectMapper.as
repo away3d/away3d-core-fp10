@@ -92,7 +92,6 @@ package away3d.materials.utils
 			var tangent : Vector3D;
 			var bitangent : Vector3D;
 			var normal : Vector3D;
-			var len : int;
 			var face : Face;
 			var faces : Vector.<Element>;
 			var j : int;
@@ -106,7 +105,7 @@ package away3d.materials.utils
 				j = faces.length;
 				
 				while (j--) {
-					face = faces[j] as Face
+					face = faces[j] as Face;
 					tangent.x += face.extra.tangent.x;
 					tangent.y += face.extra.tangent.y;
 					tangent.z += face.extra.tangent.z;

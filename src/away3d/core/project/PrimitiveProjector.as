@@ -281,7 +281,7 @@ package away3d.core.project
 				_startIndex = _startIndices[uint(_i++)];
                 _endIndex = _startIndices[uint(_i)];
                 
-				if (!_clipFlag) {
+				//if (!_clipFlag) {
 					_index = _startIndex;
 					
 					while (_index < _endIndex && _screenUVTs[uint(_screenIndices[_index]*3 + 2)] > 0)
@@ -289,7 +289,7 @@ package away3d.core.project
 					
 					if (_index < _endIndex)
 						continue;
-				}
+				//}
 				
             	_smaterial = _segmentVO.material || _frontmat;
 				
@@ -306,7 +306,7 @@ package away3d.core.project
             	_startIndex = _startIndices[uint(_i++)];
 				_endIndex = _startIndices[uint(_i)];
 				
-				if (!_clipFlag) {
+				//if (!_clipFlag) {
 					_index = _startIndex;
 					
 					while (_index < _endIndex && _screenUVTs[uint(_screenIndices[_index]*3 + 2)] > 0)
@@ -314,7 +314,7 @@ package away3d.core.project
 					
 					if (_index < _endIndex)
 						continue;
-				}
+				//}
                 
                 //switch materials for directional sprites
 				if (_spriteVO.materials.length) {
