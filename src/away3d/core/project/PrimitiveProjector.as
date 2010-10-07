@@ -350,36 +350,37 @@ package away3d.core.project
 		        _index *= 2;
 		        
 		        if (_spriteVO.displayObject) {
+		        	var bounds:Rectangle = _spriteVO.displayObject.getBounds(_spriteVO.displayObject);
 					switch(_spriteVO.align){
 						case SpriteAlign.CENTER:
-							_screenVertices[_index] -= _spriteVO.displayObject.width/2;
-							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height/2;
+							_screenVertices[_index] -= bounds.width*_scale/2;
+							_screenVertices[uint(_index + 1)] -= bounds.height*_scale/2;
 							break;
 						case SpriteAlign.TOP:
-							_screenVertices[_index] -= _spriteVO.displayObject.width/2;
+							_screenVertices[_index] -= bounds.width*_scale/2;
 							break;
 						case SpriteAlign.BOTTOM:
-							_screenVertices[_index] -= _spriteVO.displayObject.width/2;
-							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height;
+							_screenVertices[_index] -= bounds.width*_scale/2;
+							_screenVertices[uint(_index + 1)] -= bounds.height*_scale;
 							break;
 						case SpriteAlign.RIGHT:
-							_screenVertices[_index] -= _spriteVO.displayObject.width;
-						    _screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height/2;
+							_screenVertices[_index] -= bounds.width*_scale;
+						    _screenVertices[uint(_index + 1)] -= bounds.height*_scale/2;
 						  break;
 						case SpriteAlign.TOP_RIGHT:
-							_screenVertices[_index] -= _spriteVO.displayObject.width;
+							_screenVertices[_index] -= bounds.width*_scale;
 							break;
 						case SpriteAlign.BOTTOM_RIGHT:
-							_screenVertices[_index] -= _spriteVO.displayObject.width;
-							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height;
+							_screenVertices[_index] -= bounds.width*_scale;
+							_screenVertices[uint(_index + 1)] -= bounds.height*_scale;
 							break;
 						case SpriteAlign.LEFT:
-							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height/2;
+							_screenVertices[uint(_index + 1)] -= bounds.height*_scale/2;
 							break;
 						case SpriteAlign.TOP_LEFT:
 							break;
 						case SpriteAlign.BOTTOM_LEFT:				
-							_screenVertices[uint(_index + 1)] -= _spriteVO.displayObject.height;
+							_screenVertices[uint(_index + 1)] -= bounds.height*_scale;
 							break;
 					}
 		            renderer.primitive(renderer.createDrawDisplayObject(_spriteVO, _startIndex, _viewSourceObject, _scale));
