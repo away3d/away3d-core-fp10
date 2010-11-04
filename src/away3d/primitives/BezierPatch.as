@@ -365,7 +365,7 @@
 			var orId:int;
 			
 			patchData.build(true);
-
+			
 			// Iterate through all the items in the patch array
 			for (var key:String in _pI) {
 				
@@ -373,15 +373,13 @@
 				for (var p:int = 0; p < _pI[key].patchCount; p++) {	
 
 					// Generate mesh for base patch and apply to the other orientations and store
-					for each (v in vertices) {
+					for each (v in geometry.vertices) {
 						pId = _patchVertices[v][1];
 						yId = _patchVertices[v][2];
 						xId = _patchVertices[v][3];
 						orId = _patchVertices[v][4];
-						v.x = patchData.generatedPatch[key][pId][yId][xId].x; 
-						v.y = patchData.generatedPatch[key][pId][yId][xId].y; 
-						v.z = patchData.generatedPatch[key][pId][yId][xId].z; 
-						vRescaleXYZ( v, SCALINGS[orId][0], SCALINGS[orId][1], SCALINGS[orId][2] );
+						updateVertex(v, patchData.generatedPatch[key][pId][yId][xId].x, patchData.generatedPatch[key][pId][yId][xId].y, patchData.generatedPatch[key][pId][yId][xId].z)
+						orientatePatchVertex( v, SCALINGS[orId][0], SCALINGS[orId][1], SCALINGS[orId][2] );
 					}
 				}
 			}
@@ -551,10 +549,8 @@
 		}
 
 		// Scale a Vertex and apply an x, y or z offset for a new vertex - reuses vertex
-		private function vRescaleXYZ(v:Vertex, xS:Number, yS:Number, zS:Number):void {
-			v.x =(v.x * xS) + (xOffset * xS);
-			v.y =(v.y * yS) + (yOffset * yS);
-			v.z =(v.z * zS) + (zOffset * zS);
+		private function orientatePatchVertex(v:Vertex, xS:Number, yS:Number, zS:Number):void {
+			updateVertex(v, (v.x * xS) + (xOffset * xS), (v.y * yS) + (yOffset * yS), (v.z * zS) + (zOffset * zS));
 		}		
 	}
 }
