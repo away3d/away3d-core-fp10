@@ -54,15 +54,27 @@ package away3d.materials.utils
 			var st1 : UV = new UV();
 			var st2 : UV = new UV();
 			var denom : Number;
+			var v0:Vertex;
+			var v1:Vertex;
+			var v2:Vertex;
+			var uv0:UV;
+			var uv1:UV;
+			var uv2:UV;
 			
 			while (i--) {
 				face = faces[i];
-				edge1 = face.v1.position.subtract(face.v0.position);
-				edge2 = face.v2.position.subtract(face.v0.position);
-				st1.u = face.uv1.u - face.uv0.u;
-				st1.v = face.uv1.v - face.uv0.v;
-				st2.u = face.uv2.u - face.uv0.u;
-				st2.v = face.uv2.v - face.uv0.v;
+				uv0 = face.uvs[0];
+				uv1 = face.uvs[1];
+				uv2 = face.uvs[2];
+				v0 = face.vertices[0];
+				v1 = face.vertices[1];
+				v2 = face.vertices[2];
+				edge1 = v1.position.subtract(v0.position);
+				edge2 = v2.position.subtract(v0.position);
+				st1.u = uv1.u - uv0.u;
+				st1.v = uv1.v - uv0.v;
+				st2.u = uv2.u - uv0.u;
+				st2.v = uv2.v - uv0.v;
 				denom = 1.0/(st1.u*st2.v-st2.u*st1.v);
 				tangent = new Vector3D();
 				bitangent = new Vector3D();
@@ -73,7 +85,6 @@ package away3d.materials.utils
 				bitangent.y = denom*(st1.u*edge2.y - st2.u*edge1.y);
 				bitangent.z = denom*(st1.u*edge2.z - st2.u*edge1.z);
 				
-				face.normalDirty = true;
 				tangent.normalize();
 				bitangent.normalize();
 				
@@ -88,6 +99,7 @@ package away3d.materials.utils
 		{
 			var vertices : Vector.<Vertex> = model.geometry.vertices;
 			var v : Vertex;
+			var n : Vector3D;
 			var i : uint = vertices.length;
 			var tangent : Vector3D;
 			var bitangent : Vector3D;
@@ -112,9 +124,10 @@ package away3d.materials.utils
 					bitangent.x += face.extra.bitangent.x;
 					bitangent.y += face.extra.bitangent.y;
 					bitangent.z += face.extra.bitangent.z;
-					normal.x += face.normal.x;
-					normal.y += face.normal.y;
-					normal.z += face.normal.z;
+					n = face.parent.getFaceNormal(face);
+					normal.x += n.x;
+					normal.y += n.y;
+					normal.z += n.z;
 				}
 				
 				tangent.normalize();
@@ -142,6 +155,9 @@ package away3d.materials.utils
 			var uv0 : UV = new UV();
 			var uv1 : UV = new UV();
 			var uv2 : UV = new UV();
+			var v0:Vertex;
+			var v1:Vertex;
+			var v2:Vertex;
 			var u01 : Number, v01 : Number; 
 			var u02 : Number, v02 : Number;
 			var w : Number = _objectMap.width;
@@ -153,12 +169,16 @@ package away3d.materials.utils
 			
 			while (i--) {
 				face = faces[i];
-				uv0.u = face.uv0.u*w;
-				uv0.v = (1-face.uv0.v)*h;
-				uv1.u = face.uv1.u*w;
-				uv1.v = (1-face.uv1.v)*h;
-				uv2.u = face.uv2.u*w;
-				uv2.v = (1-face.uv2.v)*h;
+				
+				v0 = face.vertices[0];
+				v1 = face.vertices[1];
+				v2 = face.vertices[2];
+				uv0.u = face.uvs[0].u*w;
+				uv0.v = (1-face.uvs[0].v)*h;
+				uv1.u = face.uvs[1].u*w;
+				uv1.v = (1-face.uvs[1].v)*h;
+				uv2.u = face.uvs[2].u*w;
+				uv2.v = (1-face.uvs[2].v)*h;
 				u01 = uv1.u-uv0.u;
 				v01 = uv1.v-uv0.v;
 				u02 = uv2.u-uv0.u;
@@ -171,26 +191,26 @@ package away3d.materials.utils
 				shader.data.dot01.value = [ u01*u02+v01*v02 ];
 				shader.data.dot11.value = [ u02*u02+v02*v02 ];
 				
-				tangent0 = face.v0.extra.tangent;
-				bitangent0 = face.v0.extra.bitangent;
-				normal0 = face.v0.extra.normal;
+				tangent0 = v0.extra.tangent;
+				bitangent0 = v0.extra.bitangent;
+				normal0 = v0.extra.normal;
 
 				shader.data.tbn0.value = [ 	tangent0.x, tangent0.y, tangent0.z,
 											bitangent0.x, bitangent0.y, bitangent0.z,
 											normal0.x, normal0.y, normal0.z
 										];
 				
-				tangent = face.v1.extra.tangent;
-				bitangent = face.v1.extra.bitangent;
-				normal = face.v1.extra.normal;
+				tangent = v1.extra.tangent;
+				bitangent = v1.extra.bitangent;
+				normal = v1.extra.normal;
 				shader.data.tbn1.value = [ 	tangent.x-tangent0.x, tangent.y-tangent0.y, tangent.z-tangent0.z,
 											bitangent.x-bitangent0.x, bitangent.y-bitangent0.y, bitangent.z-bitangent0.z,
 											normal.x-normal0.x, normal.y-normal0.y, normal.z-normal0.z
 										];
 										
-				tangent = face.v2.extra.tangent;
-				bitangent = face.v2.extra.bitangent;
-				normal = face.v2.extra.normal;
+				tangent = v2.extra.tangent;
+				bitangent = v2.extra.bitangent;
+				normal = v2.extra.normal;
 				shader.data.tbn2.value = [ 	tangent.x-tangent0.x, tangent.y-tangent0.y, tangent.z-tangent0.z,
 											bitangent.x-bitangent0.x, bitangent.y-bitangent0.y, bitangent.z-bitangent0.z,
 											normal.x-normal0.x, normal.y-normal0.y, normal.z-normal0.z
@@ -225,16 +245,16 @@ package away3d.materials.utils
 			
 			while (i--) {
 				face = faces[i];
-				uv0.u = face.uv0.u*w;
-				uv0.v = (1-face.uv0.v)*h;
-				uv1.u = face.uv1.u*w;
-				uv1.v = (1-face.uv1.v)*h;
-				uv2.u = face.uv2.u*w;
-				uv2.v = (1-face.uv2.v)*h;
+				uv0.u = face.uvs[0].u*w;
+				uv0.v = (1-face.uvs[0].v)*h;
+				uv1.u = face.uvs[1].u*w;
+				uv1.v = (1-face.uvs[1].v)*h;
+				uv2.u = face.uvs[2].u*w;
+				uv2.v = (1-face.uvs[2].v)*h;
 				
 				tangent = face.extra.tangent;
 				bitangent = face.extra.bitangent;
-				normal = face.normal;
+				normal = face.parent.getFaceNormal(face);
 
 				shader.data.tbn.value = [ 	tangent.x, tangent.y, tangent.z,
 											bitangent.x, bitangent.y, bitangent.z,

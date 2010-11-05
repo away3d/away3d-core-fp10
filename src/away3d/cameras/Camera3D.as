@@ -5,7 +5,6 @@ package away3d.cameras
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.clip.*;
-	import away3d.core.draw.*;
 	import away3d.core.utils.*;
 	import away3d.events.*;
 	
@@ -291,7 +290,7 @@ package away3d.cameras
     	 * 
     	 * @see	away3d.containers.Scene3D
     	 */
-        public function screen(object:Object3D, vertex:Vertex = null):ScreenVertex
+        public function screen(object:Object3D, vertex:Vertex = null):Vector3D
         {
         	update();
         	
@@ -307,7 +306,7 @@ package away3d.cameras
 			_screenUVs.length = 0;
             _lens.project(_cameraVarsStore.viewTransformDictionary[object], _verts, _screenVertices, _screenUVs);
 
-			return new ScreenVertex(_screenVertices[uint(0)], _screenVertices[uint(1)], _lens.getScreenZ(_screenUVs[uint(2)]));
+			return new Vector3D(_screenVertices[uint(0)], _screenVertices[uint(1)], _lens.getScreenZ(_screenUVs[uint(2)]));
         }
     	        
 		/**

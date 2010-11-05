@@ -125,20 +125,20 @@ package away3d.materials
 			
 			while (i--) {
 				face = faces[i];
-				uv0.u = face.uv0.u*w;
-				uv0.v = (1-face.uv0.v)*h;
-				uv1.u = face.uv1.u*w;
-				uv1.v = (1-face.uv1.v)*h;
-				uv2.u = face.uv2.u*w;
-				uv2.v = (1-face.uv2.v)*h;
+				uv0.u = face.uvs[0].u*w;
+				uv0.v = (1-face.uvs[0].v)*h;
+				uv1.u = face.uvs[1].u*w;
+				uv1.v = (1-face.uvs[1].v)*h;
+				uv2.u = face.uvs[2].u*w;
+				uv2.v = (1-face.uvs[2].v)*h;
 				u01 = uv1.u - uv0.u;
 				v01 = uv1.v - uv0.v;
 				u02 = uv2.u - uv0.u;
 				v02 = uv2.v - uv0.v;
 				
-				v0 = face.v0.position.subtract(min);
-				v1 = face.v1.position.subtract(min);
-				v2 = face.v2.position.subtract(min);
+				v0 = face.vertices[0].position.subtract(min);
+				v1 = face.vertices[1].position.subtract(min);
+				v2 = face.vertices[2].position.subtract(min);
 				v0.x *= diffExtr.x;
 				v0.y *= diffExtr.y;
 				v0.z *= diffExtr.z;

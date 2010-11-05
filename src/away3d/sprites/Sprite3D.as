@@ -8,13 +8,6 @@ package away3d.sprites
     
     use namespace arcane;
     
-	 /**
-	 * Dispatched when the material of the sprite3d changes.
-	 * 
-	 * @eventType away3d.events.FaceEvent
-	 */
-	[Event(name="materialchanged",type="away3d.events.BillboardEvent")]
-	
     /**
     * A graphics element used to represent objects that always face the camera
     * 
@@ -147,7 +140,8 @@ package away3d.sprites
 
             _width = spriteVO.width = value;
 			
-            notifyMappingChange();
+			if (parent)
+				parent.notifyDimensionsUpdate();
         }
         
 		/**
@@ -165,7 +159,8 @@ package away3d.sprites
 			
             _height = spriteVO.height = value;
 			
-            notifyMappingChange();
+            if (parent)
+				parent.notifyDimensionsUpdate();
         }
         
 		/**
@@ -185,7 +180,8 @@ package away3d.sprites
 			
             _align = spriteVO.align = value;
 			
-            notifyMappingChange();
+            if (parent)
+				parent.notifyDimensionsUpdate();
         }
         
 		/**
@@ -203,7 +199,8 @@ package away3d.sprites
 			
             _scaling = spriteVO.scaling = value;
 			
-            notifyMappingChange();
+           	if (parent)
+				parent.notifyDimensionsUpdate();
         }
         
 		/**
@@ -221,7 +218,8 @@ package away3d.sprites
 			
             _distanceScaling = spriteVO.distanceScaling = value;
 			
-            notifyMappingChange();
+            if (parent)
+				parent.notifyDimensionsUpdate();
         }
         
 		/**
@@ -239,75 +237,8 @@ package away3d.sprites
 			
             _rotation = spriteVO.rotation = value;
 			
-            notifyMappingChange();
-        }
-        
-		/**
-		 * Returns the squared bounding radius of the 3d sprite.
-		 */
-        public override function get radius2():Number
-        {
-            return 0;
-        }
-        
-    	/**
-    	 * Returns the maximum x value of the segment
-    	 * 
-    	 * @see		away3d.core.base.Vertex#x
-    	 */
-        public override function get maxX():Number
-        {
-            return _vertex._x;
-        }
-        
-    	/**
-    	 * Returns the minimum x value of the face
-    	 * 
-    	 * @see		away3d.core.base.Vertex#x
-    	 */
-        public override function get minX():Number
-        {
-            return _vertex._x;
-        }
-        
-    	/**
-    	 * Returns the maximum y value of the segment
-    	 * 
-    	 * @see		away3d.core.base.Vertex#y
-    	 */
-        public override function get maxY():Number
-        {
-            return _vertex._y;
-        }
-        
-    	/**
-    	 * Returns the minimum y value of the face
-    	 * 
-    	 * @see		away3d.core.base.Vertex#y
-    	 */
-        public override function get minY():Number
-        {
-            return _vertex._y;
-        }
-        
-    	/**
-    	 * Returns the maximum z value of the segment
-    	 * 
-    	 * @see		away3d.core.base.Vertex#z
-    	 */
-        public override function get maxZ():Number
-        {
-            return _vertex._z;
-        }
-        
-    	/**
-    	 * Returns the minimum y value of the face
-    	 * 
-    	 * @see		away3d.core.base.Vertex#y
-    	 */
-        public override function get minZ():Number
-        {
-            return _vertex._z;
+            if (parent)
+				parent.notifyDimensionsUpdate();
         }
     	
 		/**
@@ -317,6 +248,10 @@ package away3d.sprites
 		 */
         public function Sprite3D(material:Material = null, width:Number = 10, height:Number = 10, rotation:Number = 0, align:String = "center", scaling:Number = 1, distanceScaling:Boolean = true)
         {
+            spriteVO.sprite3d = this;
+            _vertices = spriteVO.vertices;
+			_commands = spriteVO.commands;
+			
             this.material = material;
             this.width = width;
             this.height = height;
@@ -325,15 +260,11 @@ package away3d.sprites
             this.scaling = scaling;
             this.distanceScaling = distanceScaling;
             
-            spriteVO.sprite3d = this;
-            
         	//setup the vertex
-            _commands = spriteVO.commands = Vector.<String>(["M"]);
-            _vertex = _vertices[0] = spriteVO.vertices[0] = new Vertex();
-			
+            _commands[0] = "M";
+            _vertex = _vertices[0] = new Vertex();
+            
 			_vertex.parents.push(this);
-  			
-  			vertexDirty = true;
         }
     }
 }

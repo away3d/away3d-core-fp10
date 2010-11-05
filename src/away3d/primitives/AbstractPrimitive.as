@@ -68,13 +68,13 @@
 		{
 			if (_faceStore.length) {
             	_faceActive.push(_face = _faceStore.pop());
-	            _face.v0 = v0;
-	            _face.v1 = v1;
-	            _face.v2 = v2;
+	            _face.addVertexAt(0, v0, "M");
+	            _face.addVertexAt(1, v1, "L");
+	            _face.addVertexAt(2, v2, "L");
 	            _face.material = material;
-	            _face.uv0 = uv0;
-	            _face.uv1 = uv1;
-	            _face.uv2 = uv2;
+	            _face.addUVAt(0, uv0);
+	            _face.addUVAt(1, uv1);
+	            _face.addUVAt(2, uv2);
 			} else {
             	_faceActive.push(_face = new Face(v0, v1, v2, material, uv0, uv1, uv2));
    			}

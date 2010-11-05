@@ -5,6 +5,7 @@ package away3d.materials
 	import away3d.core.base.*;
 	import away3d.core.render.*;
 	import away3d.core.utils.*;
+	import away3d.loaders.data.*;
 	import away3d.events.*;
 
 	import flash.events.*;
@@ -23,6 +24,8 @@ package away3d.materials
 	 */
 	public class Material extends EventDispatcher
 	{
+		arcane var _materialData:MaterialData;
+		
 		/** @private */
         arcane var _id:int;
         /** @private */
@@ -53,6 +56,10 @@ package away3d.materials
         	return true;
         }
 		
+		function Material()
+		{
+			_materialData = new MaterialData();
+		}
 		/**
     	 * Unique identifier
     	 */

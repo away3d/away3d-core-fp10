@@ -1,5 +1,6 @@
 package away3d.loaders.data
 {
+	import away3d.animators.data.*;
 	import away3d.core.base.*;
 	
 	/**
@@ -17,26 +18,25 @@ package away3d.loaders.data
 		 *
 		 * @see away3d.core.base.Vertex
 		 */
-		public var vertices:Array = [];
-		
+		public var vertices:Vector.<Vertex> = new Vector.<Vertex>();
 		/**
 		 * Array of uv objects.
 		 *
 		 * see@ away3d.core.base.UV
 		 */
-		public var uvs:Array = [];
+		public var uvs:Vector.<UV> = new Vector.<UV>();
 		
 		/**
 		 * Array of face data objects.
 		 *
 		 * @see away3d.loaders.data.FaceData
 		 */
-		public var faces:Array = [];
+		public var faces:Vector.<FaceData> = new Vector.<FaceData>();
 		
 		/**
 		 * Optional assigned materials to the geometry.
 		 */
-		public var materials:Array = [];
+		public var materials:Vector.<MeshMaterialData> = new Vector.<MeshMaterialData>();
 		
 		/**
 		 * Defines whether both sides of the geometry are visible
@@ -48,14 +48,14 @@ package away3d.loaders.data
          * 
          * @see away3d.animators.skin.SkinVertex
          */
-        public var skinVertices:Array = [];
+        public var skinVertices:Vector.<SkinVertex> = new Vector.<SkinVertex>();
         
         /**
          * Array of skin controller objects used in bone animations
          * 
          * @see away3d.animators.skin.SkinController
          */
-        public var skinControllers:Array = [];
+        public var skinControllers:Vector.<SkinController> = new Vector.<SkinController>();
 		
 		/**
 		 * Reference to the geometry object of the resulting geometry.

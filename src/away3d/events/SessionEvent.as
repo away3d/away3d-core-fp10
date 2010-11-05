@@ -15,14 +15,19 @@ package away3d.events
     	public static const SESSION_UPDATED:String = "sessionUpdated";
     	
     	/**
+    	 * Defines the value of the type property of a drawComplete event object.
+    	 */
+    	public static const DRAW_COMPLETE:String = "drawComplete";
+    	
+    	/**
     	 * A reference to the session object that is relevant to the event.
     	 */
         public var session:AbstractSession;
 		
 		/**
-		 * Creates a new <code>FaceEvent</code> object.
+		 * Creates a new <code>SessionEvent</code> object.
 		 * 
-		 * @param	type	The type of the event. Possible values are: <code>FaceEvent.UPDATED</code>.
+		 * @param	type	The type of the event. Possible values are: <code>SessionEvent.SESSION_UPDATED</code> and <code>SessionEvent.DRAW_COMPLETE</code>.
 		 * @param	session	A reference to the session object that is relevant to the event.
 		 */
         public function SessionEvent(type:String, session:AbstractSession)
@@ -32,7 +37,7 @@ package away3d.events
         }
 		
 		/**
-		 * Creates a copy of the FaceEvent object and sets the value of each property to match that of the original.
+		 * Creates a copy of the SessionEvent object and sets the value of each property to match that of the original.
 		 */
         public override function clone():Event
         {

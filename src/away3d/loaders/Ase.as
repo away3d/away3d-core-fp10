@@ -113,9 +113,9 @@ package away3d.loaders
                             var mtfl:Array = mapline.split('\t');
     
                             var face:Face = faces[num];
-                            face.uv0 = uvs[parseInt(mtfl[1])];
-                            face.uv1 = uvs[parseInt(mtfl[2])];
-                            face.uv2 = uvs[parseInt(mtfl[3])];
+                            face.addUVAt(0, uvs[parseInt(mtfl[1])]);
+                            face.addUVAt(1, uvs[parseInt(mtfl[2])]);
+                            face.addUVAt(2, uvs[parseInt(mtfl[3])]);
                             num++;
     
                         }

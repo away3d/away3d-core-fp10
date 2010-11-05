@@ -174,9 +174,9 @@ package away3d.graphs.bsp.builder
 			do {
 				face = faces[i];
 
-				v1 = face._v0;
-				v2 = face._v1;
-				v3 = face._v2;
+				v1 = face.vertices[0];
+				v2 = face.vertices[1];
+				v3 = face.vertices[2];
 				// check if collinear (caused by t-junctions)
 				u.x = v2.x-v1.x;
 				u.y = v2.y-v1.y;

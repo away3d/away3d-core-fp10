@@ -3,7 +3,6 @@ package away3d.core.utils
 	import away3d.arcane;
 	import away3d.cameras.lenses.*;
 	import away3d.core.base.*;
-	import away3d.core.draw.*;
 	import away3d.core.geom.*;
 	import away3d.core.project.*;
 	import away3d.core.render.*;
@@ -83,10 +82,39 @@ package away3d.core.utils
         	return j - 1;
         }
         
+        private function getMedian(aindex:Number, bindex:Number):void
+        {
+			var avertex:int = screenIndices[aindex]*2;
+        	var ax:Number = screenVertices[avertex];
+        	var ay:Number = screenVertices[uint(avertex+1)];
+        	var az:Number = screenUVTs[uint(screenIndices[aindex]*3+2)];
+        	
+        	var bvertex:int = screenIndices[bindex]*2;
+        	var bx:Number = screenVertices[bvertex];
+        	var by:Number = screenVertices[uint(bvertex+1)];
+        	var bz:Number = screenUVTs[uint(screenIndices[bindex]*3+2)];
+        	
+            var mz:Number = (1/az + 1/bz) / 2;
+			
+            var faz:Number = 1/az;
+            var fbz:Number = 1/bz;
+            var ifmz:Number = 1 / mz / 2;
+			
+			screenVertices[screenVertices.length] = (ax*faz + bx*fbz)*ifmz;
+			screenVertices[screenVertices.length] = (ay*faz + by*fbz)*ifmz;
+			screenUVTs.push(0, 0, 1/mz);
+        }
+        
+        private function distanceSqr(ax:Number, ay:Number, bx:Number, by:Number):Number
+        {
+            return (ax - bx)*(ax - bx) + (ay - by)*(ay - by);
+        }
+        
 		public var source:Object3D;
 		public var screenVertices:Vector.<Number>;
 		public var screenIndices:Vector.<int>;
 		public var screenUVTs:Vector.<Number>;
+		public var screenTransform:Matrix3D;
 		
 		public function ViewSourceObject(source:Object3D)
 		{
@@ -328,9 +356,9 @@ package away3d.core.utils
 		        	screenIndices[screenIndices.length] = _vertexIndex+2;
 		        	_index4 = screenIndices.length;
 		        	
-		        	ScreenVertex.median(_startIndex, _startIndex+1, screenVertices, screenIndices, screenUVTs);
-		        	ScreenVertex.median(_startIndex+1, _startIndex+2, screenVertices, screenIndices, screenUVTs);
-		        	ScreenVertex.median(_startIndex+2, _startIndex, screenVertices, screenIndices, screenUVTs);
+		        	getMedian(_startIndex, _startIndex+1);
+		        	getMedian(_startIndex+1, _startIndex+2);
+		        	getMedian(_startIndex+2, _startIndex);
 		        	
 		        	_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 		        	_material = renderer.primitiveMaterials[priIndex];
@@ -366,7 +394,7 @@ package away3d.core.utils
 		        	screenIndices[screenIndices.length] = screenIndices[uint(_startIndex+1)];
 		        	_index2 = screenIndices.length;
 		        	
-		        	ScreenVertex.median(_startIndex, _startIndex+1, screenVertices, screenIndices, screenUVTs);
+		        	getMedian(_startIndex, _startIndex+1);
 		        	
 					_segmentVO = renderer.primitiveElements[priIndex] as SegmentVO;
 		        	_material = renderer.primitiveMaterials[priIndex];
@@ -397,7 +425,7 @@ package away3d.core.utils
         	_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
 		    _material = renderer.primitiveMaterials[priIndex];
 		    
-            if (ScreenVertex.distanceSqr(screenVertices[uint(v0*2)], screenVertices[uint(v0*2+1)], v12x, v12y) < ScreenVertex.distanceSqr(v01x, v01y, screenVertices[uint(v2*2)], screenVertices[uint(v2*2+1)])) {
+            if (distanceSqr(screenVertices[uint(v0*2)], screenVertices[uint(v0*2+1)], v12x, v12y) < distanceSqr(v01x, v01y, screenVertices[uint(v2*2)], screenVertices[uint(v2*2+1)])) {
             	_index0 = screenIndices.length;
 	        	screenIndices[screenIndices.length] = v0;
 	        	screenIndices[screenIndices.length] = vertexIndex;

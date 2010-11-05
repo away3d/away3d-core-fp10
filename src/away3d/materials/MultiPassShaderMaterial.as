@@ -13,8 +13,8 @@ package away3d.materials
 	{
 		protected var _specularColor : uint;
 		protected var _ambient : uint = 0;
-		protected var _directionals : Array;
-		protected var _points : Array;
+		protected var _directionals:Vector.<DirectionalLight3D>;
+		protected var _points:Vector.<PointLight3D>;
 		
 		protected var _directionalLightShader : Shader;
 		protected var _lightMap : BitmapData;

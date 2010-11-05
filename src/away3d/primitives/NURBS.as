@@ -475,8 +475,7 @@
 		 */
     	protected override function buildPrimitive():void
     	{
-			super.buildPrimitive();
-			
+
 			geometry = new Geometry();
 			if (_renderMode == CONTROL_POINT_NET) {
 				buildControlSegments();
@@ -499,10 +498,7 @@
 		 *  when the control point positions change.
 		 * 
 		 */		
-		public function refreshNURBS(coontrolPointsChanged:Boolean = false):void {
-			if (coontrolPointsChanged) {
-				buildPrimitive();
-			}
+		public function refreshNURBS():void {
 			if (_renderMode == CONTROL_POINT_NET) {
 				geometry = new Geometry();
 				buildControlSegments();

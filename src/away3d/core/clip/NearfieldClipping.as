@@ -17,11 +17,7 @@ package away3d.core.clip
     public class NearfieldClipping extends Clipping
     {
     	private var _faceVOs:Vector.<FaceVO>;
-    	private var _segmentVOs:Vector.<SegmentVO>;
-    	private var _spriteVOs:Vector.<SpriteVO>;
     	private var _faceVO:FaceVO;
-    	private var _segmentVO:SegmentVO;
-    	private var _spriteVO:SpriteVO;
     	private var _v0C:VertexClassification;
     	private var _v1C:VertexClassification;
     	private var _v2C:VertexClassification;
@@ -92,21 +88,10 @@ package away3d.core.clip
 			_session = mesh.session;
 			_frustum = _cameraVarsStore.frustumDictionary[mesh];
 			_processed = new Dictionary();
-			
-            _faceVOs = mesh.faceVOs;
+            _faceVOs = mesh.geometry.faceVOs;
             
 			for each (_faceVO in _faceVOs)
 				processFaceVO(_faceVO, clippedFaceVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
-			
-            _segmentVOs = mesh.segmentVOs;
-            
-			for each (_segmentVO in _segmentVOs)
-				processSegmentVO(_segmentVO, clippedSegmentVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
-			
-            _spriteVOs = mesh.spriteVOs;
-            
-			for each (_spriteVO in _spriteVOs)
-				processSpriteVO(_spriteVO, clippedSpriteVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
 			
 	        startIndices[startIndices.length] = clippedIndices.length;
 		}
@@ -262,51 +247,6 @@ package away3d.core.clip
         		processFaceVO(newFaceVO3, clippedFaceVOs, clippedVertices, clippedVerts, clippedIndices, startIndices);
         	}
     	}
-    	
-		
-		private function processSegmentVO(segmentVO:SegmentVO, clippedSegmentVOs:Vector.<SegmentVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
-		{
-			_pass = true;
-			_v0 = segmentVO.vertices[0];
-    		_v1 = segmentVO.vertices[1];
-		
-			clippedSegmentVOs[clippedSegmentVOs.length] = segmentVO;
-			
-			startIndices[startIndices.length] = clippedIndices.length;
-    		
-			if (!_processed[_v0]) {
-                clippedVertices[clippedVertices.length] = _v0;
-                clippedVerts.push(_v0.x, _v0.y, _v0.z);
-                clippedIndices[clippedIndices.length] = (_processed[_v0] = clippedVertices.length) - 1;
-            } else {
-            	clippedIndices[clippedIndices.length] = _processed[_v0] - 1;
-            }
-            if (!_processed[_v1]) {
-                clippedVertices[clippedVertices.length] = _v1;
-                clippedVerts.push(_v1.x, _v1.y, _v1.z);
-                clippedIndices[clippedIndices.length] = (_processed[_v1] = clippedVertices.length) - 1;
-            } else {
-            	clippedIndices[clippedIndices.length] = _processed[_v1] - 1;
-            }
-		}
-		
-		private function processSpriteVO(spriteVO:SpriteVO, clippedSpriteVOs:Vector.<SpriteVO>, clippedVertices:Vector.<Vertex>, clippedVerts:Vector.<Number>, clippedIndices:Vector.<int>, startIndices:Vector.<int>):void
-		{
-			_pass = true;
-			_v0 = spriteVO.vertices[0];
-		
-			clippedSpriteVOs[clippedSpriteVOs.length] = spriteVO;
-			
-			startIndices[startIndices.length] = clippedIndices.length;
-    		
-			if (!_processed[_v0]) {
-                clippedVertices[clippedVertices.length] = _v0;
-                clippedVerts.push(_v0.x, _v0.y, _v0.z);
-                clippedIndices[clippedIndices.length] = (_processed[_v0] = clippedVertices.length) - 1;
-            } else {
-            	clippedIndices[clippedIndices.length] = _processed[_v0] - 1;
-            }
-		}
     	
 		/**
 		 * @inheritDoc

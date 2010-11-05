@@ -96,6 +96,7 @@ package away3d.core.utils
         private var _diffuseTransform:Matrix3D;
         private var _specularTransform:Matrix3D;
         private var _viewPosition:Vector3D;
+        private var _normal:Vector3D;
         private var _source:Mesh;
         private var _view:View3D;
         private var _lens:AbstractLens;
@@ -176,7 +177,7 @@ package away3d.core.utils
 			
 			var directional:DirectionalLight3D;
 			
-			var _tri_scene_directionalLights:Array = _source.scene.directionalLights;
+			var _tri_scene_directionalLights:Vector.<DirectionalLight3D> = _source.scene.directionalLights;
 			for each (directional in _tri_scene_directionalLights)
             {
             	_diffuseTransform = directional.diffuseTransform[_source];
@@ -189,9 +190,10 @@ package away3d.core.utils
 				dfy = _diffuseTransform.rawData[6];
 				dfz = _diffuseTransform.rawData[10];
                 
-                nx = _faceVO.face.normal.x;
-                ny = _faceVO.face.normal.y;
-                nz = _faceVO.face.normal.z;
+                _normal = _faceVO.face.parent.getFaceNormal(_faceVO.face);
+                nx = _normal.x;
+                ny = _normal.y;
+                nz = _normal.z;
                 
                 amb = directional.ambient;
 				
@@ -225,7 +227,7 @@ package away3d.core.utils
                 ksb += blue * spec;
             }
             
-            var _tri_scene_pointLights:Array = _source.scene.pointLights;
+            var _tri_scene_pointLights:Vector.<PointLight3D> = _source.scene.pointLights;
 			var point:PointLight3D;
 			
             for each (point in _tri_scene_pointLights)
@@ -299,7 +301,7 @@ package away3d.core.utils
 				
                 if (draw_fall || draw_reflect)
                 {
-                    var _tri_source_scene_pointLights_new:Array = _source.scene.pointLights;
+                    var _tri_source_scene_pointLights_new:Vector.<PointLight3D> = _source.scene.pointLights;
             		for each (point in _tri_source_scene_pointLights_new)
                     {
                         red = point._red;

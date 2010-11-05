@@ -38,7 +38,7 @@ package away3d.materials
         		updateTransform();
         	
         	if (_materialDirty || _blendModeDirty)
-        		updateFaces();
+        		updateFaces(source, view);
         	
         	_projectionDirty = false;
         	_blendModeDirty = false;
@@ -50,10 +50,10 @@ package away3d.materials
         		_faceVO = renderer.primitiveElements[priIndex] as FaceVO;
         		_source = viewSourceObject.source;
         		if (globalProjection) {
-        			normalR = _source.sceneTransform.deltaTransformVector(_faceVO.face.normal);
+        			normalR = _source.sceneTransform.deltaTransformVector(_faceVO.face.parent.getFaceNormal(_faceVO.face));
         			if (normalR.dotProduct(_projectionVector) < 0)
         				return;
-        		} else if (_faceVO.face.normal.dotProduct(_projectionVector) < 0)
+        		} else if (_faceVO.face.parent.getFaceNormal(_faceVO.face).dotProduct(_projectionVector) < 0)
         			return;
         	}
         	
@@ -112,7 +112,7 @@ package away3d.materials
 					_mapping.concat(_invtexturemapping);
 					
 					if (_globalProjection)
-						normalR = _source.sceneTransform.deltaTransformVector(_faceVO.face.normal);
+						normalR = _source.sceneTransform.deltaTransformVector(_faceVO.face.parent.getFaceNormal(_faceVO.face));
 					
 					//check to see if the bitmap (non repeating) lies inside the drawtriangle area
 					if ((throughProjection || normalR.dotProduct(_projectionVector) >= 0) && (repeat || !findSeparatingAxis(getFacePoints(_invtexturemapping), getMappingPoints(_mapping)))) {

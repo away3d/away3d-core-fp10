@@ -12,12 +12,12 @@ package away3d.sprites
 	 */
     public class DirectionalSprite extends Sprite3D
     {
-    	private var _materials:Array = new Array();
+    	private var _materials:Vector.<Material>;
         
 		/**
 		 * Returns an array of directional materials.
 		 */
-        public function get materials():Array
+        public function get materials():Vector.<Material>
         {
             return _materials;
         }
@@ -29,6 +29,8 @@ package away3d.sprites
         public function DirectionalSprite(material:Material = null, width:Number = 10, height:Number = 10, rotation:Number = 0, align:String = "center", scaling:Number = 1, distanceScaling:Boolean = true)
         {
             super(material, width, height, rotation, align, scaling, distanceScaling);
+
+			_materials = spriteVO.materials;
         }
 		
 		/**
@@ -40,14 +42,13 @@ package away3d.sprites
         public function addDirectionalMaterial(vertex:Vertex, material:Material):void
 		{
 			_materials.push(material);
-			spriteVO.materials.push(material);
 			
 			_vertices.push(vertex);
-			spriteVO.vertices.push(vertex);
 			
 			vertex.parents.push(this);
   			
-  			vertexDirty = true;
+  			if (parent)
+  				parent.notifyGeometryChanged();
 		}
     }
 }

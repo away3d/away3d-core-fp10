@@ -20,6 +20,21 @@ package away3d.events
     	public static const DIMENSIONS_CHANGED:String = "dimensionsChanged";
     	    	    	
     	/**
+    	 * Defines the value of the type property of a mappingUpdated event object.
+    	 */
+    	public static const VISIBLE_CHANGED:String = "visibleChanged";
+    	    	    	
+    	/**
+    	 * Defines the value of the type property of a mappingUpdated event object.
+    	 */
+    	public static const MAPPING_UPDATED:String = "mappingUpdated";
+    	    	    	
+    	/**
+    	 * Defines the value of the type property of a mappingChanged event object.
+    	 */
+    	public static const MAPPING_CHANGED:String = "mappingChanged";
+    	   	    	
+    	/**
     	 * Defines the value of the type property of a geometryChanged event object.
     	 */
     	public static const GEOMETRY_CHANGED:String = "geometryChanged";

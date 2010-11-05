@@ -22,7 +22,7 @@ package away3d.materials
     	/** @private */
         arcane  override function updateMaterial(source:Object3D, view:View3D):void
         {
-        	var _source_scene_directionalLights:Array = source.scene.directionalLights;
+        	var _source_scene_directionalLights:Vector.<DirectionalLight3D> = source.scene.directionalLights;
         	for each (var directional:DirectionalLight3D in _source_scene_directionalLights) {
         		if (!directional.diffuseTransform[source] || view._updatedObjects[source]) {
         			directional.setDiffuseTransform(source);
@@ -38,7 +38,7 @@ package away3d.materials
         		}
         	}
         	
-        	var _source_scene_pointLights:Array = source.scene.pointLights;
+        	var _source_scene_pointLights:Vector.<PointLight3D> = source.scene.pointLights;
         	for each (var point:PointLight3D in _source_scene_pointLights) {
         		if (!point.viewPositions[view] || view._updatedObjects[source] || view.updated) {
         			point.setViewPosition(view);

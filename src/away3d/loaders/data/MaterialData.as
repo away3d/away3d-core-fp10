@@ -1,9 +1,12 @@
 package away3d.loaders.data
 {
+	import away3d.arcane;
 	import away3d.core.base.*;
 	import away3d.materials.*;
 	
-	import flash.display.BitmapData;
+	import flash.display.*;
+	
+	use namespace arcane;
 	
 	/**
 	 * Data class for the material data of a face.
@@ -64,11 +67,13 @@ package away3d.loaders.data
 		 */
 		public var textureFileName:String;
 		
+		public var meshMaterials:Vector.<MeshMaterialData> = new Vector.<MeshMaterialData>();
+		
 		/**
 		 * Reference to the bitmapData object of the texture image.
 		 */
 		public var textureBitmap:BitmapData;
-		
+        
 		/**
 		 * defines the material object of the resulting material.
 		 */
@@ -83,30 +88,21 @@ package away3d.loaders.data
                 return;
             
             _material = val;
-            
+			_material._materialData = this;
+			
             if (_material is BitmapMaterial)
             	textureBitmap = (_material as BitmapMaterial).bitmap;
             
-            var _element:Element;
-            
-            if(_material is Material)
-            	for each(_element in elements)
-            		(_element as Face).material = _material as Material;		
-			else if(_material is Material)
-            	for each(_element in elements)
-            		(_element as Segment).material = _material as Material;
+            var _meshMaterialData:MeshMaterialData;
+        	for each (_meshMaterialData in meshMaterials)
+        		_meshMaterialData.material = _material;
         }
         		
 		/**
 		 * String representing the material type.
 		 */
 		public var materialType:String = WIREFRAME_MATERIAL;
-		
-		/**
-		 * Array of indexes representing the elements that use the material.
-		 */
-		public var elements:Array = [];
-		
+        
 		public function clone(targetObj:Object3D):MaterialData
 		{
 			var cloneMatData:MaterialData = targetObj.materialLibrary.addMaterial(name);
@@ -120,11 +116,9 @@ package away3d.loaders.data
     		cloneMatData.textureFileName = textureFileName;
     		cloneMatData.material = material;
     		
-    		for each(var element:Element in elements)
+    		for each(var _meshMaterialData:MeshMaterialData in meshMaterials)
     		{
-    			var parentGeometry:Geometry = element.parent;
-    			var correspondingElement:Element = parentGeometry.cloneElementDictionary[element];
-    			cloneMatData.elements.push(correspondingElement);
+				cloneMatData.meshMaterials.push(_meshMaterialData.clone());
     		}
     		
     		return cloneMatData;

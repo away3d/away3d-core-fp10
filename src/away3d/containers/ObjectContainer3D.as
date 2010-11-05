@@ -1,10 +1,8 @@
 ﻿package away3d.containers
 {
     import away3d.arcane;
-	import away3d.animators.data.*;
     import away3d.core.base.*;
     import away3d.core.traverse.*;
-    import away3d.core.utils.*;
     import away3d.events.*;
 	import away3d.lights.*;
     import away3d.loaders.data.*;
@@ -192,11 +190,11 @@
         public function ObjectContainer3D(...initarray:Array)
         {
         	var init:Object;
-        	var childarray:Array = [];
+        	var childarray:Vector.<Object3D> = new Vector.<Object3D>();
         	
             for each (var object:Object in initarray)
             	if (object is Object3D)
-            		childarray.push(object);
+            		childarray.push(object as Object3D);
             	else
             		init = object;
             
@@ -532,6 +530,7 @@
             	if (child is ObjectContainer3D) {
             		(child as ObjectContainer3D).cloneBones(child as ObjectContainer3D, root);
              	} else if (child is Mesh) {
+             		/*
                 	var geometry:Geometry = (child as Mesh).geometry;
                 	var skinControllers:Array = geometry.skinControllers;
                 	var rootBone:Bone;
@@ -547,13 +546,13 @@
 		                } else
 		                	Debug.warning("no joint found for " + skinController.name);
 		            }
-		            
 		            //geometry.rootBone = rootBone;
 		            
 		            for each (skinController in skinControllers) {
 		            	//skinController.inverseTransform = new Matrix3D();
 		            	skinController.inverseTransform = child.parent.inverseSceneTransform;
 		            }
+		            */
 				}
             }
 		}	

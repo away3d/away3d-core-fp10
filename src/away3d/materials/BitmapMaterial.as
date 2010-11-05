@@ -1,4 +1,4 @@
-﻿package away3d.materials
+package away3d.materials
 {
     import away3d.arcane;
     import away3d.cameras.lenses.*;
@@ -8,8 +8,9 @@
 	import away3d.core.session.*;
     import away3d.core.utils.*;
 	import away3d.core.vos.*;
-    
-    import flash.display.*;
+    import away3d.loaders.data.*;
+
+	import flash.display.*;
     import flash.geom.*;
     import flash.utils.*;
     
@@ -18,8 +19,7 @@
     /**
     * Basic bitmap material
     */
-    public class
-	BitmapMaterial extends LayerMaterial
+    public class BitmapMaterial extends LayerMaterial
     {
     	/** @private */
     	arcane var _texturemapping:Matrix;
@@ -119,7 +119,7 @@
 				
 			if(showNormals){
 				
-				_nn = _view.cameraVarsStore.viewTransformDictionary[_source].deltaTransformVector(_faceVO.face.normal);
+				_nn = _view.cameraVarsStore.viewTransformDictionary[_source].deltaTransformVector(_faceVO.face.parent.getFaceNormal(_faceVO.face));
 				
 				var index0:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9]];
 				var index1:uint = viewSourceObject.screenIndices[renderer.primitiveProperties[priIndex*9] + 1];
@@ -223,7 +223,7 @@
 		private var _sv0y:Number;
 		private var _sv1x:Number;
 		private var _sv1y:Number;
-        
+
 		protected function renderSource(source:Object3D, containerRect:Rectangle, mapping:Matrix):void
 		{
 			//check to see if sourceDictionary exists
@@ -347,7 +347,7 @@
 			if (_view.camera.lens is ZoomFocusLens)
         		_focus = _view.camera.focus;
         	else
-        		_focus = 0;
+        		_focus = 0;                             
 			
 			if (_generated) {
 				_uvt[uint(2)] = _screenUVTs[uint(_screenIndices[_startIndex]*3 + 2)];
@@ -590,7 +590,6 @@
             _blendMode = ini.getString("blendMode", BlendMode.NORMAL);
             colorTransform = ini.getObject("colorTransform", ColorTransform) as ColorTransform;
             showNormals = ini.getBoolean("showNormals", false);
-            
             _colorTransformDirty = true;
         }
     }

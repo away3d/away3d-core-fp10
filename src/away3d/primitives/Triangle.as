@@ -29,12 +29,12 @@
 		 */
         public function get a():Vertex
         {
-            return _face.v0;
+            return _face.vertices[0];
         }
 
         public function set a(value:Vertex):void
         {
-            _face.v0 = value;
+            _face.addVertexAt(0, value, "M");
         }
 		
 		/**
@@ -42,12 +42,12 @@
 		 */
         public function get b():Vertex
         {
-            return _face.v1;
+            return _face.vertices[1];
         }
 
         public function set b(value:Vertex):void
         {
-            _face.v1 = value;
+            _face.addVertexAt(1, value, "L");
         }
 		
 		/**
@@ -55,12 +55,12 @@
 		 */
         public function get c():Vertex
         {
-            return _face.v2;
+            return _face.vertices[2];
         }
 
         public function set c(value:Vertex):void
         {
-            _face.v2 = value;
+            _face.addVertexAt(2, value, "L");
         }
 		
 		/**

@@ -1,7 +1,7 @@
 ﻿package away3d.primitives
 {
 	import away3d.arcane;
-    
+	
 	use namespace arcane;
 	
     /**

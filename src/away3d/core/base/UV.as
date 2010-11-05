@@ -3,6 +3,8 @@ package away3d.core.base
     import away3d.arcane;
     import away3d.core.utils.*;
     
+    import flash.geom.*;
+    
     use namespace arcane;
     
 	/**
@@ -15,6 +17,10 @@ package away3d.core.base
         arcane var _u:Number;
 		/** @private */
         arcane var _v:Number;
+        /** @private */
+        arcane var _mappingDirty:Boolean;
+        /** @private */
+        arcane var _texIndices:Vector.<uint> = new Vector.<uint>();
 		/** @private */
         arcane static function median(a:UV, b:UV):UV
         {
@@ -37,6 +43,16 @@ package away3d.core.base
             return new UV(a._u*ak+b._u*bk, a._v*ak + b._v*bk);
         }
         
+        private function updateMapping():void
+        {
+        	_mappingDirty = false;
+        	
+        	_mapping.x = _u;
+        	_mapping.y = 1 - _v;
+        }
+        
+        private var _mapping:Point = new Point();
+        
     	/**
     	 * An optional untyped object that can contain used-defined properties.
     	 */
@@ -45,8 +61,11 @@ package away3d.core.base
 		/**
 		 * Defines the vertical corrdinate of the texture value.
 		 */
-        public function get v():Number
-        {
+        public function get v():Number {
+        	
+			if (_mappingDirty)
+        		updateMapping();
+        	
             return _v;
         }
 
@@ -56,8 +75,11 @@ package away3d.core.base
                 return;
 
             _v = value;
-
-            notifyChange();
+			
+            _mappingDirty = true;
+            
+            if (geometry)
+            	geometry.notifyMappingUpdate();
         }
 		
 		/**
@@ -65,6 +87,9 @@ package away3d.core.base
 		 */
         public function get u():Number
         {
+			if (_mappingDirty)
+        		updateMapping();
+        	
             return _u;
         }
 
@@ -74,10 +99,21 @@ package away3d.core.base
                 return;
 
             _u = value;
-
-            notifyChange();
+            
+            _mappingDirty = true;
+            
+            if (geometry)
+            	geometry.notifyMappingUpdate();
         }
     	
+    	public function get mapping():Point
+        {
+        	if (_mappingDirty)
+        		updateMapping();
+        	
+            return _mapping;
+        }
+        
 		/**
 		 * Creates a new <code>UV</code> object.
 		 *
@@ -88,6 +124,8 @@ package away3d.core.base
         {
             _u = u;
             _v = v;
+            
+            _mappingDirty = true;
         }
 		
 		/**

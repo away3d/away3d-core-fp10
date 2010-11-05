@@ -140,7 +140,6 @@ package away3d.graphs
 
 		public function resetWith(predicate : Function) : Object
 		{
-
 			if (_asyncInProgress)
 				throw new Error("Cannot reset traversal while an asynchronous iteration is in progress!");
 			_traverseIndex = 0;

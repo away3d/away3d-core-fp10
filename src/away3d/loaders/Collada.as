@@ -685,10 +685,10 @@
                 	switch(semantic)
                 	{
                 		case "VERTEX":
-                			deserialize(input, geometryData.geoXML, Vertex, geometryData.vertices);
+                			deserializeVertices(input, geometryData.geoXML, geometryData.vertices);
                 			break;
                 		case "TEXCOORD":
-                			deserialize(input, geometryData.geoXML, UV, geometryData.uvs);
+                			deserializeUVs(input, geometryData.geoXML, geometryData.uvs);
                 			break;
                 		default:
                 	}
@@ -1195,7 +1195,7 @@
 		/**
 		 * Converts a data string to an array of objects. Handles vertex and uv objects
 		 */
-        private function deserialize(input:XML, geo:XML, VObject:Class, output:Array):Array
+        private function deserializeVertices(input:XML, geo:XML, output:Vector.<Vertex>):Vector.<Vertex>
         {
             var id:String = input.@source.split("#")[1];
 
@@ -1222,47 +1222,29 @@
     			var i:int = 0;
                 while (i < len)
                 {
-    				var element:ValueObject = new VObject();
-	            	if (element is Vertex) {
-	            		var vertex:Vertex = element as Vertex;
-	                    for each (param in params) {
-	                    	float = floats[i];
-	                    	switch (param) {
-	                    		case VALUE_X:
-	                    			if (yUp)
-	                    				vertex._x = -float*scaling;
-	                    			else
-	                    				vertex._x = float*scaling;
-	                    			break;
-	                    		case VALUE_Y:
-	                    				vertex._y = float*scaling;
-	                    			break;
-	                    			break;
-	                    		case VALUE_Z:
-	                    				vertex._z = float*scaling;
-	                    			break;
-	                    			break;
-	                    		default:
-	                    	}
-	                    	++i;
-	                    }
-		            } else if (element is UV) {
-		            	var uv:UV = element as UV;
-	                    for each (param in params) {
-	                    	float = floats[i];
-	                    	switch (param) {
-	                    		case VALUE_U:
-	                    			uv._u = float;
-	                    			break;
-	                    		case VALUE_V:
-	                    			uv._v = float;
-	                    			break;
-	                    		default:
-	                    	}
-	                    	++i;
-	                    }
-		            }
-	                output.push(element);
+            		var vertex:Vertex = new Vertex();
+                    for each (param in params) {
+                    	float = floats[i];
+                    	switch (param) {
+                    		case VALUE_X:
+                    			if (yUp)
+                    				vertex._x = -float*scaling;
+                    			else
+                    				vertex._x = float*scaling;
+                    			break;
+                    		case VALUE_Y:
+                    				vertex._y = float*scaling;
+                    			break;
+                    			break;
+                    		case VALUE_Z:
+                    				vertex._z = float*scaling;
+                    			break;
+                    			break;
+                    		default:
+                    	}
+                    	++i;
+                    }
+	                output.push(vertex);
 	            }
             }
             else
@@ -1270,7 +1252,62 @@
                 // Store indexes if no source
                 var recursive :XMLList = geo..vertices.(@id == id)["input"];
 
-                output = deserialize(recursive[0], geo, VObject, output);
+                output = deserializeVertices(recursive[0], geo, output);
+            }
+
+            return output;
+        }
+        
+        private function deserializeUVs(input:XML, geo:XML, output:Vector.<UV>):Vector.<UV>
+        {
+            var id:String = input.@source.split("#")[1];
+
+            // Source?
+            var acc:XMLList = geo..source.(@id == id)["technique_common"].accessor;
+
+            if (acc != new XMLList())
+            {
+                // Build source floats array
+                var floId:String  = acc.@source.split("#")[1];
+                var floXML:XMLList = collada..float_array.(@id == floId);
+                var floStr:String  = floXML.toString();
+                var floats:Array   = getNumberArray(floStr);
+    			var float:Number;
+                // Build params array
+                var params:Array = [];
+				var param:String;
+				
+                for each (var par:XML in acc["param"])
+                    params.push(par.@name);
+
+                // Build output array
+    			var len:int = floats.length;
+    			var i:int = 0;
+                while (i < len)
+                {
+	            	var uv:UV = new UV();
+                    for each (param in params) {
+                    	float = floats[i];
+                    	switch (param) {
+                    		case VALUE_U:
+                    			uv._u = float;
+                    			break;
+                    		case VALUE_V:
+                    			uv._v = float;
+                    			break;
+                    		default:
+                    	}
+                    	++i;
+                    }
+	                output.push(uv);
+	            }
+            }
+            else
+            {
+                // Store indexes if no source
+                var recursive :XMLList = geo..vertices.(@id == id)["input"];
+
+                output = deserializeUVs(recursive[0], geo, output);
             }
 
             return output;

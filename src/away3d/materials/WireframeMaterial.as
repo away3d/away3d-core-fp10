@@ -14,6 +14,7 @@ package away3d.materials
     */
     public class WireframeMaterial extends Material
     {
+    	
 		/** @private */
         arcane var _materialDirty:Boolean;
     	/** @private */

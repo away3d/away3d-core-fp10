@@ -20,9 +20,9 @@ package away3d.events
         public var camera:Camera3D;
 		
 		/**
-		 * Creates a new <code>FaceEvent</code> object.
+		 * Creates a new <code>CameraEvent</code> object.
 		 * 
-		 * @param	type	The type of the event. Possible values are: <code>FaceEvent.UPDATED</code>.
+		 * @param	type	The type of the event. Possible values are: <code>CameraEvent.CAMERA_UPDATED</code>.
 		 * @param	camera	A reference to the camera object that is relevant to the event.
 		 */
         public function CameraEvent(type:String, camera:Camera3D)
@@ -32,7 +32,7 @@ package away3d.events
         }
 		
 		/**
-		 * Creates a copy of the FaceEvent object and sets the value of each property to match that of the original.
+		 * Creates a copy of the CameraEvent object and sets the value of each property to match that of the original.
 		 */
         public override function clone():Event
         {

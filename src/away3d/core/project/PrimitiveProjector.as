@@ -88,7 +88,6 @@ package away3d.core.project
 		private var _pushfront:Boolean;
 		private var _pushback:Boolean;
 		
-		
         public function getScreenVerts(source:Object3D):Vector.<Number>
 		{
 			return _screenVerticesStore[source] || (_screenVerticesStore[source] = new Vector.<Number>());
@@ -117,12 +116,13 @@ package away3d.core.project
         
 		public function project(source:Object3D, viewTransform:Matrix3D, renderer:Renderer):void
 		{
-			_cameraVarsStore.createVertexClassificationDictionary(source);
-			
 			_mesh = source as Mesh;
 			_camera = _view.camera;
-			_clipping = _view.screenClipping;
 			_lens = _camera.lens;
+			
+			_cameraVarsStore.createVertexClassificationDictionary(source);
+			
+			_clipping = _view.screenClipping;
         	
 			_frontmat = _mesh.material;
 			_backmat = _mesh.back || _frontmat;
@@ -322,7 +322,7 @@ package away3d.core.project
 					var t:Number;
 					_index = _endIndex - _startIndex;
 		            while (_index--) {
-		                t = _screenUVTs[uint((_startIndex + _index)*3 + 2)];
+		                t = _screenUVTs[uint(_screenIndices[_startIndex + _index]*3 + 2)];
 		                
 		                if (minT < t) {
 		                    minT = t;

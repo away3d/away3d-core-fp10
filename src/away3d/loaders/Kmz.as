@@ -81,13 +81,15 @@ package away3d.loaders
 			
 			//pass material instance to correct materialData
 			var _materialData:MaterialData;
+			var _meshMaterialData:MeshMaterialData;
 			var _face:Face;
 			for each (_materialData in _materialLibrary) {
 				if (_materialData.textureFileName == loader.name) {
 					_materialData.textureBitmap = Bitmap(loader.content).bitmapData;
 					_materialData.material = new BitmapMaterial(_materialData.textureBitmap);
-					for each(_face in _materialData.elements)
-						_face.material = _materialData.material as Material;
+					for each (_meshMaterialData in _materialData.meshMaterials)
+						for each(_face in _meshMaterialData.elements)
+							_face.material = _materialData.material as Material;
 				}
 			}
 		}

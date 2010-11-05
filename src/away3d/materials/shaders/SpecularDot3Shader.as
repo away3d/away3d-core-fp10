@@ -26,7 +26,7 @@
         	if (_bitmapDirty)
         		invalidateFaces();
         	
-        	var _source_scene_directionalLights:Array = source.scene.directionalLights;
+        	var _source_scene_directionalLights:Vector.<DirectionalLight3D> = source.scene.directionalLights;
 			var directional:DirectionalLight3D;
         	for each (directional in _source_scene_directionalLights) {
         		if (!directional.specularTransform[source] || !directional.specularTransform[source][view] || !directional.normalMatrixSpecularTransform[source] || !directional.normalMatrixSpecularTransform[source][view] || view._updatedObjects[source] || view.updated) {
@@ -41,7 +41,7 @@
         {
         	super.renderLayer(priIndex, viewSourceObject, renderer, layer, level);
         	
-        	var _source_scene_directionalLights:Array = _source.scene.directionalLights;
+        	var _source_scene_directionalLights:Vector.<DirectionalLight3D> = _source.scene.directionalLights;
 			var directional:DirectionalLight3D;
         	for each (directional in _source_scene_directionalLights)
         	{
@@ -128,11 +128,11 @@
 				_normalBitmap.lock();
 			}
 			
-			_n0 = _source.geometry.getVertexNormal(_face.v0);
-			_n1 = _source.geometry.getVertexNormal(_face.v1);
-			_n2 = _source.geometry.getVertexNormal(_face.v2);
+			_n0 = _source.geometry.getVertexNormal(_face.vertices[0]);
+			_n1 = _source.geometry.getVertexNormal(_face.vertices[1]);
+			_n2 = _source.geometry.getVertexNormal(_face.vertices[2]);
 			
-			var _source_scene_directionalLights:Array = _source.scene.directionalLights;
+			var _source_scene_directionalLights:Vector.<DirectionalLight3D> = _source.scene.directionalLights;
 			
 			var directional:DirectionalLight3D;
 			

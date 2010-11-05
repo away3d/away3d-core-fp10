@@ -1,5 +1,6 @@
 package away3d.core.vos
 {
+	import away3d.materials.*;
 	import away3d.sprites.*;
 	
 	import flash.geom.*;
@@ -127,7 +128,7 @@ package away3d.core.vos
 		
 		public var displayObject:DisplayObject;
 		
-		public var materials:Array = new Array();
+		public var materials:Vector.<Material> = new Vector.<Material>();
 		
 		public var directions:Array = new Array();
 		

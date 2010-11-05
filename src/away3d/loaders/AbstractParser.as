@@ -109,6 +109,10 @@ package away3d.loaders
         private var _parseTime:int;
         private var _materials:Object;
         private var _faceMaterial:Material;
+        private var _materialData:MaterialData;
+        private var _faceData:FaceData;
+        private var _vertex:Vertex;
+        private var _uv:UV;
     	private var _face:Face;
         private var _moveVector:Vector3D = new Vector3D();
         
@@ -236,33 +240,41 @@ package away3d.loaders
 				
 				mesh.geometry = geometry;
 				
-				//set materialdata for each face
-				var _faceData:FaceData;
-				for each (var _meshMaterialData:MeshMaterialData in _geometryData.materials) {
-					for each (var _faceListIndex:int in _meshMaterialData.faceList) {
-						_faceData = _geometryData.faces[_faceListIndex] as FaceData;
-						_faceData.materialData = _symbolLibrary[_meshMaterialData.symbol];
+								
+				//overridden by the material property
+				//if (!material) {
+					//set materialdata for each face
+					for each (var _meshMaterialData:MeshMaterialData in _geometryData.materials) {
+						_materialData = _symbolLibrary[_meshMaterialData.symbol];
+						_materialData.meshMaterials.push(_meshMaterialData);
+						_meshMaterialData.material = _materialData.material;
+						for each (var _faceListIndex:int in _meshMaterialData.faceList) {
+							_faceData = _geometryData.faces[_faceListIndex] as FaceData;
+							_faceData.meshMaterialData = _meshMaterialData;
+						}
+						
+						_meshMaterialData.geometry = geometry;
+						
+						geometry.materialDictionary[_materialData] = _meshMaterialData;
 					}
-				}
+				//}
 				
 				
 				if (_geometryData.skinVertices.length) {
 					var rootBone:Bone = (_container as ObjectContainer3D).getBoneByName(_meshData.skeleton);
 					
-					geometry.skinVertices = _geometryData.skinVertices;
-					geometry.skinControllers = _geometryData.skinControllers;
 					//mesh.bone = container.getChildByName(_meshData.bone) as Bone;
 					
 		   			geometry.rootBone = rootBone;
 		   			
-		   			for each (var _skinController:SkinController in geometry.skinControllers)
+		   			for each (var _skinController:SkinController in _geometryData.skinControllers)
 		                _skinController.inverseTransform = parent.inverseSceneTransform;
 				}
 				
 				//create faces from face and mesh data
 				for each(_faceData in _geometryData.faces) {
-					if (_faceData.materialData)
-						_faceMaterial = _faceData.materialData.material as Material;
+					if (_faceData.meshMaterialData)
+						_faceMaterial = _faceData.meshMaterialData.material;
 					else
 						_faceMaterial = null;
 					
@@ -273,11 +285,27 @@ package away3d.loaders
 												_geometryData.uvs[_faceData.uv0],
 												_geometryData.uvs[_faceData.uv1],
 												_geometryData.uvs[_faceData.uv2]);
-					geometry.addFace(_face);
 					
-					if (_faceData.materialData)
-						_faceData.materialData.elements.push(_face);
+					if (_faceData.meshMaterialData) {
+						_faceData.meshMaterialData.elements.push(_face);
+					} else {
+						geometry.meshMaterialData.elements.push(_face);
+					}
+					
+					_face.parent = geometry;
+					
+					geometry.elements.push(_face);
+					
+					geometry.faces.push(_face);
 				}
+				
+				for each (_vertex in _geometryData.vertices)
+					_vertex.geometry = geometry;
+				
+				for each (_uv in _geometryData.uvs)
+					_uv.geometry = geometry;
+				
+				geometry.notifyGeometryChanged();
 			} else {
 				mesh.geometry = geometry;
 			}

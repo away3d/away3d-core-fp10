@@ -9,6 +9,7 @@ package away3d.core.render
 	import away3d.core.session.*;
 	import away3d.core.utils.*;
 	import away3d.core.vos.*;
+	import away3d.loaders.data.*;
 	import away3d.materials.*;
 	
 	import flash.geom.*;
@@ -448,5 +449,4 @@ package away3d.core.render
 			return _primitiveIndex;
 	    }
     }
-
 }

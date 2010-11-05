@@ -83,6 +83,7 @@ package away3d.cameras.lenses
 		
 		protected var _view:View3D;
 		protected var _projectionMatrix:Matrix3D = new Matrix3D();
+		protected var _molehillMatrix:Matrix3D = new Matrix3D();
 		protected var _cameraVarsStore:CameraVarsStore;
 		protected var _camera:Camera3D;
 		protected var _clipping:Clipping;
