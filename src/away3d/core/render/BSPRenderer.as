@@ -20,7 +20,7 @@ package away3d.core.render
     	private var _i:uint;
     	private var _orderLength:uint;
     	private var _primitivesLength:uint;
-        private var _allPrimitives:Array = new Array();
+        private var _allPrimitives:Vector.<uint> = new Vector.<uint>();
         private var _allOrder:Array = new Array();
         private var _scene:Scene3D;
         private var _camera:Camera3D;
