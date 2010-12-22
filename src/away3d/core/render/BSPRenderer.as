@@ -105,7 +105,7 @@ package away3d.core.render
 		 */
         public override function list():Vector.<uint>
         {
-            return _primitives;
+            return _allPrimitives;
         }
         
         public override function clear():void
