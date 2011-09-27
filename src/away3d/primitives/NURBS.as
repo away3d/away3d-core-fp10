@@ -475,7 +475,7 @@
 		 */
     	protected override function buildPrimitive():void
     	{
-
+			_primitiveDirty = false;
 			geometry = new Geometry();
 			if (_renderMode == CONTROL_POINT_NET) {
 				buildControlSegments();
@@ -506,6 +506,7 @@
 				for each (var v:WeightedVertex in vertices) {
 					nurbPoint(v, v.nurbData["position"].x, v.nurbData["position"].y);
 				}
+				geometry.notifyGeometryChanged();
 			}
 		}
 	}
