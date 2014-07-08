@@ -8,6 +8,7 @@ package away3d.core.utils
 	import away3d.core.render.*;
 	import away3d.core.vos.*;
 	import away3d.materials.*;
+	import flash.utils.Dictionary;
 	
 	import flash.geom.*;
 	
@@ -55,7 +56,7 @@ package away3d.core.utils
 		private var _sv1y:Number;
 		private var _sv2x:Number;
 		private var _sv2y:Number;
-        
+
         private var _startIndex:uint;
         private var _endIndex:uint;
         private var _faceVO:FaceVO;
@@ -71,7 +72,8 @@ package away3d.core.utils
         private var _vertexIndex:uint;
         private var segmentCommands:Vector.<String> = Vector.<String>(["M", "L"]);
         private var faceCommands:Vector.<String> = Vector.<String>(["M", "L", "L"]);
-        
+		private var _sourceReference:Dictionary = new Dictionary(true);
+
         private function getEndLoopIndex(i:uint):uint
         {
         	var j:uint = i + 1;
@@ -110,7 +112,7 @@ package away3d.core.utils
             return (ax - bx)*(ax - bx) + (ay - by)*(ay - by);
         }
         
-		public var source:Object3D;
+		//public var source:Object3D;
 		public var screenVertices:Vector.<Number>;
 		public var screenIndices:Vector.<int>;
 		public var screenUVTs:Vector.<Number>;
@@ -121,7 +123,22 @@ package away3d.core.utils
 			this.source = source;
 		}
 		
-		        
+		public function get source():Object3D {
+			for (var s:Object in _sourceReference) {
+				return s as Object3D;
+			}
+			
+			return null;
+		}
+		
+		public function set source(newSource:Object3D):void {
+			for (var s:Object in _sourceReference) {
+				delete _sourceReference[s];
+			}
+			
+			_sourceReference[newSource] = true;
+		}
+		
         public function contains(priIndex:uint, renderer:Renderer, x:Number, y:Number):Boolean
         {
 			_startIndex = renderer.primitiveProperties[uint(priIndex*9)];
